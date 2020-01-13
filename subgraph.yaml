@@ -1,0 +1,66 @@
+specVersion: 0.0.2
+description: Uniswap is a decentralized protocol for automated token exchange on Ethereum.
+repository: https://github.com/graphprotocol/uniswap-subgraph
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Factory
+    network: mainnet
+    source:
+      address: '0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95'
+      abi: Factory
+      startBlock: 6627917
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/factory.ts
+      entities:
+        - Exchange
+      abis:
+        - name: Factory
+          file: ./abis/factory.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+      eventHandlers:
+        - event: NewExchange(indexed address,indexed address)
+          handler: handleNewExchange
+templates:
+  # These data sources templates exist to support the different flags that a token could specify- kind: ethereum/contract
+  - kind: ethereum/contract
+    name: Exchange
+    network: mainnet
+    source:
+      abi: Exchange
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/exchange.ts
+      entities:
+        - Exchange
+        - Uniswap
+        - User
+        - UserExchangeData
+        - Transaction
+        - UniswapDayData
+        - UniswapHistoricalData
+      abis:
+        - name: Exchange
+          file: ./abis/exchange.json
+      eventHandlers:
+        - event: TokenPurchase(indexed address,indexed uint256,indexed uint256)
+          handler: handleTokenPurchase
+        - event: EthPurchase(indexed address,indexed uint256,indexed uint256)
+          handler: handleEthPurchase
+        - event: AddLiquidity(indexed address,indexed uint256,indexed uint256)
+          handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,indexed uint256,indexed uint256)
+          handler: handleRemoveLiquidity
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
