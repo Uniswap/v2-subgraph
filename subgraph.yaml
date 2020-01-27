@@ -1,23 +1,25 @@
 specVersion: 0.0.2
 description: Uniswap is a decentralized protocol for automated token exchange on Ethereum.
-repository: https://github.com/graphprotocol/uniswap-subgraph
+repository: https://github.com/ianlapham/uniswap-subgraph-v2
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: Factory
-    network: mainnet
+    network: rinkeby
     source:
-      address: '0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95'
+      address: '0x8A500Eff6D40B53ab7CA5D951E5eBa539445b6f0'
       abi: Factory
-      startBlock: 6627917
+      startBlock: 5729170
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       file: ./src/mappings/factory.ts
       entities:
-        - Exchange
+        - Uniswap
+        - Pair
+        - Token
       abis:
         - name: Factory
           file: ./abis/factory.json
@@ -28,13 +30,13 @@ dataSources:
         - name: ERC20NameBytes
           file: ./abis/ERC20NameBytes.json
       eventHandlers:
-        - event: NewExchange(indexed address,indexed address)
+        - event: ExchangeCreated(indexed address,indexed address,address,uint256)
           handler: handleNewExchange
 templates:
   # These data sources templates exist to support the different flags that a token could specify- kind: ethereum/contract
   - kind: ethereum/contract
     name: Exchange
-    network: mainnet
+    network: rinkeby
     source:
       abi: Exchange
     mapping:
@@ -43,24 +45,16 @@ templates:
       language: wasm/assemblyscript
       file: ./src/mappings/exchange.ts
       entities:
-        - Exchange
+        - Pair
         - Uniswap
-        - User
-        - UserExchangeData
-        - Transaction
-        - UniswapDayData
-        - UniswapHistoricalData
+        - Token
       abis:
         - name: Exchange
           file: ./abis/exchange.json
       eventHandlers:
-        - event: TokenPurchase(indexed address,indexed uint256,indexed uint256)
-          handler: handleTokenPurchase
-        - event: EthPurchase(indexed address,indexed uint256,indexed uint256)
-          handler: handleEthPurchase
-        - event: AddLiquidity(indexed address,indexed uint256,indexed uint256)
-          handler: handleAddLiquidity
-        - event: RemoveLiquidity(indexed address,indexed uint256,indexed uint256)
-          handler: handleRemoveLiquidity
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
+        - event: Mint(indexed address,uint256,uint256)
+          handler: handleMint
+        - event: Burn(indexed address,uint256,uint256,indexed address)
+          handler: handleBurn
+        - event: Swap(indexed address,indexed address,uint256,uint256,indexed address)
+          handler: handleSwap

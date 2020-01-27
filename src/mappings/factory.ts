@@ -1,76 +1,12 @@
-import { BigDecimal, Address } from '@graphprotocol/graph-ts'
-import { NewExchange } from '../types/Factory/Factory'
-import { Uniswap, Exchange } from '../types/schema'
+import { log, Address } from '@graphprotocol/graph-ts'
+import { Uniswap, Exchange, Token } from '../types/schema'
+import { ExchangeCreated } from '../types/Factory/Factory'
 import { Exchange as ExchangeContract } from '../types/templates'
-import { hardcodedExchanges } from './hardcodedExchanges'
-import { zeroBD, zeroBigInt, oneBigInt } from '../helpers'
+import { zeroBD, zeroBigInt, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from '../helpers'
 
-function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timestamp: i32): void {
-  const exchange = new Exchange(exchangeAddress) as Exchange
-  exchange.tokenAddress = tokenAddress
-
-  const tokenAddressStringed = tokenAddress.toHexString()
-
-  exchange.fee = BigDecimal.fromString('0.003')
-  exchange.version = 1
-  exchange.startTime = timestamp
-
-  exchange.ethLiquidity = zeroBD()
-  exchange.tokenLiquidity = zeroBD()
-  exchange.ethBalance = zeroBD()
-  exchange.tokenBalance = zeroBD()
-  exchange.combinedBalanceInEth = zeroBD()
-  exchange.combinedBalanceInUSD = zeroBD()
-  exchange.totalUniToken = zeroBD()
-
-  exchange.addLiquidityCount = zeroBigInt()
-  exchange.removeLiquidityCount = zeroBigInt()
-  exchange.sellTokenCount = zeroBigInt()
-  exchange.buyTokenCount = zeroBigInt()
-
-  exchange.lastPrice = zeroBD()
-  exchange.price = zeroBD()
-  exchange.tradeVolumeToken = zeroBD()
-  exchange.tradeVolumeEth = zeroBD()
-  exchange.tradeVolumeUSD = zeroBD()
-  exchange.totalValue = zeroBD()
-  exchange.weightedAvgPrice = zeroBD()
-  exchange.totalTxsCount = oneBigInt()
-
-  exchange.priceUSD = zeroBD()
-  exchange.lastPriceUSD = zeroBD()
-  exchange.weightedAvgPriceUSD = zeroBD()
-  exchange.tokenHolders = []
-
-  for (let i = 0; i < hardcodedExchanges.length; i++) {
-    if (tokenAddressStringed.toString() == hardcodedExchanges[i].tokenAddress.toString()) {
-      exchange.tokenSymbol = hardcodedExchanges[i].symbol
-      exchange.tokenName = hardcodedExchanges[i].name
-      exchange.tokenDecimals = hardcodedExchanges[i].tokenDecimals
-      break
-    } else {
-      exchange.tokenSymbol = 'unknown'
-      exchange.tokenName = 'unknown'
-      exchange.tokenDecimals = null
-    }
-  }
-
-  // only save for tokens with non null decimals
-  if (exchange.tokenDecimals !== null) {
-    // add the exchange for the derived relationship
-    const uniswap = Uniswap.load('1')
-    const currentExchanges = uniswap.exchanges
-    currentExchanges.push(exchange.id)
-    uniswap.exchanges = currentExchanges
-    uniswap.save()
-    exchange.save()
-  }
-}
-
-export function handleNewExchange(event: NewExchange): void {
+export function handleNewExchange(event: ExchangeCreated): void {
+  //setup factory if needed
   let factory = Uniswap.load('1')
-
-  // if no factory yet, set up blank initial
   if (factory == null) {
     factory = new Uniswap('1')
     factory.exchangeCount = 0
@@ -79,19 +15,99 @@ export function handleNewExchange(event: NewExchange): void {
     factory.totalLiquidityInEth = zeroBD()
     factory.totalVolumeUSD = zeroBD()
     factory.totalLiquidityUSD = zeroBD()
-    factory.totalTokenSells = zeroBigInt()
-    factory.totalTokenBuys = zeroBigInt()
-    factory.totalAddLiquidity = zeroBigInt()
-    factory.totalRemoveLiquidity = zeroBigInt()
     factory.exchangeHistoryEntityCount = zeroBigInt()
     factory.uniswapHistoryEntityCount = zeroBigInt()
+    factory.tokenHistoryEntityCount = zeroBigInt()
     factory.txCount = zeroBigInt()
   }
+
+  // update and save
   factory.exchangeCount = factory.exchangeCount + 1
   factory.save()
 
-  // create new exchange with data from our hard coded list
-  hardcodeExchange(event.params.exchange.toHexString(), event.params.token, event.block.timestamp.toI32()) // TODO - don't hard code, after we have the fix
+  // create the tokens
+  let token0 = Token.load(event.params.token0.toHexString())
+  let token1 = Token.load(event.params.token1.toHexString())
 
-  ExchangeContract.create(event.params.exchange)
+  // fetch info if null
+  if (token0 == null) {
+    token0 = new Token(event.params.token0.toHexString())
+    token0.symbol = fetchTokenSymbol(event.params.token0)
+    token0.name = fetchTokenName(event.params.token0)
+    token0.decimals = fetchTokenDecimals(event.params.token0)
+    token0.priceEth = zeroBD()
+    token0.priceUSD = zeroBD()
+    token0.tradeVolumeToken = zeroBD()
+    token0.tradeVolumeETH = zeroBD()
+    token0.tradeVolumeUSD = zeroBD()
+    token0.totalLiquidityToken = zeroBD()
+    token0.totalLiquidityUSD = zeroBD()
+    token0.allPairs = []
+  }
+
+  // fetch info if null
+  if (token1 == null) {
+    token1 = new Token(event.params.token1.toHexString())
+    token1.symbol = fetchTokenSymbol(event.params.token1)
+    token1.name = fetchTokenName(event.params.token1)
+    token1.decimals = fetchTokenDecimals(event.params.token1)
+    token1.priceEth = zeroBD()
+    token1.priceUSD = zeroBD()
+    token1.tradeVolumeToken = zeroBD()
+    token1.tradeVolumeETH = zeroBD()
+    token1.tradeVolumeUSD = zeroBD()
+    token1.totalLiquidityToken = zeroBD()
+    token1.totalLiquidityUSD = zeroBD()
+    token1.allPairs = []
+  }
+
+  const wethAddress = Address.fromString('0xc778417E063141139Fce010982780140Aa0cD5Ab')
+  if (event.params.token0 == wethAddress) {
+    token1.wethExchange = event.params.exchange
+  }
+  if (event.params.token1 == wethAddress) {
+    token0.wethExchange = event.params.exchange
+  }
+
+  const newAllPairsArray0 = token0.allPairs
+  newAllPairsArray0.push(event.params.exchange.toHexString())
+  token0.allPairs = newAllPairsArray0
+
+  const newAllPairsArray1 = token1.allPairs
+  newAllPairsArray1.push(event.params.exchange.toHexString())
+  token1.allPairs = newAllPairsArray1
+
+  if (token0.decimals !== null && token1.decimals !== null) {
+    // create the Pair
+    const exchange = new Exchange(event.params.exchange.toHexString()) as Exchange
+    exchange.token0 = token0.id
+    exchange.token1 = token1.id
+    exchange.startTime = event.block.timestamp.toI32()
+    exchange.totalTxsCount = zeroBigInt()
+    exchange.token0Balance = zeroBD()
+    exchange.token1Balance = zeroBD()
+    exchange.combinedBalanceEth = zeroBD()
+    exchange.combinedBalanceUSD = zeroBD()
+    exchange.totalUniToken = zeroBD()
+    exchange.tradeVolumeToken0 = zeroBD()
+    exchange.tradeVolumeToken1 = zeroBD()
+    exchange.tradeVolumeEth = zeroBD()
+    exchange.tradeVolumeUSD = zeroBD()
+    exchange.token0Price = zeroBD()
+    exchange.token1Price = zeroBD()
+
+    // update factory
+    const currentExchanges = factory.exchanges
+    currentExchanges.push(exchange.id)
+    factory.exchanges = currentExchanges
+
+    // create the tracked contract based on the template
+    ExchangeContract.create(event.params.exchange)
+
+    // save updated values
+    token0.save()
+    token1.save()
+    exchange.save()
+    factory.save()
+  }
 }
