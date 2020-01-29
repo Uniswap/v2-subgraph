@@ -6,19 +6,30 @@ type Uniswap @entity {
   exchangeCount: Int!
   exchanges: [Exchange]!
 
-  # total volume traded ever in ETH
-  totalVolumeInEth: BigDecimal!
-  totalLiquidityInEth: BigDecimal!
+  # total volume 
+  totalVolumeUSD: BigDecimal!             
+  totalVolumeEth: BigDecimal!
 
   # total volume traded ever in USD
-  totalVolumeUSD: BigDecimal!             
-  totalLiquidityUSD: BigDecimal!          
-               
+  totalLiquidityUSD: BigDecimal!  
+  totalLiquidityEth: BigDecimal!
+           
   # counters for ids               
   exchangeHistoryEntityCount: BigInt!     
   uniswapHistoryEntityCount: BigInt!    
   tokenHistoryEntityCount: BigInt!      
   txCount: BigInt!                        
+}
+
+# stores for USD calculations 
+type Bundle @entity {
+  id: ID!
+  ethPrice: BigDecimal! # price of ETH usd
+  # daiPrice: BigDecimal! # price of ETH in DAI
+
+  # add these later
+  # USDC: BigDecimal! # price of ETH is usdc 
+  # TUSD: BigDecimal! # price of ETH in TUSD
 }
 
 # Stats about a Uniswap exchange 
@@ -62,10 +73,9 @@ type Token @entity {
   name: String                       
   decimals: Int   
 
-  # price info (updated by finding routes through token/eth pairs)
-  priceEth: BigDecimal! # eth per token
-  priceUSD: BigDecimal! # usd per token 
-
+  # derived prices
+  derivedETH: BigDecimal # eth per token 
+  
   # token specific volume
   tradeVolumeToken: BigDecimal!
   tradeVolumeETH: BigDecimal!
@@ -178,6 +188,8 @@ type UniswapDayData @entity {
     txCount: BigInt!
 }
 
+
+
 enum EventType {
     AddLiquidity,
     RemoveLiquidity,
@@ -217,11 +229,12 @@ type ExchangeDayData @entity {
     date: Int!                           
     exchangeAddress: Bytes!
     token0Balance: BigDecimal!              
-    token1Balance: BigDecimal!            
+    token1Balance: BigDecimal!      
+    combinedBalanceUSD: BigDecimal!                          
     dailyVolumeToken0: BigDecimal!               
     dailyVolumeToken1: BigDecimal! 
     dailyVolumeUSD: BigDecimal!          
-    dailyTxns: BigInt!                       
+    dailyTxns: BigInt!          
 }
 
 type TokenHistoricalData @entity {
@@ -246,11 +259,13 @@ type TokenHistoricalData @entity {
 type TokenDayData @entity {
     id: ID!                              
     date: Int!                           
-    tokenAddress: Bytes!     
+    token: Token!     
     dailyVolumeToken: BigDecimal!   
     dailyVolumeETH: BigDecimal!               
     dailyVolumeUSD: BigDecimal! 
     dailyTxns: BigInt! 
+    totalLiquidityToken: BigDecimal!
+    totalLiquidityUSD: BigDecimal!
 }
 
 

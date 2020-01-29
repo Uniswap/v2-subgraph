@@ -1,5 +1,5 @@
 import { log, Address } from '@graphprotocol/graph-ts'
-import { Uniswap, Exchange, Token } from '../types/schema'
+import { Uniswap, Exchange, Token, Bundle } from '../types/schema'
 import { ExchangeCreated } from '../types/Factory/Factory'
 import { Exchange as ExchangeContract } from '../types/templates'
 import { zeroBD, zeroBigInt, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from '../helpers'
@@ -11,14 +11,19 @@ export function handleNewExchange(event: ExchangeCreated): void {
     factory = new Uniswap('1')
     factory.exchangeCount = 0
     factory.exchanges = []
-    factory.totalVolumeInEth = zeroBD()
-    factory.totalLiquidityInEth = zeroBD()
+    factory.totalVolumeEth = zeroBD()
+    factory.totalLiquidityEth = zeroBD()
     factory.totalVolumeUSD = zeroBD()
     factory.totalLiquidityUSD = zeroBD()
     factory.exchangeHistoryEntityCount = zeroBigInt()
     factory.uniswapHistoryEntityCount = zeroBigInt()
     factory.tokenHistoryEntityCount = zeroBigInt()
     factory.txCount = zeroBigInt()
+
+    const bundle = new Bundle('1')
+    bundle.ethPrice = zeroBD()
+    bundle.daiPrice = zeroBD()
+    bundle.save()
   }
 
   // update and save
@@ -35,8 +40,8 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token0.symbol = fetchTokenSymbol(event.params.token0)
     token0.name = fetchTokenName(event.params.token0)
     token0.decimals = fetchTokenDecimals(event.params.token0)
-    token0.priceEth = zeroBD()
-    token0.priceUSD = zeroBD()
+    token0.derivedETH = zeroBD()
+    token0.derivedDAI = zeroBD()
     token0.tradeVolumeToken = zeroBD()
     token0.tradeVolumeETH = zeroBD()
     token0.tradeVolumeUSD = zeroBD()
@@ -51,8 +56,8 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
     token1.decimals = fetchTokenDecimals(event.params.token1)
-    token1.priceEth = zeroBD()
-    token1.priceUSD = zeroBD()
+    token1.derivedETH = zeroBD()
+    token1.derivedDAI = zeroBD()
     token1.tradeVolumeToken = zeroBD()
     token1.tradeVolumeETH = zeroBD()
     token1.tradeVolumeUSD = zeroBD()

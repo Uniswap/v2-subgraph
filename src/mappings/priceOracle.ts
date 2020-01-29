@@ -1,6 +1,8 @@
 import { Exchange } from '../types/schema'
 import { BigDecimal, BigInt, log, Address } from '@graphprotocol/graph-ts/index'
 
+const stableBundle = ['0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735']
+
 export function getEthPriceInUSD(blockNum: BigInt): BigDecimal {
   const DAI_WETH_EXCHANGE = '0xa9dCEFFf40dA7329562E7FA4CE7bD52bf4beA453'
   const DAI_ADDRESS = '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735'
@@ -17,7 +19,7 @@ export function getEthPriceInUSD(blockNum: BigInt): BigDecimal {
       }
     }
   }
-  return BigDecimal.fromString('0')
+  return BigDecimal.fromString('0') // only for some blocks before DAI creation
 }
 
 /**
