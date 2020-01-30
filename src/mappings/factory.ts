@@ -11,8 +11,8 @@ export function handleNewExchange(event: ExchangeCreated): void {
     factory = new Uniswap('1')
     factory.exchangeCount = 0
     factory.exchanges = []
-    factory.totalVolumeEth = zeroBD()
-    factory.totalLiquidityEth = zeroBD()
+    factory.totalVolumeETH = zeroBD()
+    factory.totalLiquidityETH = zeroBD()
     factory.totalVolumeUSD = zeroBD()
     factory.totalLiquidityUSD = zeroBD()
     factory.exchangeHistoryEntityCount = zeroBigInt()
@@ -22,7 +22,6 @@ export function handleNewExchange(event: ExchangeCreated): void {
 
     const bundle = new Bundle('1')
     bundle.ethPrice = zeroBD()
-    bundle.daiPrice = zeroBD()
     bundle.save()
   }
 
@@ -41,12 +40,11 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token0.name = fetchTokenName(event.params.token0)
     token0.decimals = fetchTokenDecimals(event.params.token0)
     token0.derivedETH = zeroBD()
-    token0.derivedDAI = zeroBD()
     token0.tradeVolumeToken = zeroBD()
     token0.tradeVolumeETH = zeroBD()
     token0.tradeVolumeUSD = zeroBD()
     token0.totalLiquidityToken = zeroBD()
-    token0.totalLiquidityUSD = zeroBD()
+    token0.totalLiquidityETH = zeroBD()
     token0.allPairs = []
   }
 
@@ -57,12 +55,11 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token1.name = fetchTokenName(event.params.token1)
     token1.decimals = fetchTokenDecimals(event.params.token1)
     token1.derivedETH = zeroBD()
-    token1.derivedDAI = zeroBD()
     token1.tradeVolumeToken = zeroBD()
     token1.tradeVolumeETH = zeroBD()
     token1.tradeVolumeUSD = zeroBD()
     token1.totalLiquidityToken = zeroBD()
-    token1.totalLiquidityUSD = zeroBD()
+    token1.totalLiquidityETH = zeroBD()
     token1.allPairs = []
   }
 
@@ -91,12 +88,11 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.totalTxsCount = zeroBigInt()
     exchange.token0Balance = zeroBD()
     exchange.token1Balance = zeroBD()
-    exchange.combinedBalanceEth = zeroBD()
-    exchange.combinedBalanceUSD = zeroBD()
+    exchange.combinedBalanceETH = zeroBD()
     exchange.totalUniToken = zeroBD()
     exchange.tradeVolumeToken0 = zeroBD()
     exchange.tradeVolumeToken1 = zeroBD()
-    exchange.tradeVolumeEth = zeroBD()
+    exchange.tradeVolumeETH = zeroBD()
     exchange.tradeVolumeUSD = zeroBD()
     exchange.token0Price = zeroBD()
     exchange.token1Price = zeroBD()
