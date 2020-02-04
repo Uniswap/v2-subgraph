@@ -18,28 +18,41 @@ type Uniswap @entity {
   exchangeHistoryEntityCount: BigInt!     
   uniswapHistoryEntityCount: BigInt!    
   tokenHistoryEntityCount: BigInt!      
+  reserveEntityCount: BigInt!
+  mintCount: BigInt! 
+  burnCount: BigInt!
+  swapCount: BigInt!
+  syncCount: BigInt!
   txCount: BigInt!                        
 }
 
 # Data checkpointed at each event
 type UniswapHistoricalData @entity {
-    id: ID!  # unique based on incremental entity count, one for each transactions
-    timestamp: Int!
-    totalVolumeUSD: BigDecimal!   # accumulated at each trade         
-    totalLiquidityUSD: BigDecimal!
-    totalLiquidityETH: BigDecimal!
-    txCount: BigInt!
+  id: ID!  # unique based on incremental entity count, one for each transactions
+  timestamp: Int!
+  totalVolumeUSD: BigDecimal!  
+  totalVolumeETH: BigDecimal!   
+  totalLiquidityUSD: BigDecimal!
+  totalLiquidityETH: BigDecimal!
+  txCount: BigInt!
 }
 
 # Data accumulated and condensed into day stats for all of Uniswap
 type UniswapDayData @entity {
-    id: ID! # timestamp rounded to current day by dividing by 86400 - should only be one per day
-    date: Int!
-    dailyVolumeUSD: BigDecimal!
-    totalVolumeUSD: BigDecimal!          
-    totalLiquidityUSD: BigDecimal!
-    totalLiquidityETH: BigDecimal!
-    txCount: BigInt!
+  id: ID! 
+  # timestamp rounded to current day by dividing by 86400 - should only be one per day
+  date: Int!
+
+  dailyVolumeUSD: BigDecimal!
+  dailyVolumeETH: BigDecimal!
+
+  totalVolumeETH: BigDecimal!
+  totalVolumeUSD: BigDecimal!
+
+  totalLiquidityUSD: BigDecimal!
+  totalLiquidityETH: BigDecimal!
+
+  txCount: BigInt!
 }
 
 # stores for USD calculations 
@@ -85,6 +98,11 @@ type Exchange @entity {
   factory: Uniswap! @derivedFrom(field: "exchanges")
 }
 
+enum EventType {
+  mint,
+  burn,
+  swap
+}
 
 type ExchangeHistoricalData @entity {
   id: ID!
@@ -214,7 +232,7 @@ type UserExchangeData @entity {
   token0Withdrawn: BigDecimal!
 
   # token1 info
-  token1Deposited: BigDecimal!    # Where negative means tokens were exchanged for eth
+  token1Deposited: BigDecimal!  
   token1Withdrawn: BigDecimal!
   
   # balance of lp shares for this exchange
@@ -228,53 +246,93 @@ type UserExchangeData @entity {
 }
 
 type Transaction @entity {
-  id: ID!  # txn  hash concatenated with exchange - need this for token to token swaps
-  exchange: Exchange!
-  token0: String!
-  token1: String!
-  valueUSD: BigDecimal!
-  valueETH: BigDecimal!
-  addLiquidityEvents: [AddLiquidityEvent!]
-  removeLiquidityEvents: [RemoveLiquidityEvent!]
-  swapEvents: [SwapEvent!]
+  id: ID! # tx hash
   block: Int!
   timestamp: Int!
-  user: Bytes!
+  mints: [Mint]!
+  burns: [Burn]! 
+  swaps: [Swap]!
+  syncs: [Sync]!
 }
 
-interface TransactionEvent {
+type Reserve @entity{
   id: ID!
-  transaction: Transaction!
-  token0Amount: BigDecimal!
-  token1Amount: BigDecimal!
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
 }
 
-type AddLiquidityEvent implements TransactionEvent  @entity {
-  id: ID!             
-  transaction: Transaction! @derivedFrom(field: "addLiquidityEvents")
-  token0Amount: BigDecimal!
-  token1Amount: BigDecimal!
+type Mint  @entity{
+  id: ID!
+  exchange: Exchange
+  token0: Token
+  token1: Token
+  valueUSD: BigDecimal
+  valueETH: BigDecimal
+  amount0: BigDecimal
+  amount1: BigDecimal
+  tx: Transaction!  @derivedFrom(field: "mints")
+  logIndex: BigInt!
+  feeTo: Bytes
+  feeLiquidity: BigDecimal
+  to: Bytes!
+  liquidity: BigDecimal!
+  reservesPre: Reserve
+  reservesPost: Reserve
+  sender: Bytes 
 }
 
-type RemoveLiquidityEvent implements TransactionEvent @entity {
-  id: ID!              
-  transaction: Transaction! @derivedFrom(field: "removeLiquidityEvents")
-  token0Amount: BigDecimal!
-  token1Amount: BigDecimal!
+type Burn @entity{
+  id: ID!
+  exchange: Exchange
+  token0: Token
+  token1: Token
+  valueUSD: BigDecimal
+  valueETH: BigDecimal
+  amount0: BigDecimal
+  amount1: BigDecimal
+  tx: Transaction!  @derivedFrom(field: "burns")
+  logIndex: BigInt!
+  feeTo: Bytes
+  feeLiquidity: BigDecimal
+  to: Bytes!
+  liquidity: BigDecimal!
+  reservesPre: Reserve
+  reservesPost: Reserve
+  sender: Bytes 
 }
 
-type SwapEvent @entity {
-  id: ID!              
-  transaction: Transaction! @derivedFrom(field: "swapEvents")
-  tokenSoldAmount: BigDecimal!
-  tokenBoughtAmount: BigDecimal!
+type Swap @entity{
+  id: ID!
+  exchange: Exchange
+
+  tokenBought: Token!
+  amountBought: BigDecimal
+
+  tokenSold: Token!
+  amountSold: BigDecimal
+
+  valueUSD: BigDecimal
+  valueETH: BigDecimal
+
+  tx: Transaction!  @derivedFrom(field: "swaps")
+  logIndex: BigInt!
+  to: Bytes!
+  sender: Bytes 
 }
 
-enum EventType {
-  AddLiquidity,
-  RemoveLiquidity,
-  Swap
+type Sync @entity{
+  id: ID!
+  tx: Transaction!  @derivedFrom(field: "syncs")
+  exchange: Exchange
+  reservesPre: Reserve
+  reservesPost: Reserve
 }
+
+
+
+
+
+
 
 
 

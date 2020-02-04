@@ -1,4 +1,4 @@
-import { log, Address } from '@graphprotocol/graph-ts'
+import { Address } from '@graphprotocol/graph-ts'
 import { Uniswap, Exchange, Token, Bundle } from '../types/schema'
 import { ExchangeCreated } from '../types/Factory/Factory'
 import { Exchange as ExchangeContract } from '../types/templates'
@@ -6,19 +6,24 @@ import { zeroBD, zeroBigInt, fetchTokenSymbol, fetchTokenName, fetchTokenDecimal
 
 export function handleNewExchange(event: ExchangeCreated): void {
   //setup factory if needed
-  let factory = Uniswap.load('1')
-  if (factory == null) {
-    factory = new Uniswap('1')
-    factory.exchangeCount = 0
-    factory.exchanges = []
-    factory.totalVolumeETH = zeroBD()
-    factory.totalLiquidityETH = zeroBD()
-    factory.totalVolumeUSD = zeroBD()
-    factory.totalLiquidityUSD = zeroBD()
-    factory.exchangeHistoryEntityCount = zeroBigInt()
-    factory.uniswapHistoryEntityCount = zeroBigInt()
-    factory.tokenHistoryEntityCount = zeroBigInt()
-    factory.txCount = zeroBigInt()
+  let uniswap = Uniswap.load('1')
+  if (uniswap == null) {
+    uniswap = new Uniswap('1')
+    uniswap.exchangeCount = 0
+    uniswap.exchanges = []
+    uniswap.totalVolumeETH = zeroBD()
+    uniswap.totalLiquidityETH = zeroBD()
+    uniswap.totalVolumeUSD = zeroBD()
+    uniswap.totalLiquidityUSD = zeroBD()
+    uniswap.exchangeHistoryEntityCount = zeroBigInt()
+    uniswap.uniswapHistoryEntityCount = zeroBigInt()
+    uniswap.tokenHistoryEntityCount = zeroBigInt()
+    uniswap.reserveEntityCount = zeroBigInt()
+    uniswap.mintCount = zeroBigInt()
+    uniswap.burnCount = zeroBigInt()
+    uniswap.swapCount = zeroBigInt()
+    uniswap.syncCount = zeroBigInt()
+    uniswap.txCount = zeroBigInt()
 
     const bundle = new Bundle('1')
     bundle.ethPrice = zeroBD()
@@ -26,8 +31,8 @@ export function handleNewExchange(event: ExchangeCreated): void {
   }
 
   // update and save
-  factory.exchangeCount = factory.exchangeCount + 1
-  factory.save()
+  uniswap.exchangeCount = uniswap.exchangeCount + 1
+  uniswap.save()
 
   // create the tokens
   let token0 = Token.load(event.params.token0.toHexString())
@@ -98,9 +103,9 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.token1Price = zeroBD()
 
     // update factory
-    const currentExchanges = factory.exchanges
+    const currentExchanges = uniswap.exchanges
     currentExchanges.push(exchange.id)
-    factory.exchanges = currentExchanges
+    uniswap.exchanges = currentExchanges
 
     // create the tracked contract based on the template
     ExchangeContract.create(event.params.exchange)
@@ -109,6 +114,6 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token0.save()
     token1.save()
     exchange.save()
-    factory.save()
+    uniswap.save()
   }
 }
