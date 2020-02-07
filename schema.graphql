@@ -23,7 +23,10 @@ type Uniswap @entity {
   burnCount: BigInt!
   swapCount: BigInt!
   syncCount: BigInt!
-  txCount: BigInt!                        
+  txCount: BigInt!     
+
+  # as reference for new day datas 
+  mostLiquidTokens: [TokenDayData!]!                   
 }
 
 # Data checkpointed at each event
@@ -140,6 +143,8 @@ type ExchangeDayData @entity {
   id: ID!                              
   date: Int!                           
   exchangeAddress: Bytes!
+  token0: Token!
+  token1: Token!
   token0Balance: BigDecimal!              
   token1Balance: BigDecimal!      
   combinedBalanceETH: BigDecimal!    
@@ -175,6 +180,9 @@ type Token @entity {
 
   # all pairs a token is a part of 
   allPairs: [Exchange!]
+
+  # reference tracker for most liquid pairs 
+  mostLiquidPairs: [ExchangeDayData!]!
 }
 
 
@@ -214,6 +222,10 @@ type TokenDayData @entity {
   totalLiquidityUSD: BigDecimal!
 
   dailyTxns: BigInt! 
+
+  # top pairs that this token is in by liquidity
+  maxStored: Int!
+  mostLiquidPairs: [ExchangeDayData!]!
 }
 
 

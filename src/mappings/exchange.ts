@@ -24,8 +24,6 @@ import { Mint, Burn, Swap, Transfer, Sync } from '../types/Exchange/Exchange'
 import { getEthPriceInUSD } from '../mappings/priceOracle'
 import { convertTokenToDecimal, oneBigInt, zeroBD, zeroBigInt, equalToZero } from '../helpers'
 
-const maxTokenDayDatas = 10
-
 function createUserDataEntity(id: string, user: Address, exchange: Address): void {
   const userExchangeData = new UserExchangeData(id)
   userExchangeData.userAddress = user
@@ -45,7 +43,6 @@ function createUserDataEntity(id: string, user: Address, exchange: Address): voi
 
 function updateExchangeHistorical(exchangeHistoricalData: ExchangeHistoricalData, exchange: Exchange): void {
   const bundle = Bundle.load('1')
-  log.debug('mybug this is the token balance passed in : {}', [exchange.token0Balance.toString()])
   exchangeHistoricalData.token0Balance = exchange.token0Balance
   exchangeHistoricalData.token1Balance = exchange.token1Balance
   exchangeHistoricalData.combinedBalanceETH = exchange.combinedBalanceETH
@@ -63,7 +60,10 @@ function updateExchangeHistorical(exchangeHistoricalData: ExchangeHistoricalData
 
 function createExchangeDayData(dayExchangeID: string, dayStartTimestamp: i32, eventAddress: Address): void {
   const exchangeDayData = new ExchangeDayData(dayExchangeID)
+  const exchange = Exchange.load(eventAddress.toHexString())
   exchangeDayData.date = dayStartTimestamp
+  exchangeDayData.token0 = exchange.token0
+  exchangeDayData.token1 = exchange.token1
   exchangeDayData.exchangeAddress = eventAddress
   exchangeDayData.token0Balance = zeroBD()
   exchangeDayData.token1Balance = zeroBD()
@@ -73,16 +73,6 @@ function createExchangeDayData(dayExchangeID: string, dayStartTimestamp: i32, ev
   exchangeDayData.dailyTxns = zeroBigInt()
   exchangeDayData.combinedBalanceETH = zeroBD()
   exchangeDayData.combinedBalanceUSD = zeroBD()
-  exchangeDayData.save()
-}
-
-function updateExchangeDayData(exchangeDayData: ExchangeDayData, exchange: Exchange): void {
-  const bundle = Bundle.load('1')
-  exchangeDayData.token0Balance = exchange.token0Balance
-  exchangeDayData.token1Balance = exchange.token1Balance
-  exchangeDayData.combinedBalanceETH = exchange.combinedBalanceETH
-  exchangeDayData.combinedBalanceUSD = exchange.combinedBalanceETH.times(bundle.ethPrice)
-  exchangeDayData.dailyTxns = exchangeDayData.dailyTxns.plus(oneBigInt())
   exchangeDayData.save()
 }
 
@@ -101,6 +91,8 @@ function updateTokenHistoricalData(tokenHistoricalData: TokenHistoricalData, tok
   tokenHistoricalData.save()
 }
 
+const maxExchangeDayDatas = 10
+
 function createTokenDayData(id: string, token: Token, dayStartTimestamp: i32): void {
   const tokenDayData = new TokenDayData(id)
   tokenDayData.date = dayStartTimestamp
@@ -112,11 +104,26 @@ function createTokenDayData(id: string, token: Token, dayStartTimestamp: i32): v
   tokenDayData.totalLiquidityToken = zeroBD()
   tokenDayData.totalLiquidityETH = zeroBD()
   tokenDayData.totalLiquidityUSD = zeroBD()
+  tokenDayData.maxStored = maxExchangeDayDatas
+  tokenDayData.mostLiquidPairs = token.mostLiquidPairs
   tokenDayData.save()
 }
 
+function updateExchangeDayData(exchangeDayData: ExchangeDayData, exchange: Exchange): void {
+  const bundle = Bundle.load('1')
+  exchangeDayData.token0Balance = exchange.token0Balance
+  exchangeDayData.token1Balance = exchange.token1Balance
+  exchangeDayData.combinedBalanceETH = exchange.combinedBalanceETH
+  exchangeDayData.combinedBalanceUSD = exchange.combinedBalanceETH.times(bundle.ethPrice)
+  exchangeDayData.dailyTxns = exchangeDayData.dailyTxns.plus(oneBigInt())
+  exchangeDayData.save()
+}
+
+const maxTokenDayDatas = 10
+
 function createUniswapDayData(dayID: i32, dayStartTimestamp: i32): void {
   const uniswapDayData = new UniswapDayData(dayID.toString())
+  const uniswap = Uniswap.load('1')
   uniswapDayData.date = dayStartTimestamp
   uniswapDayData.dailyVolumeUSD = zeroBD()
   uniswapDayData.dailyVolumeETH = zeroBD()
@@ -125,37 +132,103 @@ function createUniswapDayData(dayID: i32, dayStartTimestamp: i32): void {
   uniswapDayData.totalLiquidityUSD = zeroBD()
   uniswapDayData.totalLiquidityETH = zeroBD()
   uniswapDayData.maxStored = maxTokenDayDatas
-  uniswapDayData.mostLiquidTokens = []
+  uniswapDayData.mostLiquidTokens = uniswap.mostLiquidTokens
   uniswapDayData.txCount = zeroBigInt()
   uniswapDayData.save()
+}
+
+function updateStoredExchanges(tokenDayData: TokenDayData, exchangeDayID: string): void {
+  const exchangeDayData = ExchangeDayData.load(exchangeDayID.toString())
+  const newList = tokenDayData.mostLiquidPairs
+  let alreadyInList = false
+  // check if exchange is already in list, make sure to compare on exchange
+  for (let i = 0; i < newList.length; i++) {
+    const currentExchangeData = ExchangeDayData.load(newList[i])
+    log.debug('mybug address 1: {}', [currentExchangeData.exchangeAddress.toHexString()])
+    log.debug('mybug address 2: {}', [exchangeDayData.exchangeAddress.toHexString()])
+    if (currentExchangeData.exchangeAddress.toHexString() == exchangeDayData.exchangeAddress.toHexString()) {
+      alreadyInList = true
+      newList[i] = exchangeDayData.id
+    }
+  }
+  // set to impossibly high number
+  let minTokenLiquidity = new BigDecimal(BigInt.fromI32(I32.MAX_VALUE))
+  let minIndex = 0
+  if (newList.length < tokenDayData.maxStored && !alreadyInList) {
+    newList.push(exchangeDayData.id)
+  } else if (!alreadyInList) {
+    // loop through stored list and find min token liquidity
+    for (let i = 0; i < newList.length; i++) {
+      const currentPairs = tokenDayData.mostLiquidPairs as Array<string>
+      const id = currentPairs[i]
+      const currentExchangeDayData = ExchangeDayData.load(id.toString())
+      const globalToken = tokenDayData.token
+      const localToken0 = currentExchangeDayData.token0
+      // if our token of interest is token0, compare against that
+      if (globalToken == localToken0) {
+        if (currentExchangeDayData.token0Balance < minTokenLiquidity) {
+          minTokenLiquidity = currentExchangeDayData.token0Balance
+          minIndex = i
+        }
+      }
+      // our token of interest must be token 1
+      else {
+        if (currentExchangeDayData.token1Balance < minTokenLiquidity) {
+          minTokenLiquidity = currentExchangeDayData.token1Balance
+          minIndex = i
+        }
+      }
+    }
+    // if current token has more liquidity than min, replace it
+    if (tokenDayData.totalLiquidityToken > minTokenLiquidity) {
+      newList[minIndex] = exchangeDayData.id
+    }
+  }
+  tokenDayData.mostLiquidPairs = newList
+  const token = Token.load(tokenDayData.token)
+  token.mostLiquidPairs = newList
+  token.save()
+  tokenDayData.save()
 }
 
 /**
  * Loop through stored token datas and find minimum liquidity in ETH.
  * If new token is higher than min, replace min list at min index.
  */
-function updateMin(tokenDayData: TokenDayData, dayID: i32): void {
+function updateStoredTokens(tokenDayData: TokenDayData, dayID: i32): void {
+  const uniswap = Uniswap.load('1')
   const uniswapDayData = UniswapDayData.load(dayID.toString())
   const newList = uniswapDayData.mostLiquidTokens
-  let localMinLiquidity = zeroBD()
+  let alreadyInList = false
+  // check if token is already in the list
+  for (let i = 0; i < newList.length; i++) {
+    const currentDayData = TokenDayData.load(newList[i].toString())
+    if (currentDayData.token.toString() == tokenDayData.token.toString()) {
+      alreadyInList = true
+      newList[i] = tokenDayData.id
+    }
+  }
   let minIndex = 0
-  if (newList.length < uniswapDayData.maxStored) {
+  if (newList.length < uniswapDayData.maxStored && !alreadyInList) {
     newList.push(tokenDayData.id)
-  } else {
+  } else if (!alreadyInList) {
+    let localMinLiquidity = new BigDecimal(BigInt.fromI32(I32.MAX_VALUE))
+    // loop through stored list and find min liquidity
     for (let i = 0; i < newList.length; i++) {
-      const currentTokens = uniswapDayData.mostLiquidTokens as Array<string>
-      const id = currentTokens[i]
-      const currentDayData = TokenDayData.load(id.toString())
+      const currentDayData = TokenDayData.load(newList[i].toString())
       if (currentDayData.totalLiquidityETH < localMinLiquidity) {
         localMinLiquidity = currentDayData.totalLiquidityETH
         minIndex = i
       }
     }
+    // if current token has more liquidity than min, replace it
     if (tokenDayData.totalLiquidityETH > localMinLiquidity) {
       newList[minIndex] = tokenDayData.id
     }
   }
   uniswapDayData.mostLiquidTokens = newList
+  uniswap.mostLiquidTokens = newList
+  uniswap.save()
   uniswapDayData.save()
 }
 
@@ -163,14 +236,15 @@ function updateMin(tokenDayData: TokenDayData, dayID: i32): void {
  * Save daily stats for token. Reference global list of day datas
  * and add to list if greater liquidity than min.
  */
-function updateTokenDayData(dayID: i32, tokenDayData: TokenDayData, token: Token): void {
+function updateTokenDayData(exchangeDayID: string, dayID: i32, tokenDayData: TokenDayData, token: Token): void {
   const bundle = Bundle.load('1')
   tokenDayData.totalLiquidityToken = token.totalLiquidityToken
   tokenDayData.totalLiquidityETH = token.totalLiquidityETH
   tokenDayData.totalLiquidityUSD = token.totalLiquidityETH.times(bundle.ethPrice)
   tokenDayData.dailyTxns = tokenDayData.dailyTxns.plus(oneBigInt())
   tokenDayData.save()
-  updateMin(tokenDayData, dayID)
+  updateStoredTokens(tokenDayData, dayID)
+  updateStoredExchanges(tokenDayData, exchangeDayID)
 }
 
 /**
@@ -554,7 +628,7 @@ export function handleMint(event: Mint): void {
       createTokenDayData(token0DayID as string, token0 as Token, dayStartTimestamp as i32)
     }
     token0DayData = TokenDayData.load(token0DayID)
-    updateTokenDayData(dayID, token0DayData as TokenDayData, token0 as Token)
+    updateTokenDayData(dayExchangeID, dayID, token0DayData as TokenDayData, token0 as Token)
 
     // day data for token1
     const token1DayID = token1.id
@@ -566,7 +640,7 @@ export function handleMint(event: Mint): void {
       createTokenDayData(token1DayID as string, token1 as Token, dayStartTimestamp as i32)
     }
     token1DayData = TokenDayData.load(token1DayID)
-    updateTokenDayData(dayID, token1DayData as TokenDayData, token1 as Token)
+    updateTokenDayData(dayExchangeID, dayID, token1DayData as TokenDayData, token1 as Token)
   }
 }
 
@@ -727,7 +801,7 @@ export function handleBurn(event: Burn): void {
       createTokenDayData(token0DayID as string, token0 as Token, dayStartTimestamp as i32)
     }
     token0DayData = TokenDayData.load(token0DayID)
-    updateTokenDayData(dayID, token0DayData as TokenDayData, token0 as Token)
+    updateTokenDayData(dayExchangeID, dayID, token0DayData as TokenDayData, token0 as Token)
 
     // uodate day data for token1
     const token1DayID = token1.id
@@ -739,7 +813,7 @@ export function handleBurn(event: Burn): void {
       createTokenDayData(token1DayID as string, token1 as Token, dayStartTimestamp as i32)
     }
     token1DayData = TokenDayData.load(token1DayID)
-    updateTokenDayData(dayID, token1DayData as TokenDayData, token0 as Token)
+    updateTokenDayData(dayExchangeID, dayID, token1DayData as TokenDayData, token0 as Token)
   }
 }
 
@@ -984,7 +1058,7 @@ export function handleSwap(event: Swap): void {
       createTokenDayData(token0DayID as string, token0 as Token, dayStartTimestamp as i32)
     }
     token0DayData = TokenDayData.load(token0DayID)
-    updateTokenDayData(dayID, token0DayData as TokenDayData, token0 as Token)
+    updateTokenDayData(dayExchangeID, dayID, token0DayData as TokenDayData, token0 as Token)
     token0DayData.dailyVolumeToken = token0DayData.dailyVolumeToken.plus(token0Amount)
     token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(token0Amount.times(ethPerToken0))
     token0DayData.dailyVolumeUSD = token0DayData.dailyVolumeUSD.plus(
@@ -1002,7 +1076,7 @@ export function handleSwap(event: Swap): void {
       createTokenDayData(token1DayID as string, token1 as Token, dayStartTimestamp as i32)
     }
     token1DayData = TokenDayData.load(token1DayID)
-    updateTokenDayData(dayID, token1DayData as TokenDayData, token1 as Token)
+    updateTokenDayData(dayExchangeID, dayID, token1DayData as TokenDayData, token1 as Token)
     token1DayData.dailyVolumeToken = token1DayData.dailyVolumeToken.plus(token1Amount)
     token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(token1Amount.times(ethPerToken1))
     token1DayData.dailyVolumeUSD = token1DayData.dailyVolumeUSD.plus(

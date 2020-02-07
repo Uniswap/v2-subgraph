@@ -24,6 +24,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     uniswap.swapCount = zeroBigInt()
     uniswap.syncCount = zeroBigInt()
     uniswap.txCount = zeroBigInt()
+    uniswap.mostLiquidTokens = []
 
     const bundle = new Bundle('1')
     bundle.ethPrice = zeroBD()
@@ -51,6 +52,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token0.totalLiquidityToken = zeroBD()
     token0.totalLiquidityETH = zeroBD()
     token0.allPairs = []
+    token0.mostLiquidPairs = []
   }
 
   // fetch info if null
@@ -66,6 +68,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token1.totalLiquidityToken = zeroBD()
     token1.totalLiquidityETH = zeroBD()
     token1.allPairs = []
+    token1.mostLiquidPairs = []
   }
 
   const wethAddress = Address.fromString('0xc778417E063141139Fce010982780140Aa0cD5Ab')
