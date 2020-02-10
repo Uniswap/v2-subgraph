@@ -22,7 +22,7 @@ import {
   updateTokenHistoricalData
 } from './historicalUpdates'
 import { updateExchangeDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
-import { getEthPriceInUSD } from '../mappings/priceOracle'
+import { getEthPriceInUSD } from './priceOracle'
 import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero } from '../helpers'
 
 function updateCounters(): void {

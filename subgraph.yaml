@@ -43,7 +43,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
-      file: ./src/mappings/exchange.ts
+      file: ./src/mappings/core.ts
       entities:
         - Pair
         - Uniswap
