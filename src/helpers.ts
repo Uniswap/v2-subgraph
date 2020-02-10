@@ -19,25 +19,11 @@ export function bigDecimalExp18(): BigDecimal {
   return BigDecimal.fromString('1000000000000000000')
 }
 
-// export function zeroBD(): BigDecimal {
-//   return BigDecimal.fromString('0')
-// }
+export const ZERO_BD = BigDecimal.fromString('0')
 
-const BD_ZERO_BD = BigDecimal.fromString('0')
+export const ZERO_BI = BigInt.fromI32(0)
 
-const ZEROS = {
-  [typeof BigDecimal]: BigDecimal.fromString('0')
-}
-
-ZEROS[typeof BigDecimal]
-
-export function zeroBigInt(): BigInt {
-  return BigInt.fromI32(0)
-}
-
-export function oneBigInt(): BigInt {
-  return BigInt.fromI32(1)
-}
+export const ONE_BI = BigInt.fromI32(1)
 
 export function convertEthToDecimal(eth: BigInt): BigDecimal {
   return eth.toBigDecimal().div(exponentToBigDecimal(18))
@@ -52,7 +38,7 @@ export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: i32
 
 export function equalToZero(value: BigDecimal): boolean {
   const formattedVal = parseFloat(value.toString())
-  const zero = parseFloat(zeroBD().toString())
+  const zero = parseFloat(ZERO_BD.toString())
   if (zero == formattedVal) {
     return true
   }

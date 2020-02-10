@@ -2,7 +2,7 @@ import { Address } from '@graphprotocol/graph-ts'
 import { Uniswap, Exchange, Token, Bundle } from '../types/schema'
 import { ExchangeCreated } from '../types/Factory/Factory'
 import { Exchange as ExchangeContract } from '../types/templates'
-import { zeroBD, zeroBigInt, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from '../helpers'
+import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from '../helpers'
 
 export function handleNewExchange(event: ExchangeCreated): void {
   //setup factory if needed
@@ -11,23 +11,23 @@ export function handleNewExchange(event: ExchangeCreated): void {
     uniswap = new Uniswap('1')
     uniswap.exchangeCount = 0
     uniswap.exchanges = []
-    uniswap.totalVolumeETH = zeroBD()
-    uniswap.totalLiquidityETH = zeroBD()
-    uniswap.totalVolumeUSD = zeroBD()
-    uniswap.totalLiquidityUSD = zeroBD()
-    uniswap.exchangeHistoryEntityCount = zeroBigInt()
-    uniswap.uniswapHistoryEntityCount = zeroBigInt()
-    uniswap.tokenHistoryEntityCount = zeroBigInt()
-    uniswap.reserveEntityCount = zeroBigInt()
-    uniswap.mintCount = zeroBigInt()
-    uniswap.burnCount = zeroBigInt()
-    uniswap.swapCount = zeroBigInt()
-    uniswap.syncCount = zeroBigInt()
-    uniswap.txCount = zeroBigInt()
+    uniswap.totalVolumeETH = ZERO_BD
+    uniswap.totalLiquidityETH = ZERO_BD
+    uniswap.totalVolumeUSD = ZERO_BD
+    uniswap.totalLiquidityUSD = ZERO_BD
+    uniswap.exchangeHistoryEntityCount = ZERO_BI
+    uniswap.uniswapHistoryEntityCount = ZERO_BI
+    uniswap.tokenHistoryEntityCount = ZERO_BI
+    uniswap.reserveEntityCount = ZERO_BI
+    uniswap.mintCount = ZERO_BI
+    uniswap.burnCount = ZERO_BI
+    uniswap.swapCount = ZERO_BI
+    uniswap.syncCount = ZERO_BI
+    uniswap.txCount = ZERO_BI
     uniswap.mostLiquidTokens = []
 
     const bundle = new Bundle('1')
-    bundle.ethPrice = zeroBD()
+    bundle.ethPrice = ZERO_BD
     bundle.save()
   }
 
@@ -45,12 +45,12 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token0.symbol = fetchTokenSymbol(event.params.token0)
     token0.name = fetchTokenName(event.params.token0)
     token0.decimals = fetchTokenDecimals(event.params.token0)
-    token0.derivedETH = zeroBD()
-    token0.tradeVolumeToken = zeroBD()
-    token0.tradeVolumeETH = zeroBD()
-    token0.tradeVolumeUSD = zeroBD()
-    token0.totalLiquidityToken = zeroBD()
-    token0.totalLiquidityETH = zeroBD()
+    token0.derivedETH = ZERO_BD
+    token0.tradeVolumeToken = ZERO_BD
+    token0.tradeVolumeETH = ZERO_BD
+    token0.tradeVolumeUSD = ZERO_BD
+    token0.totalLiquidityToken = ZERO_BD
+    token0.totalLiquidityETH = ZERO_BD
     token0.allPairs = []
     token0.mostLiquidPairs = []
   }
@@ -61,12 +61,12 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
     token1.decimals = fetchTokenDecimals(event.params.token1)
-    token1.derivedETH = zeroBD()
-    token1.tradeVolumeToken = zeroBD()
-    token1.tradeVolumeETH = zeroBD()
-    token1.tradeVolumeUSD = zeroBD()
-    token1.totalLiquidityToken = zeroBD()
-    token1.totalLiquidityETH = zeroBD()
+    token1.derivedETH = ZERO_BD
+    token1.tradeVolumeToken = ZERO_BD
+    token1.tradeVolumeETH = ZERO_BD
+    token1.tradeVolumeUSD = ZERO_BD
+    token1.totalLiquidityToken = ZERO_BD
+    token1.totalLiquidityETH = ZERO_BD
     token1.allPairs = []
     token1.mostLiquidPairs = []
   }
@@ -93,17 +93,17 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.token0 = token0.id
     exchange.token1 = token1.id
     exchange.startTime = event.block.timestamp.toI32()
-    exchange.totalTxsCount = zeroBigInt()
-    exchange.token0Balance = zeroBD()
-    exchange.token1Balance = zeroBD()
-    exchange.combinedBalanceETH = zeroBD()
-    exchange.totalUniToken = zeroBD()
-    exchange.tradeVolumeToken0 = zeroBD()
-    exchange.tradeVolumeToken1 = zeroBD()
-    exchange.tradeVolumeETH = zeroBD()
-    exchange.tradeVolumeUSD = zeroBD()
-    exchange.token0Price = zeroBD()
-    exchange.token1Price = zeroBD()
+    exchange.totalTxsCount = ZERO_BI
+    exchange.token0Balance = ZERO_BD
+    exchange.token1Balance = ZERO_BD
+    exchange.combinedBalanceETH = ZERO_BD
+    exchange.totalUniToken = ZERO_BD
+    exchange.tradeVolumeToken0 = ZERO_BD
+    exchange.tradeVolumeToken1 = ZERO_BD
+    exchange.tradeVolumeETH = ZERO_BD
+    exchange.tradeVolumeUSD = ZERO_BD
+    exchange.token0Price = ZERO_BD
+    exchange.token1Price = ZERO_BD
 
     // update factory
     const currentExchanges = uniswap.exchanges
