@@ -19,9 +19,17 @@ export function bigDecimalExp18(): BigDecimal {
   return BigDecimal.fromString('1000000000000000000')
 }
 
-export function zeroBD(): BigDecimal {
-  return BigDecimal.fromString('0')
+// export function zeroBD(): BigDecimal {
+//   return BigDecimal.fromString('0')
+// }
+
+const BD_ZERO_BD = BigDecimal.fromString('0')
+
+const ZEROS = {
+  [typeof BigDecimal]: BigDecimal.fromString('0')
 }
+
+ZEROS[typeof BigDecimal]
 
 export function zeroBigInt(): BigInt {
   return BigInt.fromI32(0)

@@ -813,7 +813,7 @@ export function handleBurn(event: Burn): void {
       createTokenDayData(token1DayID as string, token1 as Token, dayStartTimestamp as i32)
     }
     token1DayData = TokenDayData.load(token1DayID)
-    updateTokenDayData(dayExchangeID, dayID, token1DayData as TokenDayData, token0 as Token)
+    updateTokenDayData(dayExchangeID, dayID, token1DayData as TokenDayData, token1 as Token)
   }
 }
 
