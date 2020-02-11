@@ -1,0 +1,359 @@
+# Uniswap global values 
+type Uniswap @entity {
+  id: ID!
+  
+  # exchange info 
+  exchangeCount: Int!
+  exchanges: [Exchange]!
+
+  # total volume 
+  totalVolumeUSD: BigDecimal!             
+  totalVolumeETH: BigDecimal!
+
+  # total liquidity
+  totalLiquidityUSD: BigDecimal! 
+  totalLiquidityETH: BigDecimal!
+           
+  # counters for ids               
+  exchangeHistoryEntityCount: BigInt!     
+  uniswapHistoryEntityCount: BigInt!    
+  tokenHistoryEntityCount: BigInt!      
+  reserveEntityCount: BigInt!
+  mintCount: BigInt! 
+  burnCount: BigInt!
+  swapCount: BigInt!
+  syncCount: BigInt!
+  txCount: BigInt!     
+
+  # as reference for new day datas 
+  mostLiquidTokens: [TokenDayData!]!                   
+}
+
+# Data checkpointed at each event
+type UniswapHistoricalData @entity {
+  id: ID!  # unique based on incremental entity count, one for each transactions
+  timestamp: Int!
+  totalVolumeUSD: BigDecimal!  
+  totalVolumeETH: BigDecimal!   
+  totalLiquidityUSD: BigDecimal!
+  totalLiquidityETH: BigDecimal!
+  txCount: BigInt!
+}
+
+# Data accumulated and condensed into day stats for all of Uniswap
+type UniswapDayData @entity {
+  id: ID! 
+  # timestamp rounded to current day by dividing by 86400 - should only be one per day
+  date: Int!
+
+  dailyVolumeUSD: BigDecimal!
+  dailyVolumeETH: BigDecimal!
+
+  totalVolumeETH: BigDecimal!
+  totalVolumeUSD: BigDecimal!
+
+  totalLiquidityUSD: BigDecimal!
+  totalLiquidityETH: BigDecimal!
+
+  # daily top tokens in liquidity 
+  maxStored: Int!
+  mostLiquidTokens: [TokenDayData!]!
+
+  txCount: BigInt!
+}
+
+# stores for USD calculations 
+type Bundle @entity {
+  id: ID!
+  ethPrice: BigDecimal! # price of ETH usd
+  # daiPrice: BigDecimal! # price of ETH in DAI
+
+  # add these later
+  # USDC: BigDecimal! # price of ETH is usdc 
+  # TUSD: BigDecimal! # price of ETH in TUSD
+}
+
+# Stats about a Uniswap exchange 
+type Exchange @entity {
+  id: ID! #exchange address
+
+  # token info 
+  token0: Token!
+  token1: Token!
+
+  # useful stats 
+  startTime: Int!
+  totalTxsCount: BigInt!                  
+
+  # liquidity info 
+  token0Balance: BigDecimal!
+  token1Balance: BigDecimal!
+  combinedBalanceETH: BigDecimal!  
+  totalUniToken: BigDecimal!
+
+  # volume info      
+  tradeVolumeToken0: BigDecimal!
+  tradeVolumeToken1: BigDecimal!
+  tradeVolumeETH: BigDecimal!             
+  tradeVolumeUSD: BigDecimal!
+
+  # price info - token0 per token1, etc
+  token0Price: BigDecimal! 
+  token1Price: BigDecimal!
+
+  # derivations 
+  factory: Uniswap! @derivedFrom(field: "exchanges")
+}
+
+enum EventType {
+  mint,
+  burn,
+  swap
+}
+
+type ExchangeHistoricalData @entity {
+  id: ID!
+  exchangeAddress: Bytes!
+  type: EventType!
+  timestamp: Int!
+
+  # liquidity
+  token0Balance: BigDecimal!              
+  token1Balance: BigDecimal!             
+  combinedBalanceUSD: BigDecimal!  
+  combinedBalanceETH: BigDecimal!      
+  totalUniToken: BigDecimal!   
+  
+  # volume
+  tradeVolumeToken0: BigDecimal!           
+  tradeVolumeToken1: BigDecimal!           
+  tradeVolumeETH: BigDecimal!  
+  tradeVolumeUSD: BigDecimal!             
+
+  # pricing
+  token0Price: BigDecimal!            
+  token1Price: BigDecimal!    
+
+  # txns
+  totalTxsCount: BigInt!  
+}
+
+# Data accumulated and condensed into day stats for each exchange
+type ExchangeDayData @entity {
+  id: ID!                              
+  date: Int!                           
+  exchangeAddress: Bytes!
+  token0: Token!
+  token1: Token!
+  token0Balance: BigDecimal!              
+  token1Balance: BigDecimal!      
+  combinedBalanceETH: BigDecimal!    
+  combinedBalanceUSD: BigDecimal!                          
+  dailyVolumeToken0: BigDecimal!               
+  dailyVolumeToken1: BigDecimal! 
+  dailyVolumeUSD: BigDecimal!          
+  dailyTxns: BigInt!          
+}
+
+# stats about an individual token (can exist on multiple exchanges)
+type Token @entity {
+  # id is the token address
+  id: ID! 
+  symbol: String                     
+  name: String                       
+  decimals: Int   
+
+  # derived prices
+  derivedETH: BigDecimal # eth per token 
+  
+  # token specific volume
+  tradeVolumeToken: BigDecimal!
+  tradeVolumeETH: BigDecimal!
+  tradeVolumeUSD: BigDecimal!   
+
+  # liquidity across all pairs 
+  totalLiquidityToken: BigDecimal!          
+  totalLiquidityETH: BigDecimal!  
+
+  # address of weth exchange if exists 
+  wethExchange: Bytes
+
+  # all pairs a token is a part of 
+  allPairs: [Exchange!]
+
+  # reference tracker for most liquid pairs 
+  mostLiquidPairs: [ExchangeDayData!]!
+}
+
+
+type TokenHistoricalData @entity {
+  id: ID!
+  token: Token!
+  timestamp: Int!
+  
+  # volume
+  tradeVolumeToken: BigDecimal!           
+  tradeVolumeETH: BigDecimal!           
+  tradeVolumeUSD: BigDecimal! 
+
+  totalLiquidityToken: BigDecimal!        
+  totalLiquidityETH: BigDecimal!            
+  totalLiquidityUSD: BigDecimal!            
+
+  # pricing
+  priceETH: BigDecimal            
+  priceUSD: BigDecimal            
+}
+
+# Data accumulated and condensed into day stats for each token across all pairs 
+type TokenDayData @entity {
+  id: ID!                              
+  date: Int!                           
+  token: Token!     
+
+  # volume state 
+  dailyVolumeToken: BigDecimal!   
+  dailyVolumeETH: BigDecimal!               
+  dailyVolumeUSD: BigDecimal! 
+
+  # liquidity stats
+  totalLiquidityToken: BigDecimal!
+  totalLiquidityETH: BigDecimal!
+  totalLiquidityUSD: BigDecimal!
+
+  dailyTxns: BigInt! 
+
+  # top pairs that this token is in by liquidity
+  maxStored: Int!
+  mostLiquidPairs: [ExchangeDayData!]!
+}
+
+
+type User @entity {
+  # user eth address
+  id: ID!    
+  # all exhanges user has shares within 
+  exchangeBalances: [UserExchangeData!]!  @derivedFrom(field: "user")
+}
+
+type UserExchangeData @entity {
+  # ID is concatenation of exchange addr and user addr. i.e. 0xahiow4-0xkashkd34....
+  id: ID!   
+  userAddress: Bytes!
+  user: User!
+  exchange: Exchange!
+
+  # token0 info 
+  token0Deposited: BigDecimal!     
+  token0Withdrawn: BigDecimal!
+
+  # token1 info
+  token1Deposited: BigDecimal!  
+  token1Withdrawn: BigDecimal!
+  
+  # balance of lp shares for this exchange
+  uniTokenBalance: BigDecimal!  
+
+  # swapping data 
+  token0Bought: BigDecimal!
+  token0Sold: BigDecimal!
+  token1Bought: BigDecimal!
+  token1Sold: BigDecimal!
+}
+
+type Transaction @entity {
+  id: ID! # tx hash
+  block: Int!
+  timestamp: Int!
+  mints: [Mint]!
+  burns: [Burn]! 
+  swaps: [Swap]!
+  syncs: [Sync]!
+}
+
+type Reserve @entity{
+  id: ID!
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
+}
+
+interface exchangeEvent {
+  id: ID!
+}
+
+type Mint implements exchangeEvent @entity{
+  id: ID!
+  timestamp: Int!
+  exchange: Exchange
+  token0: Token
+  token1: Token
+  valueUSD: BigDecimal
+  valueETH: BigDecimal
+  amount0: BigDecimal
+  amount1: BigDecimal
+  tx: Transaction!  @derivedFrom(field: "mints")
+  logIndex: BigInt!
+  feeTo: Bytes
+  feeLiquidity: BigDecimal
+  to: Bytes!
+  liquidity: BigDecimal!
+  reservesPre: Reserve
+  reservesPost: Reserve
+  sender: Bytes 
+}
+
+type Burn @entity{
+  id: ID!
+  exchange: Exchange
+  timestamp: Int!
+  token0: Token
+  token1: Token
+  valueUSD: BigDecimal
+  valueETH: BigDecimal
+  amount0: BigDecimal
+  amount1: BigDecimal
+  tx: Transaction!  @derivedFrom(field: "burns")
+  logIndex: BigInt!
+  feeTo: Bytes
+  feeLiquidity: BigDecimal
+  from: Bytes
+  liquidity: BigDecimal!
+  reservesPre: Reserve
+  reservesPost: Reserve
+  sender: Bytes 
+}
+
+type Swap @entity{
+  id: ID!
+  exchange: Exchange
+  timestamp: Int!
+  tx: Transaction!  @derivedFrom(field: "swaps")
+  tokenBought: Token!
+  amountBought: BigDecimal
+  tokenSold: Token!
+  amountSold: BigDecimal
+  valueUSD: BigDecimal
+  valueETH: BigDecimal
+  logIndex: BigInt!
+  to: Bytes!
+  sender: Bytes
+}
+
+type Sync @entity{
+  id: ID!
+  tx: Transaction!  @derivedFrom(field: "syncs")
+  exchange: Exchange
+  reservesPre: Reserve
+  reservesPost: Reserve
+}
+
+
+
+
+
+
+
+
+
+
+
