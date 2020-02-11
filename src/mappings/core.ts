@@ -15,13 +15,13 @@ import {
   Burn as BurnEvent,
   Swap as SwapEvent
 } from '../types/schema'
-import { Mint, Burn, Swap, Transfer, Sync } from '../types/Exchange/Exchange'
+import { Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Exchange/Exchange'
 import {
   updateUniswapHistoricalData,
   updateExchangeHistoricalData,
   updateTokenHistoricalData
 } from './historicalUpdates'
-import { updateExchangeDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
+// import { updateExchangeDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
 import { getEthPriceInUSD } from './priceOracle'
 import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero } from '../helpers'
 
@@ -315,10 +315,10 @@ export function handleMint(event: Mint): void {
     updateTokenHistoricalData(token1 as Token, event)
 
     // update day entities
-    updateExchangeDayData(event)
-    updateUniswapDayData(event)
-    updateTokenDayData(token0 as Token, event)
-    updateTokenDayData(token1 as Token, event)
+    // updateExchangeDayData(event)
+    // updateUniswapDayData(event)
+    // updateTokenDayData(token0 as Token, event)
+    // updateTokenDayData(token1 as Token, event)
   }
 }
 
@@ -411,10 +411,10 @@ export function handleBurn(event: Burn): void {
     updateTokenHistoricalData(token1 as Token, event)
 
     // update day entities
-    updateExchangeDayData(event)
-    updateUniswapDayData(event)
-    updateTokenDayData(token0 as Token, event)
-    updateTokenDayData(token1 as Token, event)
+    // updateExchangeDayData(event)
+    // updateUniswapDayData(event)
+    // updateTokenDayData(token0 as Token, event)
+    // updateTokenDayData(token1 as Token, event)
   }
 }
 
@@ -560,10 +560,10 @@ export function handleSwap(event: Swap): void {
     updateTokenHistoricalData(token1 as Token, event)
 
     // update day entities
-    updateExchangeDayData(event)
-    updateUniswapDayData(event)
-    updateTokenDayData(token0 as Token, event)
-    updateTokenDayData(token1 as Token, event)
+    // updateExchangeDayData(event)
+    // updateUniswapDayData(event)
+    // updateTokenDayData(token0 as Token, event)
+    // updateTokenDayData(token1 as Token, event)
 
     // get ids for date related entities
     const timestamp = event.block.timestamp.toI32()
