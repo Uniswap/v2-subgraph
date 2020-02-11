@@ -1,0 +1,32 @@
+image: "node:latest"
+
+before_script:
+    - yarn global add @graphprotocol/graph-cli
+
+stages:
+    - deploy
+
+cache:
+    paths:
+        - node_modules/
+
+deploy-staging:
+    stage: deploy
+    script:
+        - yarn install
+        - yarn codegen
+        - yarn build
+        - graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ $SUBGRAPH_NAME_STAGING --access-token $GRAPH_ACCESS_TOKEN
+    only:
+        - master
+
+deploy-prod:
+    stage: deploy
+    script:
+        - yarn install
+        - yarn codegen
+        - yarn build
+        - graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ $SUBGRAPH_NAME --access-token $GRAPH_ACCESS_TOKEN
+    only:
+        - master
+    when: manual
