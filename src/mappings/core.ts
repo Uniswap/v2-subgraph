@@ -6,9 +6,9 @@ import {
   Token,
   Uniswap,
   Transaction,
-  UniswapDayData,
-  ExchangeDayData,
-  TokenDayData,
+  // UniswapDayData,
+  // ExchangeDayData,
+  // TokenDayData,
   Mint as MintEvent,
   Reserve,
   Sync as SyncEvent,
@@ -16,24 +16,24 @@ import {
   Swap as SwapEvent
 } from '../types/schema'
 import { Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Exchange/Exchange'
-import {
-  updateUniswapHistoricalData,
-  updateExchangeHistoricalData,
-  updateTokenHistoricalData
-} from './historicalUpdates'
+// import {
+//   updateUniswapHistoricalData,
+//   updateExchangeHistoricalData,
+//   updateTokenHistoricalData
+// } from './historicalUpdates'
 // import { updateExchangeDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
-import { getEthPriceInUSD } from './priceOracle'
+// import { getEthPriceInUSD } from './priceOracle'
 import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero } from '../helpers'
 
-function updateCounters(): void {
-  const uniswap = Uniswap.load('1')
-  uniswap.exchangeHistoryEntityCount = uniswap.exchangeHistoryEntityCount.plus(ONE_BI)
-  uniswap.uniswapHistoryEntityCount = uniswap.uniswapHistoryEntityCount.plus(ONE_BI)
-  uniswap.tokenHistoryEntityCount = uniswap.tokenHistoryEntityCount.plus(ONE_BI)
-  uniswap.reserveEntityCount = uniswap.reserveEntityCount.plus(ONE_BI)
-  uniswap.txCount = uniswap.txCount.plus(ONE_BI)
-  uniswap.save()
-}
+// function updateCounters(): void {
+//   const uniswap = Uniswap.load('1')
+//   uniswap.exchangeHistoryEntityCount = uniswap.exchangeHistoryEntityCount.plus(ONE_BI)
+//   uniswap.uniswapHistoryEntityCount = uniswap.uniswapHistoryEntityCount.plus(ONE_BI)
+//   uniswap.tokenHistoryEntityCount = uniswap.tokenHistoryEntityCount.plus(ONE_BI)
+//   uniswap.reserveEntityCount = uniswap.reserveEntityCount.plus(ONE_BI)
+//   uniswap.txCount = uniswap.txCount.plus(ONE_BI)
+//   uniswap.save()
+// }
 
 /**
  * Search through graph to find derived Eth per token.
@@ -254,31 +254,31 @@ export function handleMint(event: Mint): void {
     exchange.save()
 
     // ETH/USD prices
-    const bundle = Bundle.load('1')
-    bundle.ethPrice = getEthPriceInUSD(event.block.number)
-    bundle.save()
+    // const bundle = Bundle.load('1')
+    // bundle.ethPrice = getEthPriceInUSD(event.block.number)
+    // bundle.save()
 
     // update global token0 info
     const ethPerToken0 = findEthPerToken(token0 as Token, false)
-    const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
+    // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
     token0.totalLiquidityToken = token0.totalLiquidityToken.plus(token0Amount)
     token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
 
     // update global token1 info
     const ethPerToken1 = findEthPerToken(token1 as Token, false)
-    const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
+    // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
     token1.totalLiquidityToken = token1.totalLiquidityToken.plus(token1Amount)
     token1.totalLiquidityETH = token1.totalLiquidityToken.times(ethPerToken1)
 
     // get new amounts of USD and ETH for tracking
     const amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
-    const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
+    // const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
     // update global liquidity
     uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.plus(amountTotalETH)
-    uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
+    // uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
 
     // update exchange liquidity
     exchange.combinedBalanceETH = exchange.combinedBalanceETH.plus(amountTotalETH)
@@ -294,7 +294,7 @@ export function handleMint(event: Mint): void {
     mintEvent.exchange = exchange.id as string
     mintEvent.token0 = token0.id as string
     mintEvent.token1 = token1.id as string
-    mintEvent.valueUSD = amountTotalUSD as BigDecimal
+    // mintEvent.valueUSD = amountTotalUSD as BigDecimal
     mintEvent.valueETH = amountTotalETH as BigDecimal
     mintEvent.amount0 = token0Amount as BigDecimal
     mintEvent.amount1 = token1Amount as BigDecimal
@@ -306,13 +306,13 @@ export function handleMint(event: Mint): void {
     mintEvent.save()
 
     // update counters
-    updateCounters()
+    // updateCounters()
 
     // update historical entities
-    updateUniswapHistoricalData(event)
-    updateExchangeHistoricalData(event, 'mint')
-    updateTokenHistoricalData(token0 as Token, event)
-    updateTokenHistoricalData(token1 as Token, event)
+    // updateUniswapHistoricalData(event)
+    // updateExchangeHistoricalData(event, 'mint')
+    // updateTokenHistoricalData(token0 as Token, event)
+    // updateTokenHistoricalData(token1 as Token, event)
 
     // update day entities
     // updateExchangeDayData(event)
@@ -348,32 +348,32 @@ export function handleBurn(event: Burn): void {
     exchange.totalTxsCount = exchange.totalTxsCount.plus(ONE_BI)
 
     //ETH / USD prices
-    const bundle = Bundle.load('1')
-    const ethPriceInUSD = getEthPriceInUSD(event.block.number)
-    bundle.ethPrice = ethPriceInUSD
-    bundle.save()
+    // const bundle = Bundle.load('1')
+    // const ethPriceInUSD = getEthPriceInUSD(event.block.number)
+    // bundle.ethPrice = ethPriceInUSD
+    // bundle.save()
 
     // update global token0 info
     const ethPerToken0 = findEthPerToken(token0 as Token, false)
-    const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
+    // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
     token0.totalLiquidityToken = token0.totalLiquidityToken.minus(token0Amount)
     token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
 
     // update global token1 info
     const ethPerToken1 = findEthPerToken(token1 as Token, false)
-    const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
+    // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
     token1.totalLiquidityToken = token1.totalLiquidityToken.minus(token1Amount)
     token1.totalLiquidityETH = token1.totalLiquidityToken.times(ethPerToken1)
 
     // get new amounts of USD and ETH for tracking
     const amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
-    const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
+    // const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
     // update global liquidity
     uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.minus(amountTotalETH)
-    uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
+    // uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
 
     // update global counter and save
     exchange.combinedBalanceETH = exchange.combinedBalanceETH.minus(amountTotalETH)
@@ -390,7 +390,7 @@ export function handleBurn(event: Burn): void {
     burnEvent.exchange = exchange.id as string
     burnEvent.token0 = token0.id as string
     burnEvent.token1 = token1.id as string
-    burnEvent.valueUSD = amountTotalUSD as BigDecimal
+    // burnEvent.valueUSD = amountTotalUSD as BigDecimal
     burnEvent.valueETH = amountTotalETH as BigDecimal
     burnEvent.amount0 = token0Amount as BigDecimal
     burnEvent.amount1 = token1Amount as BigDecimal
@@ -402,13 +402,13 @@ export function handleBurn(event: Burn): void {
     burnEvent.save()
 
     // update counters
-    updateCounters()
+    // updateCounters()
 
     // update historical entities
-    updateUniswapHistoricalData(event)
-    updateExchangeHistoricalData(event, 'mint')
-    updateTokenHistoricalData(token0 as Token, event)
-    updateTokenHistoricalData(token1 as Token, event)
+    // updateUniswapHistoricalData(event)
+    // updateExchangeHistoricalData(event, 'mint')
+    // updateTokenHistoricalData(token0 as Token, event)
+    // updateTokenHistoricalData(token1 as Token, event)
 
     // update day entities
     // updateExchangeDayData(event)
@@ -463,47 +463,47 @@ export function handleSwap(event: Swap): void {
     exchange.save()
 
     //ETH / USD prices
-    const bundle = Bundle.load('1')
-    const ethPriceInUSD = getEthPriceInUSD(event.block.number)
-    bundle.ethPrice = ethPriceInUSD
-    bundle.save()
+    // const bundle = Bundle.load('1')
+    // const ethPriceInUSD = getEthPriceInUSD(event.block.number)
+    // bundle.ethPrice = ethPriceInUSD
+    // bundle.save()
 
     const ethPerToken0 = findEthPerToken(token0 as Token, false)
-    const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
+    // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
 
     const ethPerToken1 = findEthPerToken(token1 as Token, false)
-    const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
+    // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
 
     // get new amounts of USD and ETH for tracking
     const amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
-    const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
+    // const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
     // update token0 volume and liquidity stats
     token0.totalLiquidityToken = token0.totalLiquidityToken.plus(token0AmountSigned)
     token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
     token0.tradeVolumeToken = token0.tradeVolumeToken.plus(token0Amount)
     token0.tradeVolumeETH = token0.tradeVolumeETH.plus(token0Amount.times(ethPerToken0))
-    token0.tradeVolumeUSD = token0.tradeVolumeUSD.plus(token0AmountSigned.times(usdPerToken0))
+    // token0.tradeVolumeUSD = token0.tradeVolumeUSD.plus(token0AmountSigned.times(usdPerToken0))
 
     // update token1 volume and liquidity stats
     token1.totalLiquidityToken = token1.totalLiquidityToken.plus(token1AmountSigned)
     token1.totalLiquidityETH = token1.totalLiquidityToken.times(ethPerToken1)
     token1.tradeVolumeToken = token1.tradeVolumeToken.plus(token1Amount)
     token1.tradeVolumeETH = token1.tradeVolumeETH.plus(token1Amount.times(ethPerToken1))
-    token1.tradeVolumeUSD = token0.tradeVolumeUSD.plus(token1AmountSigned.times(usdPerToken1))
+    // token1.tradeVolumeUSD = token0.tradeVolumeUSD.plus(token1AmountSigned.times(usdPerToken1))
 
     // update exchange volume data
     exchange.tradeVolumeETH = exchange.tradeVolumeETH.plus(amountTotalETH)
-    exchange.tradeVolumeUSD = exchange.tradeVolumeUSD.plus(amountTotalUSD)
+    // exchange.tradeVolumeUSD = exchange.tradeVolumeUSD.plus(amountTotalUSD)
     exchange.combinedBalanceETH = exchange.combinedBalanceETH
       .plus(token0AmountSigned.times(ethPerToken0))
       .plus(token1AmountSigned.times(ethPerToken1))
 
     // update global values
     const uniswap = Uniswap.load('1')
-    uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(amountTotalUSD)
+    // uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(amountTotalUSD)
     uniswap.totalVolumeETH = uniswap.totalVolumeETH.plus(amountTotalETH)
 
     // save entities
@@ -535,7 +535,7 @@ export function handleSwap(event: Swap): void {
       swapEvent.tokenBought = token0.id
       swapEvent.tokenSold = token1.id
     }
-    swapEvent.valueUSD = amountTotalUSD
+    // swapEvent.valueUSD = amountTotalUSD
     swapEvent.valueETH = amountTotalETH
     swapEvent.logIndex = event.logIndex
     swapEvent.to = event.params.to
