@@ -16,7 +16,7 @@ deploy-staging:
         - yarn install
         - yarn codegen
         - yarn build
-        - graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ $SUBGRAPH_NAME_STAGING --access-token $GRAPH_ACCESS_TOKEN
+        - graph deploy ---ipfs https://api.staging.thegraph.com/ipfs/ --node https://api.staging.thegraph.com/deploy/ $SUBGRAPH_NAME_STAGING --access-token $GRAPH_ACCESS_TOKEN
     only:
         - master
 
