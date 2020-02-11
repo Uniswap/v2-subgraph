@@ -551,67 +551,67 @@ export function handleSwap(event: Swap): void {
     transaction.save()
 
     // update counters
-    updateCounters()
+    // updateCounters()
 
-    // update historical entities
-    updateUniswapHistoricalData(event)
-    updateExchangeHistoricalData(event, 'swap')
-    updateTokenHistoricalData(token0 as Token, event)
-    updateTokenHistoricalData(token1 as Token, event)
+    // // update historical entities
+    // updateUniswapHistoricalData(event)
+    // updateExchangeHistoricalData(event, 'swap')
+    // updateTokenHistoricalData(token0 as Token, event)
+    // updateTokenHistoricalData(token1 as Token, event)
 
-    // update day entities
-    // updateExchangeDayData(event)
-    // updateUniswapDayData(event)
-    // updateTokenDayData(token0 as Token, event)
-    // updateTokenDayData(token1 as Token, event)
+    // // update day entities
+    // // updateExchangeDayData(event)
+    // // updateUniswapDayData(event)
+    // // updateTokenDayData(token0 as Token, event)
+    // // updateTokenDayData(token1 as Token, event)
 
-    // get ids for date related entities
-    const timestamp = event.block.timestamp.toI32()
-    const dayID = timestamp / 86400
-    const dayExchangeID = event.address
-      .toHexString()
-      .concat('-')
-      .concat(BigInt.fromI32(dayID).toString())
+    // // get ids for date related entities
+    // const timestamp = event.block.timestamp.toI32()
+    // const dayID = timestamp / 86400
+    // const dayExchangeID = event.address
+    //   .toHexString()
+    //   .concat('-')
+    //   .concat(BigInt.fromI32(dayID).toString())
 
-    // swap specific updating
-    let uniswapDayData = UniswapDayData.load(dayID.toString())
-    uniswapDayData.dailyVolumeUSD = uniswapDayData.dailyVolumeUSD.plus(amountTotalUSD)
-    uniswapDayData.dailyVolumeETH = uniswapDayData.dailyVolumeETH.plus(amountTotalETH)
-    uniswapDayData.save()
+    // // swap specific updating
+    // let uniswapDayData = UniswapDayData.load(dayID.toString())
+    // uniswapDayData.dailyVolumeUSD = uniswapDayData.dailyVolumeUSD.plus(amountTotalUSD)
+    // uniswapDayData.dailyVolumeETH = uniswapDayData.dailyVolumeETH.plus(amountTotalETH)
+    // uniswapDayData.save()
 
-    // swap specific updating
-    const exchangeDayData = ExchangeDayData.load(dayExchangeID)
-    exchangeDayData.dailyVolumeToken0 = exchangeDayData.dailyVolumeToken0.plus(token0Amount)
-    exchangeDayData.dailyVolumeToken1 = exchangeDayData.dailyVolumeToken1.plus(token1Amount)
-    exchangeDayData.dailyVolumeUSD = exchangeDayData.dailyVolumeUSD.plus(amountTotalUSD)
-    exchangeDayData.save()
+    // // swap specific updating
+    // const exchangeDayData = ExchangeDayData.load(dayExchangeID)
+    // exchangeDayData.dailyVolumeToken0 = exchangeDayData.dailyVolumeToken0.plus(token0Amount)
+    // exchangeDayData.dailyVolumeToken1 = exchangeDayData.dailyVolumeToken1.plus(token1Amount)
+    // exchangeDayData.dailyVolumeUSD = exchangeDayData.dailyVolumeUSD.plus(amountTotalUSD)
+    // exchangeDayData.save()
 
-    // swap specific updating
-    const token0DayID = token0.id
-      .toString()
-      .concat('-')
-      .concat(BigInt.fromI32(dayID).toString())
-    let token0DayData = TokenDayData.load(token0DayID)
-    token0DayData = TokenDayData.load(token0DayID)
-    token0DayData.dailyVolumeToken = token0DayData.dailyVolumeToken.plus(token0Amount)
-    token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(token0Amount.times(ethPerToken0))
-    token0DayData.dailyVolumeUSD = token0DayData.dailyVolumeUSD.plus(
-      token0Amount.times(ethPerToken0).times(bundle.ethPrice)
-    )
-    token0DayData.save()
+    // // swap specific updating
+    // const token0DayID = token0.id
+    //   .toString()
+    //   .concat('-')
+    //   .concat(BigInt.fromI32(dayID).toString())
+    // let token0DayData = TokenDayData.load(token0DayID)
+    // token0DayData = TokenDayData.load(token0DayID)
+    // token0DayData.dailyVolumeToken = token0DayData.dailyVolumeToken.plus(token0Amount)
+    // token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(token0Amount.times(ethPerToken0))
+    // token0DayData.dailyVolumeUSD = token0DayData.dailyVolumeUSD.plus(
+    //   token0Amount.times(ethPerToken0).times(bundle.ethPrice)
+    // )
+    // token0DayData.save()
 
-    // swap specific updating
-    const token1DayID = token1.id
-      .toString()
-      .concat('-')
-      .concat(BigInt.fromI32(dayID).toString())
-    let token1DayData = TokenDayData.load(token1DayID)
-    token1DayData = TokenDayData.load(token1DayID)
-    token1DayData.dailyVolumeToken = token1DayData.dailyVolumeToken.plus(token1Amount)
-    token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(token1Amount.times(ethPerToken1))
-    token1DayData.dailyVolumeUSD = token1DayData.dailyVolumeUSD.plus(
-      token1Amount.times(ethPerToken1).times(bundle.ethPrice)
-    )
-    token1DayData.save()
+    // // swap specific updating
+    // const token1DayID = token1.id
+    //   .toString()
+    //   .concat('-')
+    //   .concat(BigInt.fromI32(dayID).toString())
+    // let token1DayData = TokenDayData.load(token1DayID)
+    // token1DayData = TokenDayData.load(token1DayID)
+    // token1DayData.dailyVolumeToken = token1DayData.dailyVolumeToken.plus(token1Amount)
+    // token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(token1Amount.times(ethPerToken1))
+    // token1DayData.dailyVolumeUSD = token1DayData.dailyVolumeUSD.plus(
+    //   token1Amount.times(ethPerToken1).times(bundle.ethPrice)
+    // )
+    // token1DayData.save()
   }
 }
