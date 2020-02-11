@@ -233,7 +233,27 @@ type User @entity {
   # user eth address
   id: ID!    
   # all exhanges user has shares within 
-  exchangeBalances: [UserExchangeData!]!  @derivedFrom(field: "user")
+  exchangeBalances: [UserExchangeData!]  @derivedFrom(field: "user")
+}
+
+type OwnershipTokenBalance @entity {
+  id: ID!
+  amount: BigInt!
+  exchange: Exchange!
+  token: Token!
+  user: User!
+}
+
+type OwnershipTokenTransfer @entity {
+  id: ID!
+  amount: BigInt!
+  exchange: Exchange!
+  exchangeSupply: BigInt!
+  snapshotEthLiquidity: BigInt!
+  snapshotTokenLiquidity: BigInt!
+  timestamp: BigInt!
+  transaction: String!
+  user: User!
 }
 
 type UserExchangeData @entity {
@@ -250,9 +270,6 @@ type UserExchangeData @entity {
   # token1 info
   token1Deposited: BigDecimal!  
   token1Withdrawn: BigDecimal!
-  
-  # balance of lp shares for this exchange
-  uniTokenBalance: BigDecimal!  
 
   # swapping data 
   token0Bought: BigDecimal!

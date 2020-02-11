@@ -1,8 +1,10 @@
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
+import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import {
   Exchange,
-  Bundle,
+  User,
+  OwnershipTokenBalance,
+  OwnershipTokenTransfer,
   Token,
   Uniswap,
   Transaction,
@@ -23,7 +25,7 @@ import { Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Exchange/Ex
 // } from './historicalUpdates'
 // import { updateExchangeDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
 // import { getEthPriceInUSD } from './priceOracle'
-import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero } from '../helpers'
+import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, createOwnershipTokenBalance } from '../helpers'
 
 // function updateCounters(): void {
 //   const uniswap = Uniswap.load('1')
@@ -153,7 +155,7 @@ export function handleSync(event: Sync): void {
  * If we find a case with two transfers, we overwrite old values.
  *
  * 1. if mint, create new mint entity if needed
- * 2. same for burn
+ * 2. same for burn 
  * 3. in both bases, if the last entity in array is complete then we know
  *    that we must be on the second transfer in the order. In this case,
  *    overwrite the old values and shift them to "fee" slots (because first
@@ -164,7 +166,20 @@ export function handleTransfer(event: Transfer): void {
   const uniswap = Uniswap.load('1')
   const txn = event.transaction.hash.toHexString()
   const from = event.params.from
+  const fromUser = createUser(from);
   const to = event.params.to
+  const toUser = createUser(to);
+
+  const fromOwnershipTokenBalance = createOwnershipTokenBalance(event.address, from);
+  fromOwnershipTokenBalance.amount = fromOwnershipTokenBalance.amount.minus(event.params.value);
+  if (fromOwnershipTokenBalance.amount.lt(BigInt.fromI32(0))) log.error("Ownership token balance < 0", [fromOwnershipTokenBalance.id]);
+  fromOwnershipTokenBalance.save();
+
+  const toOwnershipTokenBalance = createOwnershipTokenBalance(event.address, from);
+  toOwnershipTokenBalance.amount = toOwnershipTokenBalance.amount.plus(event.params.value);
+  if (toOwnershipTokenBalance.amount.lt(BigInt.fromI32(0))) log.error("Ownership token balance < 0", [toOwnershipTokenBalance.id]);
+  toOwnershipTokenBalance.save();
+
   const poolTokenAmount = convertTokenToDecimal(event.params.value, 18)
   let transaction = Transaction.load(txn)
   if (transaction == null) {
@@ -241,6 +256,7 @@ export function handleMint(event: Mint): void {
   const exchange = Exchange.load(exchangeId)
   const uniswap = Uniswap.load('1')
 
+  // TODO: Figure out if there are any cases where the exchange would not be known about in advance 
   if (exchange !== null) {
     const token0 = Token.load(exchange.token0)
     const token1 = Token.load(exchange.token1)
@@ -298,6 +314,7 @@ export function handleMint(event: Mint): void {
     mintEvent.valueETH = amountTotalETH as BigDecimal
     mintEvent.amount0 = token0Amount as BigDecimal
     mintEvent.amount1 = token1Amount as BigDecimal
+    // TODO: Is this better using exchange_address-token_address as the ID?
     const newReserves = new Reserve(uniswap.reserveEntityCount.toString())
     newReserves.reserve0 = exchange.token0Balance.minus(token0Amount) as BigDecimal
     newReserves.reserve1 = exchange.token1Balance.minus(token1Amount) as BigDecimal

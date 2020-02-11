@@ -1,7 +1,8 @@
-import { BigInt, BigDecimal, Address } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, Address, log } from '@graphprotocol/graph-ts'
 import { ERC20 } from './types/Factory/ERC20'
 import { ERC20SymbolBytes } from './types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from './types/Factory/ERC20NameBytes'
+import { User, OwnershipTokenBalance } from './types/schema'
 
 /************************************
  ********** Helpers ***********
@@ -104,4 +105,27 @@ export function fetchTokenDecimals(tokenAddress: Address): i32 {
     decimalValue = decimalResult.value
   }
   return decimalValue
+}
+
+export function createOwnershipTokenBalance(exchange: Address, user: Address): OwnershipTokenBalance {
+  const id = exchange.toHexString().concat('-').concat(user.toHexString())
+  let ownershipTokenBalance = OwnershipTokenBalance.load(id)
+  if (ownershipTokenBalance === null) {
+    ownershipTokenBalance = new OwnershipTokenBalance(id)
+    ownershipTokenBalance.amount = BigInt.fromI32(0)
+    ownershipTokenBalance.exchange = exchange.toHexString()
+    ownershipTokenBalance.user = user.toHexString()
+    ownershipTokenBalance.save()
+  }
+  if (ownershipTokenBalance == null) log.error("OwnershipTokenBalance is null", [id])
+  return ownershipTokenBalance as OwnershipTokenBalance
+}
+
+export function createUser(address: Address): User {
+  let user = User.load(address.toHexString())
+  if (user === null) {
+    user = new User(address.toHexString())
+    user.save()
+  }
+  return user;
 }
