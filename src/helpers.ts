@@ -121,11 +121,10 @@ export function createOwnershipTokenBalance(exchange: Address, user: Address): O
   return ownershipTokenBalance as OwnershipTokenBalance
 }
 
-export function createUser(address: Address): User {
+export function createUser(address: Address): void {
   let user = User.load(address.toHexString())
   if (user === null) {
     user = new User(address.toHexString())
     user.save()
   }
-  return user;
 }

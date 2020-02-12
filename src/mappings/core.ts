@@ -2,9 +2,6 @@
 import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import {
   Exchange,
-  User,
-  OwnershipTokenBalance,
-  OwnershipTokenTransfer,
   Token,
   Uniswap,
   Transaction,
@@ -166,9 +163,9 @@ export function handleTransfer(event: Transfer): void {
   const uniswap = Uniswap.load('1')
   const txn = event.transaction.hash.toHexString()
   const from = event.params.from
-  const fromUser = createUser(from);
+  createUser(from);
   const to = event.params.to
-  const toUser = createUser(to);
+  createUser(to);
 
   const fromOwnershipTokenBalance = createOwnershipTokenBalance(event.address, from);
   fromOwnershipTokenBalance.amount = fromOwnershipTokenBalance.amount.minus(event.params.value);
