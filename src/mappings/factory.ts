@@ -1,5 +1,10 @@
 import { Address } from '@graphprotocol/graph-ts'
-import { Uniswap, Exchange, Token, Bundle } from '../types/schema'
+import { 
+  Uniswap, 
+  Exchange, 
+  Token, 
+  // Bundle 
+} from '../types/schema'
 import { ExchangeCreated } from '../types/Factory/Factory'
 import { Exchange as ExchangeContract } from '../types/templates'
 import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from '../helpers'
@@ -24,11 +29,11 @@ export function handleNewExchange(event: ExchangeCreated): void {
     uniswap.swapCount = ZERO_BI
     uniswap.syncCount = ZERO_BI
     uniswap.txCount = ZERO_BI
-    uniswap.mostLiquidTokens = []
+    // uniswap.mostLiquidTokens = []
 
-    const bundle = new Bundle('1')
-    bundle.ethPrice = ZERO_BD
-    bundle.save()
+    // const bundle = new Bundle('1')
+    // bundle.ethPrice = ZERO_BD
+    // bundle.save()
   }
 
   // update and save
@@ -52,7 +57,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token0.totalLiquidityToken = ZERO_BD
     token0.totalLiquidityETH = ZERO_BD
     token0.allPairs = []
-    token0.mostLiquidPairs = []
+    // token0.mostLiquidPairs = []
   }
 
   // fetch info if null
@@ -68,7 +73,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token1.totalLiquidityToken = ZERO_BD
     token1.totalLiquidityETH = ZERO_BD
     token1.allPairs = []
-    token1.mostLiquidPairs = []
+    // token1.mostLiquidPairs = []
   }
 
   const wethAddress = Address.fromString('0xc778417E063141139Fce010982780140Aa0cD5Ab')

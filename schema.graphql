@@ -26,52 +26,52 @@ type Uniswap @entity {
   txCount: BigInt!     
 
   # as reference for new day datas 
-  mostLiquidTokens: [TokenDayData!]!                   
+  # mostLiquidTokens: [TokenDayData!]!                   
 }
 
 # Data checkpointed at each event
-type UniswapHistoricalData @entity {
-  id: ID!  # unique based on incremental entity count, one for each transactions
-  timestamp: Int!
-  totalVolumeUSD: BigDecimal!  
-  totalVolumeETH: BigDecimal!   
-  totalLiquidityUSD: BigDecimal!
-  totalLiquidityETH: BigDecimal!
-  txCount: BigInt!
-}
+# type UniswapHistoricalData @entity {
+#   id: ID!  # unique based on incremental entity count, one for each transactions
+#   timestamp: Int!
+#   totalVolumeUSD: BigDecimal!  
+#   totalVolumeETH: BigDecimal!   
+#   totalLiquidityUSD: BigDecimal!
+#   totalLiquidityETH: BigDecimal!
+#   txCount: BigInt!
+# }
 
 # Data accumulated and condensed into day stats for all of Uniswap
-type UniswapDayData @entity {
-  id: ID! 
-  # timestamp rounded to current day by dividing by 86400 - should only be one per day
-  date: Int!
+# type UniswapDayData @entity {
+#   id: ID! 
+#   # timestamp rounded to current day by dividing by 86400 - should only be one per day
+#   date: Int!
 
-  dailyVolumeUSD: BigDecimal!
-  dailyVolumeETH: BigDecimal!
+#   dailyVolumeUSD: BigDecimal!
+#   dailyVolumeETH: BigDecimal!
 
-  totalVolumeETH: BigDecimal!
-  totalVolumeUSD: BigDecimal!
+#   totalVolumeETH: BigDecimal!
+#   totalVolumeUSD: BigDecimal!
 
-  totalLiquidityUSD: BigDecimal!
-  totalLiquidityETH: BigDecimal!
+#   totalLiquidityUSD: BigDecimal!
+#   totalLiquidityETH: BigDecimal!
 
-  # daily top tokens in liquidity 
-  maxStored: Int!
-  mostLiquidTokens: [TokenDayData!]!
+#   # daily top tokens in liquidity 
+#   maxStored: Int!
+#   mostLiquidTokens: [TokenDayData!]!
 
-  txCount: BigInt!
-}
+#   txCount: BigInt!
+# }
 
 # stores for USD calculations 
-type Bundle @entity {
-  id: ID!
-  ethPrice: BigDecimal! # price of ETH usd
-  # daiPrice: BigDecimal! # price of ETH in DAI
+# type Bundle @entity {
+#   id: ID!
+#   ethPrice: BigDecimal! # price of ETH usd
+#   # daiPrice: BigDecimal! # price of ETH in DAI
 
-  # add these later
-  # USDC: BigDecimal! # price of ETH is usdc 
-  # TUSD: BigDecimal! # price of ETH in TUSD
-}
+#   # add these later
+#   # USDC: BigDecimal! # price of ETH is usdc 
+#   # TUSD: BigDecimal! # price of ETH in TUSD
+# }
 
 # Stats about a Uniswap exchange 
 type Exchange @entity {
@@ -111,49 +111,49 @@ enum EventType {
   swap
 }
 
-type ExchangeHistoricalData @entity {
-  id: ID!
-  exchangeAddress: Bytes!
-  type: EventType!
-  timestamp: Int!
+# type ExchangeHistoricalData @entity {
+#   id: ID!
+#   exchangeAddress: Bytes!
+#   type: EventType!
+#   timestamp: Int!
 
-  # liquidity
-  token0Balance: BigDecimal!              
-  token1Balance: BigDecimal!             
-  combinedBalanceUSD: BigDecimal!  
-  combinedBalanceETH: BigDecimal!      
-  totalUniToken: BigDecimal!   
+#   # liquidity
+#   token0Balance: BigDecimal!              
+#   token1Balance: BigDecimal!             
+#   combinedBalanceUSD: BigDecimal!  
+#   combinedBalanceETH: BigDecimal!      
+#   totalUniToken: BigDecimal!   
   
-  # volume
-  tradeVolumeToken0: BigDecimal!           
-  tradeVolumeToken1: BigDecimal!           
-  tradeVolumeETH: BigDecimal!  
-  tradeVolumeUSD: BigDecimal!             
+#   # volume
+#   tradeVolumeToken0: BigDecimal!           
+#   tradeVolumeToken1: BigDecimal!           
+#   tradeVolumeETH: BigDecimal!  
+#   tradeVolumeUSD: BigDecimal!             
 
-  # pricing
-  token0Price: BigDecimal!            
-  token1Price: BigDecimal!    
+#   # pricing
+#   token0Price: BigDecimal!            
+#   token1Price: BigDecimal!    
 
-  # txns
-  totalTxsCount: BigInt!  
-}
+#   # txns
+#   totalTxsCount: BigInt!  
+# }
 
 # Data accumulated and condensed into day stats for each exchange
-type ExchangeDayData @entity {
-  id: ID!                              
-  date: Int!                           
-  exchangeAddress: Bytes!
-  token0: Token!
-  token1: Token!
-  token0Balance: BigDecimal!              
-  token1Balance: BigDecimal!      
-  combinedBalanceETH: BigDecimal!    
-  combinedBalanceUSD: BigDecimal!                          
-  dailyVolumeToken0: BigDecimal!               
-  dailyVolumeToken1: BigDecimal! 
-  dailyVolumeUSD: BigDecimal!          
-  dailyTxns: BigInt!          
-}
+# type ExchangeDayData @entity {
+#   id: ID!                              
+#   date: Int!                           
+#   exchangeAddress: Bytes!
+#   token0: Token!
+#   token1: Token!
+#   token0Balance: BigDecimal!              
+#   token1Balance: BigDecimal!      
+#   combinedBalanceETH: BigDecimal!    
+#   combinedBalanceUSD: BigDecimal!                          
+#   dailyVolumeToken0: BigDecimal!               
+#   dailyVolumeToken1: BigDecimal! 
+#   dailyVolumeUSD: BigDecimal!          
+#   dailyTxns: BigInt!          
+# }
 
 # stats about an individual token (can exist on multiple exchanges)
 type Token @entity {
@@ -182,51 +182,51 @@ type Token @entity {
   allPairs: [Exchange!]
 
   # reference tracker for most liquid pairs 
-  mostLiquidPairs: [ExchangeDayData!]!
+  # mostLiquidPairs: [ExchangeDayData!]!
 }
 
 
-type TokenHistoricalData @entity {
-  id: ID!
-  token: Token!
-  timestamp: Int!
+# type TokenHistoricalData @entity {
+#   id: ID!
+#   token: Token!
+#   timestamp: Int!
   
-  # volume
-  tradeVolumeToken: BigDecimal!           
-  tradeVolumeETH: BigDecimal!           
-  tradeVolumeUSD: BigDecimal! 
+#   # volume
+#   tradeVolumeToken: BigDecimal!           
+#   tradeVolumeETH: BigDecimal!           
+#   tradeVolumeUSD: BigDecimal! 
 
-  totalLiquidityToken: BigDecimal!        
-  totalLiquidityETH: BigDecimal!            
-  totalLiquidityUSD: BigDecimal!            
+#   totalLiquidityToken: BigDecimal!        
+#   totalLiquidityETH: BigDecimal!            
+#   totalLiquidityUSD: BigDecimal!            
 
-  # pricing
-  priceETH: BigDecimal            
-  priceUSD: BigDecimal            
-}
+#   # pricing
+#   priceETH: BigDecimal            
+#   priceUSD: BigDecimal            
+# }
 
 # Data accumulated and condensed into day stats for each token across all pairs 
-type TokenDayData @entity {
-  id: ID!                              
-  date: Int!                           
-  token: Token!     
+# type TokenDayData @entity {
+#   id: ID!                              
+#   date: Int!                           
+#   token: Token!     
 
-  # volume state 
-  dailyVolumeToken: BigDecimal!   
-  dailyVolumeETH: BigDecimal!               
-  dailyVolumeUSD: BigDecimal! 
+#   # volume state 
+#   dailyVolumeToken: BigDecimal!   
+#   dailyVolumeETH: BigDecimal!               
+#   dailyVolumeUSD: BigDecimal! 
 
-  # liquidity stats
-  totalLiquidityToken: BigDecimal!
-  totalLiquidityETH: BigDecimal!
-  totalLiquidityUSD: BigDecimal!
+#   # liquidity stats
+#   totalLiquidityToken: BigDecimal!
+#   totalLiquidityETH: BigDecimal!
+#   totalLiquidityUSD: BigDecimal!
 
-  dailyTxns: BigInt! 
+#   dailyTxns: BigInt! 
 
-  # top pairs that this token is in by liquidity
-  maxStored: Int!
-  mostLiquidPairs: [ExchangeDayData!]!
-}
+#   # top pairs that this token is in by liquidity
+#   maxStored: Int!
+#   mostLiquidPairs: [ExchangeDayData!]!
+# }
 
 
 type User @entity {
