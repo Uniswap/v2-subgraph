@@ -240,7 +240,6 @@ type OwnershipTokenBalance @entity {
   id: ID!
   amount: BigInt!
   exchange: Exchange!
-  token: Token!
   user: User!
 }
 
