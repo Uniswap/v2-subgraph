@@ -12,9 +12,10 @@ import {
   Reserve,
   Sync as SyncEvent,
   Burn as BurnEvent,
-  Swap as SwapEvent
+  Swap as SwapEvent,
+  LiquidityTokenTransfer
 } from '../types/schema'
-import { Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Exchange/Exchange'
+import { Exchange as ExchangeContract, Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Exchange/Exchange'
 // import {
 //   updateUniswapHistoricalData,
 //   updateExchangeHistoricalData,
@@ -22,7 +23,7 @@ import { Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Exchange/Ex
 // } from './historicalUpdates'
 // import { updateExchangeDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
 // import { getEthPriceInUSD } from './priceOracle'
-import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, createOwnershipTokenBalance } from '../helpers'
+import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, createLiquidityTokenBalance } from '../helpers'
 
 // function updateCounters(): void {
 //   const uniswap = Uniswap.load('1')
@@ -166,16 +167,18 @@ export function handleTransfer(event: Transfer): void {
   createUser(from);
   const to = event.params.to
   createUser(to);
-
-  const fromOwnershipTokenBalance = createOwnershipTokenBalance(event.address, from);
-  fromOwnershipTokenBalance.amount = fromOwnershipTokenBalance.amount.minus(event.params.value);
-  if (fromOwnershipTokenBalance.amount.lt(BigInt.fromI32(0))) log.error("Ownership token balance < 0", [fromOwnershipTokenBalance.id]);
-  fromOwnershipTokenBalance.save();
-
-  const toOwnershipTokenBalance = createOwnershipTokenBalance(event.address, from);
-  toOwnershipTokenBalance.amount = toOwnershipTokenBalance.amount.plus(event.params.value);
-  if (toOwnershipTokenBalance.amount.lt(BigInt.fromI32(0))) log.error("Ownership token balance < 0", [toOwnershipTokenBalance.id]);
-  toOwnershipTokenBalance.save();
+  const transferId = exchangeId + "-" + txn + "-" + from + "-" + to
+  let liquidityTokenTransfer = LiquidityTokenTransfer.load(transferId);
+  liquidityTokenTransfer.from = from.toHex();
+  liquidityTokenTransfer.to = to.toHex();
+  liquidityTokenTransfer.amount = event.params.value;
+  liquidityTokenTransfer.transferType = "transfer"
+  liquidityTokenTransfer.timestamp = event.block.timestamp;
+  liquidityTokenTransfer.transaction = txn;
+  let exchangeContract = ExchangeContract.bind(event.address);
+  liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply();
+  liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
+  liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
 
   const poolTokenAmount = convertTokenToDecimal(event.params.value, 18)
   let transaction = Transaction.load(txn)
@@ -191,6 +194,8 @@ export function handleTransfer(event: Transfer): void {
   }
   // mint
   if (from.toHexString() == '0x0000000000000000000000000000000000000000') {
+    liquidityTokenTransfer.transferType = "mint"
+    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(event.params.value);
     let mints = transaction.mints
     if (mints.length === 0 || isCompleteMint(mints[mints.length - 1])) {
       uniswap.mintCount = uniswap.mintCount.plus(ONE_BI)
@@ -218,8 +223,16 @@ export function handleTransfer(event: Transfer): void {
       mint.save()
     }
   }
+  else {
+    liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.plus(event.params.value);
+    const fromUserLiquidityTokenBalance = createLiquidityTokenBalance(event.address, from);
+    fromUserLiquidityTokenBalance.amount = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter;
+    fromUserLiquidityTokenBalance.save();
+  }
   // burn
   if (to.toHexString() == '0x0000000000000000000000000000000000000000') {
+    liquidityTokenTransfer.transferType = "mint"
+    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(event.params.value);
     let burns = transaction.burns
     if (burns.length === 0 || isCompleteBurn(burns[burns.length - 1])) {
       uniswap.burnCount = uniswap.burnCount.plus(ONE_BI)
@@ -245,7 +258,13 @@ export function handleTransfer(event: Transfer): void {
       burn.liquidity = poolTokenAmount
       burn.save()
     }
+  } else {
+    liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.minus(event.params.value);
+    const toUserLiquidityTokenBalance = createLiquidityTokenBalance(event.address, to);
+    toUserLiquidityTokenBalance.amount = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter;
+    toUserLiquidityTokenBalance.save();
   }
+  liquidityTokenTransfer.save();
 }
 
 export function handleMint(event: Mint): void {

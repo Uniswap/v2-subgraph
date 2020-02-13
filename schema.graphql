@@ -234,25 +234,37 @@ type User @entity {
   id: ID!    
   # all exhanges user has shares within 
   exchangeBalances: [UserExchangeData!]  @derivedFrom(field: "user")
+  liquidityTokenBalances: [LiquidityTokenBalance!] @derivedFrom(field: "user")
+  liquidityTokenTransfersOut: [LiquidityTokenTransfer!] @derivedFrom(field: "from")
+  liquidityTokenTransfersIn: [LiquidityTokenTransfer!] @derivedFrom(field: "to")
 }
 
-type OwnershipTokenBalance @entity {
+type LiquidityTokenBalance @entity {
   id: ID!
   amount: BigInt!
   exchange: Exchange!
   user: User!
 }
 
-type OwnershipTokenTransfer @entity {
-  id: ID!
+type LiquidityTokenTransfer @entity {
+  id: ID! # concat: exchange-transactionHash-fromUser-toUser
   amount: BigInt!
   exchange: Exchange!
-  exchangeSupply: BigInt!
-  snapshotEthLiquidity: BigInt!
-  snapshotTokenLiquidity: BigInt!
+  transferType: String # Mint, Burn, or Transfer
+  exchangeLiquidityTokenSupplyBefore: BigInt
+  exchangeLiquidityTokenSupplyAfter: BigInt
+  fromUserLiquidityTokenBalanceBefore: BigInt
+  fromUserLiquidityTokenBalanceAfter: BigInt
+  toUserLiquidityTokenBalanceBefore: BigInt
+  toUserLiquidityTokenBalanceAfter: BigInt
+  exchangeTotalEthLiquidityBefore: BigInt
+  exchangeTotalEthLiquidityAfter: BigInt
+  exchangeTotalTokenLiquidityBefore: BigInt
+  exchangeTotalTokenLiquidityAfter: BigInt
   timestamp: BigInt!
-  transaction: String!
-  user: User!
+  transaction: Transaction!
+  from: User!
+  to: User!
 }
 
 type UserExchangeData @entity {

@@ -2,7 +2,8 @@ import { BigInt, BigDecimal, Address, log } from '@graphprotocol/graph-ts'
 import { ERC20 } from './types/Factory/ERC20'
 import { ERC20SymbolBytes } from './types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from './types/Factory/ERC20NameBytes'
-import { User, OwnershipTokenBalance } from './types/schema'
+import { Exchange, User, LiquidityTokenBalance, LiquidityTokenTransfer } from './types/schema'
+import { Transfer } from './types/templates/Exchange/Exchange'
 
 /************************************
  ********** Helpers ***********
@@ -107,18 +108,18 @@ export function fetchTokenDecimals(tokenAddress: Address): i32 {
   return decimalValue
 }
 
-export function createOwnershipTokenBalance(exchange: Address, user: Address): OwnershipTokenBalance {
+export function createLiquidityTokenBalance(exchange: Address, user: Address): LiquidityTokenBalance {
   const id = exchange.toHexString().concat('-').concat(user.toHexString())
-  let ownershipTokenBalance = OwnershipTokenBalance.load(id)
-  if (ownershipTokenBalance === null) {
-    ownershipTokenBalance = new OwnershipTokenBalance(id)
-    ownershipTokenBalance.amount = BigInt.fromI32(0)
-    ownershipTokenBalance.exchange = exchange.toHexString()
-    ownershipTokenBalance.user = user.toHexString()
-    ownershipTokenBalance.save()
+  let liquidityTokenBalance = LiquidityTokenBalance.load(id)
+  if (liquidityTokenBalance === null) {
+    liquidityTokenBalance = new LiquidityTokenBalance(id)
+    liquidityTokenBalance.amount = BigInt.fromI32(0)
+    liquidityTokenBalance.exchange = exchange.toHexString()
+    liquidityTokenBalance.user = user.toHexString()
+    liquidityTokenBalance.save()
   }
-  if (ownershipTokenBalance == null) log.error("OwnershipTokenBalance is null", [id])
-  return ownershipTokenBalance as OwnershipTokenBalance
+  if (liquidityTokenBalance == null) log.error("LiquidityTokenBalance is null", [id])
+  return liquidityTokenBalance as LiquidityTokenBalance
 }
 
 export function createUser(address: Address): void {
