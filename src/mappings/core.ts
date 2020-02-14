@@ -178,7 +178,7 @@ export function handleTransfer(event: Transfer): void {
   liquidityTokenTransfer.transaction = txn;
   let exchangeContract = ExchangeContract.bind(event.address);
   liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply();
-  liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter
+  liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
   liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
   liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
 
@@ -266,6 +266,10 @@ export function handleTransfer(event: Transfer): void {
     toUserLiquidityTokenBalance.amount = toUserLiquidityTokenBalance.amount.plus(event.params.value);
     toUserLiquidityTokenBalance.save();
   }
+  liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+  liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+  liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+  liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
   liquidityTokenTransfer.save();
 }
 

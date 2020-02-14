@@ -235,8 +235,8 @@ type User @entity {
   # all exhanges user has shares within 
   exchangeBalances: [UserExchangeData!]  @derivedFrom(field: "user")
   liquidityTokenBalances: [LiquidityTokenBalance!] @derivedFrom(field: "user")
-  liquidityTokenTransfersOut: [LiquidityTokenTransfer!] @derivedFrom(field: "from")
-  liquidityTokenTransfersIn: [LiquidityTokenTransfer!] @derivedFrom(field: "to")
+  liquidityTokenTransfersOut: [LiquidityTokenTransfer!] @derivedFrom(field: "fromUser")
+  liquidityTokenTransfersIn: [LiquidityTokenTransfer!] @derivedFrom(field: "toUser")
 }
 
 type LiquidityTokenBalance @entity {
@@ -255,16 +255,20 @@ type LiquidityTokenTransfer @entity {
   exchangeLiquidityTokenSupplyAfter: BigInt
   fromUserLiquidityTokenBalanceBefore: BigInt
   fromUserLiquidityTokenBalanceAfter: BigInt
+  fromUserPoolOwnershipBefore: BigDecimal
+  fromUserPoolOwnershipAfter: BigDecimal
   toUserLiquidityTokenBalanceBefore: BigInt
   toUserLiquidityTokenBalanceAfter: BigInt
+  toUserPoolOwnershipBefore: BigDecimal
+  toUserPoolOwnershipAfter: BigDecimal
   exchangeTotalEthLiquidityBefore: BigInt
   exchangeTotalEthLiquidityAfter: BigInt
   exchangeTotalTokenLiquidityBefore: BigInt
   exchangeTotalTokenLiquidityAfter: BigInt
   timestamp: BigInt!
   transaction: Transaction!
-  from: User!
-  to: User!
+  fromUser: User!
+  toUser: User!
 }
 
 type UserExchangeData @entity {
