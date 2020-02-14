@@ -178,6 +178,7 @@ export function handleTransfer(event: Transfer): void {
   liquidityTokenTransfer.transaction = txn;
   let exchangeContract = ExchangeContract.bind(event.address);
   liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply();
+  liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter
   liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
   liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
 
