@@ -103,6 +103,9 @@ type Exchange @entity {
 
   # derivations 
   factory: Uniswap! @derivedFrom(field: "exchanges")
+
+  liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "exchange")
+  liquidityTokenTransfers: [LiquidityTokenTransfer!] @derivedFrom(field: "exchange")
 }
 
 enum EventType {
@@ -234,16 +237,18 @@ type User @entity {
   id: ID!    
   # all exhanges user has shares within 
   exchangeBalances: [UserExchangeData!]  @derivedFrom(field: "user")
-  liquidityTokenBalances: [LiquidityTokenBalance!] @derivedFrom(field: "user")
+  liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "user")
   liquidityTokenTransfersOut: [LiquidityTokenTransfer!] @derivedFrom(field: "fromUser")
   liquidityTokenTransfersIn: [LiquidityTokenTransfer!] @derivedFrom(field: "toUser")
 }
 
-type LiquidityTokenBalance @entity {
+type LiquidityPosition @entity {
   id: ID!
-  amount: BigInt!
-  exchange: Exchange!
   user: User!
+  liquidityTokenBalance: BigInt!
+  exchange: Exchange!
+  exchangeLiquidityTokenSupply: BigInt
+  poolOwnership: BigDecimal
 }
 
 type LiquidityTokenTransfer @entity {

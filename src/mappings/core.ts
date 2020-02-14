@@ -13,6 +13,7 @@ import {
   Sync as SyncEvent,
   Burn as BurnEvent,
   Swap as SwapEvent,
+  LiquidityPosition,
   LiquidityTokenTransfer
 } from '../types/schema'
 import { Exchange as ExchangeContract, Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Exchange/Exchange'
@@ -23,7 +24,7 @@ import { Exchange as ExchangeContract, Mint, Burn, Swap, Transfer, Sync } from '
 // } from './historicalUpdates'
 // import { updateExchangeDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
 // import { getEthPriceInUSD } from './priceOracle'
-import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, createLiquidityTokenBalance } from '../helpers'
+import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, createLiquidityPosition } from '../helpers'
 
 // function updateCounters(): void {
 //   const uniswap = Uniswap.load('1')
@@ -227,9 +228,15 @@ export function handleTransfer(event: Transfer): void {
   }
   else {
     liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.plus(event.params.value);
-    const fromUserLiquidityTokenBalance = createLiquidityTokenBalance(event.address, from);
-    fromUserLiquidityTokenBalance.amount = fromUserLiquidityTokenBalance.amount.minus(event.params.value);
-    fromUserLiquidityTokenBalance.save();
+    const fromUserLiquidityPosition = createLiquidityPosition(event.address, from);
+    fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityPosition.liquidityTokenBalance.minus(event.params.value);
+    fromUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
+    if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+      fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
+    } else {
+      fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(fromUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+    }
+    fromUserLiquidityPosition.save();
   }
   // burn
   if (to.toHexString() == '0x0000000000000000000000000000000000000000') {
@@ -262,9 +269,15 @@ export function handleTransfer(event: Transfer): void {
     }
   } else {
     liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.minus(event.params.value);
-    const toUserLiquidityTokenBalance = createLiquidityTokenBalance(event.address, to);
-    toUserLiquidityTokenBalance.amount = toUserLiquidityTokenBalance.amount.plus(event.params.value);
-    toUserLiquidityTokenBalance.save();
+    const toUserLiquidityPosition = createLiquidityPosition(event.address, from);
+    toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityPosition.liquidityTokenBalance.minus(event.params.value);
+    toUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
+    if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+      toUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
+    } else {
+      toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(toUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+    }
+    toUserLiquidityPosition.save();
   }
   if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
     liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
