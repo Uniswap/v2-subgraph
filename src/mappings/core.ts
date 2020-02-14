@@ -170,8 +170,8 @@ export function handleTransfer(event: Transfer): void {
   const transferId = exchangeId + "-" + txn + "-" + from.toHex() + "-" + to.toHex()
   let liquidityTokenTransfer = new LiquidityTokenTransfer(transferId);
   liquidityTokenTransfer.exchange = exchangeId;
-  liquidityTokenTransfer.from = from.toHex();
-  liquidityTokenTransfer.to = to.toHex();
+  liquidityTokenTransfer.fromUser = from.toHex();
+  liquidityTokenTransfer.toUser = to.toHex();
   liquidityTokenTransfer.amount = event.params.value;
   liquidityTokenTransfer.transferType = "transfer"
   liquidityTokenTransfer.timestamp = event.block.timestamp;
@@ -266,10 +266,21 @@ export function handleTransfer(event: Transfer): void {
     toUserLiquidityTokenBalance.amount = toUserLiquidityTokenBalance.amount.plus(event.params.value);
     toUserLiquidityTokenBalance.save();
   }
-  liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
-  liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
-  liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
-  liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+  if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
+    liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
+    liquidityTokenTransfer.toUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
+  } else {
+    liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+    liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+  }
+
+  if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+    liquidityTokenTransfer.fromUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
+    liquidityTokenTransfer.toUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
+  } else {
+    liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+    liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+  }
   liquidityTokenTransfer.save();
 }
 
