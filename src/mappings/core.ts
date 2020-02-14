@@ -169,6 +169,7 @@ export function handleTransfer(event: Transfer): void {
   createUser(to);
   const transferId = exchangeId + "-" + txn + "-" + from.toHex() + "-" + to.toHex()
   let liquidityTokenTransfer = new LiquidityTokenTransfer(transferId);
+  liquidityTokenTransfer.exchange = exchangeId;
   liquidityTokenTransfer.from = from.toHex();
   liquidityTokenTransfer.to = to.toHex();
   liquidityTokenTransfer.amount = event.params.value;
