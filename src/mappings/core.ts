@@ -167,8 +167,8 @@ export function handleTransfer(event: Transfer): void {
   createUser(from);
   const to = event.params.to
   createUser(to);
-  const transferId = exchangeId + "-" + txn + "-" + from + "-" + to
-  let liquidityTokenTransfer = LiquidityTokenTransfer.load(transferId);
+  const transferId = exchangeId + "-" + txn + "-" + from.toHex() + "-" + to.toHex()
+  let liquidityTokenTransfer = new LiquidityTokenTransfer(transferId);
   liquidityTokenTransfer.from = from.toHex();
   liquidityTokenTransfer.to = to.toHex();
   liquidityTokenTransfer.amount = event.params.value;
@@ -226,7 +226,7 @@ export function handleTransfer(event: Transfer): void {
   else {
     liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.plus(event.params.value);
     const fromUserLiquidityTokenBalance = createLiquidityTokenBalance(event.address, from);
-    fromUserLiquidityTokenBalance.amount = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter;
+    fromUserLiquidityTokenBalance.amount = fromUserLiquidityTokenBalance.amount.minus(event.params.value);
     fromUserLiquidityTokenBalance.save();
   }
   // burn
@@ -261,7 +261,7 @@ export function handleTransfer(event: Transfer): void {
   } else {
     liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.minus(event.params.value);
     const toUserLiquidityTokenBalance = createLiquidityTokenBalance(event.address, to);
-    toUserLiquidityTokenBalance.amount = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter;
+    toUserLiquidityTokenBalance.amount = toUserLiquidityTokenBalance.amount.plus(event.params.value);
     toUserLiquidityTokenBalance.save();
   }
   liquidityTokenTransfer.save();
