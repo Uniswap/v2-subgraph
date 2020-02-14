@@ -180,8 +180,10 @@ export function handleTransfer(event: Transfer): void {
   let exchangeContract = ExchangeContract.bind(event.address);
   liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply();
   liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
-  liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
-  liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
+  let fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
+  let toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
+  liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = fromUserLiquidityTokenBalanceAfter;
+  liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = toUserLiquidityTokenBalanceAfter;
 
   const poolTokenAmount = convertTokenToDecimal(event.params.value, 18)
   let transaction = Transaction.load(txn)
@@ -227,9 +229,8 @@ export function handleTransfer(event: Transfer): void {
     }
   }
   else {
-    liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.plus(event.params.value);
     const fromUserLiquidityPosition = createLiquidityPosition(event.address, from);
-    fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityPosition.liquidityTokenBalance.minus(event.params.value);
+    fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityTokenBalanceAfter;
     fromUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
     if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
       fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
@@ -237,6 +238,7 @@ export function handleTransfer(event: Transfer): void {
       fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(fromUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
     }
     fromUserLiquidityPosition.save();
+    liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = fromUserLiquidityTokenBalanceAfter.plus(event.params.value);
   }
   // burn
   if (to.toHexString() == '0x0000000000000000000000000000000000000000') {
@@ -268,9 +270,8 @@ export function handleTransfer(event: Transfer): void {
       burn.save()
     }
   } else {
-    liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.minus(event.params.value);
     const toUserLiquidityPosition = createLiquidityPosition(event.address, from);
-    toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityPosition.liquidityTokenBalance.minus(event.params.value);
+    toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityTokenBalanceAfter;
     toUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
     if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
       toUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
@@ -278,6 +279,7 @@ export function handleTransfer(event: Transfer): void {
       toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(toUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
     }
     toUserLiquidityPosition.save();
+    liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = toUserLiquidityTokenBalanceAfter.minus(event.params.value);
   }
   if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
     liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
