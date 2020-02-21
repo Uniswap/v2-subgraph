@@ -1,28 +1,54 @@
 specVersion: 0.0.2
 description: Uniswap is a decentralized protocol for automated token exchange on Ethereum.
-repository: https://github.com/ianlapham/uniswap-subgraph-v2
+repository: https://github.com/graphprotocol/uniswap-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Factory
+    name: FactoryV1Contract
+    network: rinkeby
+    source:
+      address: '0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36'
+      abi: FactoryV1Contract
+      startBlock: 6627917
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/V1/factory.ts
+      entities:
+        - Exchange
+      abis:
+        - name: FactoryV1Contract
+          file: ./abis/V1/FactoryV1Contract.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+      eventHandlers:
+        - event: NewExchange(indexed address,indexed address)
+          handler: handleNewExchange
+  - kind: ethereum/contract
+    name: FactoryV2Contract
     network: rinkeby
     source:
       address: '0x8A500Eff6D40B53ab7CA5D951E5eBa539445b6f0'
-      abi: Factory
+      abi: FactoryV2Contract
       startBlock: 5729170
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
-      file: ./src/mappings/factory.ts
+      file: ./src/mappings/V2/factory.ts
       entities:
         - Uniswap
         - Pair
         - Token
       abis:
-        - name: Factory
-          file: ./abis/factory.json
+        - name: FactoryV2Contract
+          file: ./abis/V2/FactoryV2Contract.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: ERC20SymbolBytes
@@ -35,22 +61,54 @@ dataSources:
 templates:
   # These data sources templates exist to support the different flags that a token could specify- kind: ethereum/contract
   - kind: ethereum/contract
-    name: Exchange
+    name: ExchangeV1Contract
     network: rinkeby
     source:
-      abi: Exchange
+      abi: ExchangeV1Contract
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
-      file: ./src/mappings/core.ts
+      file: ./src/mappings/V1/exchange.ts
+      entities:
+        - Exchange
+        - Uniswap
+        - User
+        - UserExchangeData
+        - Transaction
+        - UniswapDayData
+        - UniswapHistoricalData
+      abis:
+        - name: ExchangeV1Contract
+          file: ./abis/V1/ExchangeV1Contract.json
+      eventHandlers:
+        - event: TokenPurchase(indexed address,indexed uint256,indexed uint256)
+          handler: handleTokenPurchase
+        - event: EthPurchase(indexed address,indexed uint256,indexed uint256)
+          handler: handleEthPurchase
+        - event: AddLiquidity(indexed address,indexed uint256,indexed uint256)
+          handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,indexed uint256,indexed uint256)
+          handler: handleRemoveLiquidity
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+  - kind: ethereum/contract
+    name: ExchangeV2Contract
+    network: rinkeby
+    source:
+      abi: ExchangeV2Contract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/V2/core.ts
       entities:
         - Pair
         - Uniswap
         - Token
       abis:
-        - name: Exchange
-          file: ./abis/exchange.json
+        - name: ExchangeV2Contract
+          file: ./abis/V2/ExchangeV2Contract.json
       eventHandlers:
         - event: Mint(indexed address,uint256,uint256)
           handler: handleMint

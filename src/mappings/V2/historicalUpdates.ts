@@ -9,7 +9,7 @@
 //   ExchangeHistoricalData,
 //   TokenHistoricalData
 // } from '../types/schema'
-// import { ONE_BI } from '../helpers'
+// import { ONE_BI } from './helpers'
 
 // export function updateUniswapHistoricalData(event: EthereumEvent): void {
 //   const uniswap = Uniswap.load('1')

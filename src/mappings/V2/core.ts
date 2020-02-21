@@ -2,9 +2,11 @@
 import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import {
   Exchange,
-  Token,
+  Asset,
   Uniswap,
+  UniswapFactory,
   Transaction,
+  Migration,
   // UniswapDayData,
   // ExchangeDayData,
   // TokenDayData,
@@ -13,10 +15,9 @@ import {
   Sync as SyncEvent,
   Burn as BurnEvent,
   Swap as SwapEvent,
-  LiquidityPosition,
   LiquidityTokenTransfer
-} from '../types/schema'
-import { Exchange as ExchangeContract, Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Exchange/Exchange'
+} from '../../types/schema'
+import { ExchangeV2Contract as ExchangeContract, Mint, Burn, Swap, Transfer, Sync } from '../../types/templates/ExchangeV2Contract/ExchangeV2Contract'
 // import {
 //   updateUniswapHistoricalData,
 //   updateExchangeHistoricalData,
@@ -24,7 +25,7 @@ import { Exchange as ExchangeContract, Mint, Burn, Swap, Transfer, Sync } from '
 // } from './historicalUpdates'
 // import { updateExchangeDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
 // import { getEthPriceInUSD } from './priceOracle'
-import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, createLiquidityPosition } from '../helpers'
+import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, createLiquidityPosition } from './helpers'
 
 // function updateCounters(): void {
 //   const uniswap = Uniswap.load('1')
@@ -41,33 +42,33 @@ import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, create
  * @todo update to be derived ETH (add stablecoin estimates)
  *
  **/
-function findEthPerToken(token: Token, maxDepthReached: boolean): BigDecimal {
+function findEthPerToken(token: Asset, maxDepthReached: boolean): BigDecimal {
   if (token.wethExchange != null) {
     const wethExchange = Exchange.load(token.wethExchange.toHexString())
-    if (wethExchange.token0 == token.id) {
+    if (wethExchange.base == token.id) {
       // our token is token 0
-      return wethExchange.token1Price
+      return wethExchange.targetPrice
     } else {
       // our token is token 1
-      return wethExchange.token0Price
+      return wethExchange.basePrice
     }
   } else if (!maxDepthReached) {
-    const allPairs = token.allPairs as Array<string>
-    for (let i = 0; i < allPairs.length; i++) {
-      const currentExchange = Exchange.load(allPairs[i])
-      if (currentExchange.token0 == token.id) {
+    const allExchanges = token.allExchanges as Array<string>
+    for (let i = 0; i < allExchanges.length; i++) {
+      const currentExchange = Exchange.load(allExchanges[i])
+      if (currentExchange.base == token.id) {
         // our token is token 0
-        const otherToken = Token.load(currentExchange.token1)
-        const otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
+        const otherToken = Asset.load(currentExchange.target)
+        const otherTokenEthPrice = findEthPerToken(otherToken as Asset, true)
         if (otherTokenEthPrice != null) {
-          return currentExchange.token1Price.times(otherTokenEthPrice)
+          return currentExchange.targetPrice.times(otherTokenEthPrice)
         }
       } else {
         // our token is token 1
-        const otherToken = Token.load(currentExchange.token0)
-        const otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
+        const otherToken = Asset.load(currentExchange.base)
+        const otherTokenEthPrice = findEthPerToken(otherToken as Asset, true)
         if (otherTokenEthPrice != null) {
-          return currentExchange.token0Price.times(otherTokenEthPrice)
+          return currentExchange.basePrice.times(otherTokenEthPrice)
         }
       }
     }
@@ -93,19 +94,20 @@ function isCompleteBurn(burnId: string): boolean {
  * Update balances on exchange.
  */
 export function handleSync(event: Sync): void {
-  const uniswap = Uniswap.load('1')
+  // TODO: Add in global uniswap values
+  const factory = UniswapFactory.load('2')
   const exchangeId = event.address.toHex()
   const exchange = Exchange.load(exchangeId)
-  const token0 = Token.load(exchange.token0)
-  const token1 = Token.load(exchange.token1)
+  const token0 = Asset.load(exchange.base)
+  const token1 = Asset.load(exchange.target)
   const amount0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
   const amount1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
   const txn = event.transaction.hash.toHexString()
   let transaction = Transaction.load(txn)
   if (transaction !== null) {
-    uniswap.reserveEntityCount = uniswap.reserveEntityCount.plus(ONE_BI)
-    uniswap.save()
-    const newReserves = new Reserve(uniswap.reserveEntityCount.toString())
+    factory.reserveEntityCount = factory.reserveEntityCount.plus(ONE_BI)
+    factory.save()
+    const newReserves = new Reserve(factory.reserveEntityCount.toString())
     newReserves.reserve0 = amount0
     newReserves.reserve1 = amount1
     newReserves.save()
@@ -135,14 +137,14 @@ export function handleSync(event: Sync): void {
     transaction.syncs = []
   }
   const newSyncs = transaction.syncs
-  const sync = new SyncEvent(uniswap.syncCount.toString())
-  uniswap.syncCount = uniswap.syncCount.plus(ONE_BI)
+  const sync = new SyncEvent(factory.syncCount.toString())
+  factory.syncCount = factory.syncCount.plus(ONE_BI)
   newSyncs.push(sync.id)
   transaction.syncs = newSyncs
   transaction.save()
   // update with new values
-  exchange.token0Balance = amount0
-  exchange.token1Balance = amount1
+  exchange.baseBalance = amount0
+  exchange.targetBalance = amount1
   exchange.save()
 }
 
@@ -162,12 +164,14 @@ export function handleSync(event: Sync): void {
  */
 export function handleTransfer(event: Transfer): void {
   const exchangeId = event.address.toHex()
-  const uniswap = Uniswap.load('1')
+  const factory = UniswapFactory.load('2')
   const txn = event.transaction.hash.toHexString()
   const from = event.params.from
   createUser(from);
   const to = event.params.to
   createUser(to);
+
+
   const transferId = exchangeId + "-" + txn + "-" + from.toHex() + "-" + to.toHex()
   let liquidityTokenTransfer = new LiquidityTokenTransfer(transferId);
   liquidityTokenTransfer.exchange = exchangeId;
@@ -182,29 +186,37 @@ export function handleTransfer(event: Transfer): void {
   liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
   let fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
   let toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
+  // TODO: Get token reserves and save to the liquidity event
+  // let token0Reserve, token1Reserve, blockTimestampLast = exchangeContract.getReserves();
   liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = fromUserLiquidityTokenBalanceAfter;
   liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = toUserLiquidityTokenBalanceAfter;
 
   const poolTokenAmount = convertTokenToDecimal(event.params.value, 18)
   let transaction = Transaction.load(txn)
+
   if (transaction == null) {
     transaction = new Transaction(txn)
     transaction.block = event.block.number.toI32()
     transaction.timestamp = event.block.timestamp.toI32()
+    transaction.addLiquidityEvents = []
+    transaction.removeLiquidityEvents = []
+    transaction.ethPurchaseEvents = []
+    transaction.tokenPurchaseEvents = []
     transaction.mints = []
     transaction.swaps = []
     transaction.burns = []
     transaction.syncs = []
-    transaction.save()
   }
+  transaction.isMigration = false;
+
   // mint
   if (from.toHexString() == '0x0000000000000000000000000000000000000000') {
     liquidityTokenTransfer.transferType = "mint"
     liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(event.params.value);
     let mints = transaction.mints
     if (mints.length === 0 || isCompleteMint(mints[mints.length - 1])) {
-      uniswap.mintCount = uniswap.mintCount.plus(ONE_BI)
-      const mintId = uniswap.mintCount.toString()
+      factory.mintCount = factory.mintCount.plus(ONE_BI)
+      const mintId = factory.mintCount.toString()
       const mint = new MintEvent(mintId)
       mint.exchange = exchangeId
       mint.timestamp = event.block.timestamp.toI32()
@@ -214,18 +226,22 @@ export function handleTransfer(event: Transfer): void {
       const newMints = transaction.mints
       newMints.push(mint.id)
       transaction.mints = newMints
-      uniswap.save()
-      transaction.save()
+      factory.save()
       mint.save()
     } else {
       // second transfer before mint, overwrite old values
-      const mintId = uniswap.mintCount.toString()
+      const mintId = factory.mintCount.toString()
       const mint = MintEvent.load(mintId)
       mint.feeTo = mint.to
       mint.feeLiquidity = mint.liquidity
       mint.to = to
       mint.liquidity = poolTokenAmount
       mint.save()
+    }
+    if(transaction.removeLiquidityEvents.length > 0) {
+      transaction.isMigration = true
+      const migration = new Migration(txn)
+      migration.save()
     }
   }
   else {
@@ -246,8 +262,8 @@ export function handleTransfer(event: Transfer): void {
     liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(event.params.value);
     let burns = transaction.burns
     if (burns.length === 0 || isCompleteBurn(burns[burns.length - 1])) {
-      uniswap.burnCount = uniswap.burnCount.plus(ONE_BI)
-      const burnId = uniswap.burnCount.toString()
+      factory.burnCount = factory.burnCount.plus(ONE_BI)
+      const burnId = factory.burnCount.toString()
       const burn = new BurnEvent(burnId)
       burn.exchange = exchangeId
       burn.timestamp = event.block.timestamp.toI32()
@@ -256,12 +272,11 @@ export function handleTransfer(event: Transfer): void {
       const newBurns = transaction.burns
       newBurns.push(burn.id)
       transaction.burns = newBurns
-      uniswap.save()
-      transaction.save()
+      factory.save()
       burn.save()
     } else {
       // second transfer before burn, overwrite old values
-      const burnId = uniswap.burnCount.toString()
+      const burnId = factory.burnCount.toString()
       const burn = BurnEvent.load(burnId)
       burn.feeTo = burn.from
       burn.feeLiquidity = burn.liquidity
@@ -296,24 +311,26 @@ export function handleTransfer(event: Transfer): void {
     liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
     liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
   }
+  transaction.save()
   liquidityTokenTransfer.save();
 }
 
 export function handleMint(event: Mint): void {
   const exchangeId = event.address.toHex()
   const exchange = Exchange.load(exchangeId)
-  const uniswap = Uniswap.load('1')
+  // TODO Add in global uniswap aggregations
+  const factory = UniswapFactory.load('2')
 
   // TODO: Figure out if there are any cases where the exchange would not be known about in advance 
   if (exchange !== null) {
-    const token0 = Token.load(exchange.token0)
-    const token1 = Token.load(exchange.token1)
+    const token0 = Asset.load(exchange.base)
+    const token1 = Asset.load(exchange.target)
 
     // update exchange info (except balances, sync will cover that)
     const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
     const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
-    exchange.token0Price = exchange.token0Balance.div(exchange.token1Balance).truncate(18)
-    exchange.token1Price = exchange.token1Balance.div(exchange.token0Balance).truncate(18)
+    exchange.basePrice = exchange.baseBalance.div(exchange.targetBalance).truncate(18)
+    exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
     exchange.totalTxsCount = exchange.totalTxsCount.plus(ONE_BI)
     exchange.save()
 
@@ -323,14 +340,14 @@ export function handleMint(event: Mint): void {
     // bundle.save()
 
     // update global token0 info
-    const ethPerToken0 = findEthPerToken(token0 as Token, false)
+    const ethPerToken0 = findEthPerToken(token0 as Asset, false)
     // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
     token0.totalLiquidityToken = token0.totalLiquidityToken.plus(token0Amount)
     token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
 
     // update global token1 info
-    const ethPerToken1 = findEthPerToken(token1 as Token, false)
+    const ethPerToken1 = findEthPerToken(token1 as Asset, false)
     // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
     token1.totalLiquidityToken = token1.totalLiquidityToken.plus(token1Amount)
@@ -341,7 +358,7 @@ export function handleMint(event: Mint): void {
     // const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
     // update global liquidity
-    uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.plus(amountTotalETH)
+    factory.totalLiquidityETH = factory.totalLiquidityETH.plus(amountTotalETH)
     // uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
 
     // update exchange liquidity
@@ -349,23 +366,23 @@ export function handleMint(event: Mint): void {
     token0.save()
     token1.save()
     exchange.save()
-    uniswap.save()
+    factory.save()
 
     // now we know we can complete mint event that was created during transfer
-    const mintId = uniswap.mintCount.toString()
+    const mintId = factory.mintCount.toString()
     const mintEvent = MintEvent.load(mintId)
     mintEvent.sender = event.params.sender
     mintEvent.exchange = exchange.id as string
-    mintEvent.token0 = token0.id as string
-    mintEvent.token1 = token1.id as string
+    mintEvent.base = token0.id as string
+    mintEvent.target = token1.id as string
     // mintEvent.valueUSD = amountTotalUSD as BigDecimal
     mintEvent.valueETH = amountTotalETH as BigDecimal
-    mintEvent.amount0 = token0Amount as BigDecimal
-    mintEvent.amount1 = token1Amount as BigDecimal
+    mintEvent.amountBase = token0Amount as BigDecimal
+    mintEvent.amountTarget = token1Amount as BigDecimal
     // TODO: Is this better using exchange_address-token_address as the ID?
-    const newReserves = new Reserve(uniswap.reserveEntityCount.toString())
-    newReserves.reserve0 = exchange.token0Balance.minus(token0Amount) as BigDecimal
-    newReserves.reserve1 = exchange.token1Balance.minus(token1Amount) as BigDecimal
+    const newReserves = new Reserve(factory.reserveEntityCount.toString())
+    newReserves.reserve0 = exchange.baseBalance.minus(token0Amount) as BigDecimal
+    newReserves.reserve1 = exchange.targetBalance.minus(token1Amount) as BigDecimal
     newReserves.save()
     mintEvent.reservesPre = newReserves.id
     mintEvent.save()
@@ -390,25 +407,26 @@ export function handleMint(event: Mint): void {
 export function handleBurn(event: Burn): void {
   const exchangeId = event.address.toHex()
   const exchange = Exchange.load(exchangeId)
-  const uniswap = Uniswap.load('1')
+  // TODO Add in global aggregations
+  const factory = UniswapFactory.load('2')
 
   if (exchange !== null) {
     //update token info
-    const token0 = Token.load(exchange.token0)
-    const token1 = Token.load(exchange.token1)
+    const token0 = Asset.load(exchange.base)
+    const token1 = Asset.load(exchange.target)
     const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
     const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
     // need to avoid div by 0, check balances first
-    if (!equalToZero(exchange.token1Balance)) {
-      exchange.token0Price = exchange.token0Balance.div(exchange.token1Balance).truncate(18)
+    if (!equalToZero(exchange.targetBalance)) {
+      exchange.basePrice = exchange.baseBalance.div(exchange.targetBalance).truncate(18)
     } else {
-      exchange.token0Price = ZERO_BD
+      exchange.basePrice = ZERO_BD
     }
-    if (!equalToZero(exchange.token0Balance)) {
-      exchange.token1Price = exchange.token1Balance.div(exchange.token0Balance).truncate(18)
+    if (!equalToZero(exchange.baseBalance)) {
+      exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
     } else {
-      exchange.token1Price = ZERO_BD
+      exchange.targetPrice = ZERO_BD
     }
     exchange.totalTxsCount = exchange.totalTxsCount.plus(ONE_BI)
 
@@ -419,14 +437,14 @@ export function handleBurn(event: Burn): void {
     // bundle.save()
 
     // update global token0 info
-    const ethPerToken0 = findEthPerToken(token0 as Token, false)
+    const ethPerToken0 = findEthPerToken(token0 as Asset, false)
     // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
     token0.totalLiquidityToken = token0.totalLiquidityToken.minus(token0Amount)
     token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
 
     // update global token1 info
-    const ethPerToken1 = findEthPerToken(token1 as Token, false)
+    const ethPerToken1 = findEthPerToken(token1 as Asset, false)
     // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
     token1.totalLiquidityToken = token1.totalLiquidityToken.minus(token1Amount)
@@ -437,7 +455,7 @@ export function handleBurn(event: Burn): void {
     // const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
     // update global liquidity
-    uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.minus(amountTotalETH)
+    factory.totalLiquidityETH = factory.totalLiquidityETH.minus(amountTotalETH)
     // uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
 
     // update global counter and save
@@ -445,23 +463,23 @@ export function handleBurn(event: Burn): void {
     token0.save()
     token1.save()
     exchange.save()
-    uniswap.save()
+    factory.save()
 
     // update the remaining values for mint
-    const burnId = uniswap.burnCount.toString()
+    const burnId = factory.burnCount.toString()
     const burnEvent = BurnEvent.load(burnId)
     burnEvent.sender = event.params.sender
     burnEvent.from = event.params.to
     burnEvent.exchange = exchange.id as string
-    burnEvent.token0 = token0.id as string
-    burnEvent.token1 = token1.id as string
+    burnEvent.base = token0.id as string
+    burnEvent.target = token1.id as string
     // burnEvent.valueUSD = amountTotalUSD as BigDecimal
     burnEvent.valueETH = amountTotalETH as BigDecimal
-    burnEvent.amount0 = token0Amount as BigDecimal
-    burnEvent.amount1 = token1Amount as BigDecimal
-    const newReserves = new Reserve(uniswap.reserveEntityCount.toString())
-    newReserves.reserve0 = exchange.token0Balance.plus(token0Amount) as BigDecimal
-    newReserves.reserve1 = exchange.token1Balance.plus(token1Amount) as BigDecimal
+    burnEvent.amountBase = token0Amount as BigDecimal
+    burnEvent.amountTarget = token1Amount as BigDecimal
+    const newReserves = new Reserve(factory.reserveEntityCount.toString())
+    newReserves.reserve0 = exchange.baseBalance.plus(token0Amount) as BigDecimal
+    newReserves.reserve1 = exchange.targetBalance.plus(token1Amount) as BigDecimal
     newReserves.save()
     burnEvent.reservesPre = newReserves.id
     burnEvent.save()
@@ -488,8 +506,8 @@ export function handleSwap(event: Swap): void {
   const exchangeID = event.address.toHex()
   const exchange = Exchange.load(exchangeID)
   if (exchange !== null) {
-    const token0 = Token.load(exchange.token0)
-    const token1 = Token.load(exchange.token1)
+    const token0 = Asset.load(exchange.base)
+    const token1 = Asset.load(exchange.target)
 
     // create values for tracking, signed and unsigned
     let token0Amount: BigDecimal
@@ -511,19 +529,19 @@ export function handleSwap(event: Swap): void {
     }
 
     // protect against divide by 0
-    if (equalToZero(exchange.token0Balance)) {
-      exchange.token1Price = ZERO_BD
+    if (equalToZero(exchange.baseBalance)) {
+      exchange.targetPrice = ZERO_BD
     } else {
-      exchange.token1Price = exchange.token1Balance.div(exchange.token0Balance).truncate(18)
+      exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
     }
-    if (equalToZero(exchange.token1Balance)) {
-      exchange.token0Price = ZERO_BD
+    if (equalToZero(exchange.targetBalance)) {
+      exchange.basePrice = ZERO_BD
     } else {
-      exchange.token0Price = exchange.token0Balance.div(exchange.token1Balance).truncate(18)
+      exchange.basePrice = exchange.baseBalance.div(exchange.targetBalance).truncate(18)
     }
     // update exchange values and save
-    exchange.tradeVolumeToken0 = exchange.tradeVolumeToken0.plus(token0Amount)
-    exchange.tradeVolumeToken1 = exchange.tradeVolumeToken0.plus(token1Amount)
+    exchange.tradeVolumeBase = exchange.tradeVolumeBase.plus(token0Amount)
+    exchange.tradeVolumeTarget = exchange.tradeVolumeTarget.plus(token1Amount)
     exchange.totalTxsCount = exchange.totalTxsCount.plus(ONE_BI)
     exchange.save()
 
@@ -533,11 +551,11 @@ export function handleSwap(event: Swap): void {
     // bundle.ethPrice = ethPriceInUSD
     // bundle.save()
 
-    const ethPerToken0 = findEthPerToken(token0 as Token, false)
+    const ethPerToken0 = findEthPerToken(token0 as Asset, false)
     // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
 
-    const ethPerToken1 = findEthPerToken(token1 as Token, false)
+    const ethPerToken1 = findEthPerToken(token1 as Asset, false)
     // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
 
@@ -567,19 +585,20 @@ export function handleSwap(event: Swap): void {
       .plus(token1AmountSigned.times(ethPerToken1))
 
     // update global values
-    const uniswap = Uniswap.load('1')
+    // TODO Add in global aggregations
+    const factory = UniswapFactory.load('2')
     // uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(amountTotalUSD)
-    uniswap.totalVolumeETH = uniswap.totalVolumeETH.plus(amountTotalETH)
+    factory.totalVolumeETH = factory.totalVolumeETH.plus(amountTotalETH)
 
     // save entities
     exchange.save()
     token0.save()
     token1.save()
-    uniswap.save()
+    factory.save()
 
     // create swap event and add to transaction
-    const swapId = uniswap.swapCount
-    uniswap.swapCount = uniswap.swapCount.plus(ONE_BI)
+    const swapId = factory.swapCount
+    factory.swapCount = factory.swapCount.plus(ONE_BI)
     const swapEvent = new SwapEvent(swapId.toString())
     swapEvent.exchange = exchange.id
     swapEvent.timestamp = event.block.timestamp.toI32()

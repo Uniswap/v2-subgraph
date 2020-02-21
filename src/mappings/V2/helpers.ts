@@ -1,9 +1,8 @@
-import { BigInt, BigDecimal, Address, log } from '@graphprotocol/graph-ts'
-import { ERC20 } from './types/Factory/ERC20'
-import { ERC20SymbolBytes } from './types/Factory/ERC20SymbolBytes'
-import { ERC20NameBytes } from './types/Factory/ERC20NameBytes'
-import { Exchange, User, LiquidityPosition, LiquidityTokenTransfer } from './types/schema'
-import { Transfer } from './types/templates/Exchange/Exchange'
+import { log, BigInt, BigDecimal, Address } from '@graphprotocol/graph-ts'
+import { ERC20 } from '../../types/FactoryV2Contract/ERC20'
+import { ERC20SymbolBytes } from '../../types/FactoryV2Contract/ERC20SymbolBytes'
+import { ERC20NameBytes } from '../../types/FactoryV2Contract/ERC20NameBytes'
+import { Exchange, User, LiquidityPosition, LiquidityTokenTransfer } from '../../types/schema'
 
 /************************************
  ********** Helpers ***********
@@ -128,4 +127,8 @@ export function createUser(address: Address): void {
     user = new User(address.toHexString())
     user.save()
   }
+}
+
+export function oneBigInt(): BigInt {
+  return BigInt.fromI32(1)
 }
