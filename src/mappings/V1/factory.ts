@@ -103,6 +103,8 @@ export function handleNewExchange(event: NewExchange): void {
     totals.totalSyncs = ZERO_BI
     totals.exchangeHistoryEntityCount = ZERO_BI
     totals.uniswapHistoryEntityCount = ZERO_BI
+    totals.tokenHistoryEntityCount = ZERO_BI
+    totals.reserveEntityCount = ZERO_BI
     totals.txCount = ZERO_BI
   }
   totals.totalExchangeCount = totals.totalExchangeCount + 1
