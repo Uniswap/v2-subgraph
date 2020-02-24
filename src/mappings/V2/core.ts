@@ -136,7 +136,7 @@ export function handleSync(event: Sync): void {
     transaction = new Transaction(txn)
     transaction.block = event.block.number.toI32()
     transaction.timestamp = event.block.timestamp.toI32()
-    createUser(event.transaction.from)
+    // createUser(event.transaction.from)
     transaction.user = event.transaction.from.toHex()
     transaction.mints = []
     transaction.swaps = []
