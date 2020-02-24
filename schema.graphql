@@ -113,7 +113,7 @@ type Exchange @entity {
     targetLiquidity: BigDecimal!            # Equals the target token liquidity provided. Will likely be different thatn targetBalance
     v1Equivalent: Exchange
     # TODO - determine how to structure fees in schema to work for V1 and V2 fee structure
-    # fee: BigDecimal!                        # Always 0.3% for v1 uniswap
+    fee: BigDecimal!                        # Always 0.3% for v1 uniswap
     startTime: Int!                         # Time exchange was created
     
     # TODO - determine if this is still needed

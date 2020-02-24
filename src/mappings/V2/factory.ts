@@ -131,6 +131,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     // create the Pair
     const exchange = new Exchange(event.params.exchange.toHexString()) as Exchange
     exchange.version = 2
+    exchange.fee = ZERO_BD
     exchange.base = token0.id
     exchange.target = token1.id
     exchange.startTime = event.block.timestamp.toI32()
