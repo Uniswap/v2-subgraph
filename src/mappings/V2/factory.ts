@@ -80,6 +80,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
   // fetch info if null
   if (token0 == null) {
     token0 = new Asset(event.params.token0.toHexString())
+    token0.isToken = true
     token0.symbol = fetchTokenSymbol(event.params.token0)
     token0.name = fetchTokenName(event.params.token0)
     token0.decimals = fetchTokenDecimals(event.params.token0)
@@ -96,6 +97,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
   // fetch info if null
   if (token1 == null) {
     token1 = new Asset(event.params.token1.toHexString())
+    token1.isToken = true
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
     token1.decimals = fetchTokenDecimals(event.params.token1)
