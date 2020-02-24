@@ -100,12 +100,12 @@ export function handleSync(event: Sync): void {
   const exchange = Exchange.load(exchangeId)
   const token0 = Asset.load(exchange.base)
   const token1 = Asset.load(exchange.target)
-  log.debug("reserve0: {}", [event.params.reserve0.toString()])
-  log.debug("reserve1: {}", [event.params.reserve1.toString()])
-  const amount0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
-  const amount1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
-  log.debug("amount0: {}", [amount0.toString()])
-  log.debug("amount1: {}", [amount1.toString()])
+  // log.debug("reserve0: {}", [event.params.reserve0.toString()])
+  // log.debug("reserve1: {}", [event.params.reserve1.toString()])
+  // const amount0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
+  // const amount1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
+  // log.debug("amount0: {}", [amount0.toString()])
+  // log.debug("amount1: {}", [amount1.toString()])
   const txn = event.transaction.hash.toHexString()
   let transaction = Transaction.load(txn)
   if (transaction !== null) {
@@ -143,14 +143,14 @@ export function handleSync(event: Sync): void {
   }
   const newSyncs = transaction.syncs
   const sync = new SyncEvent(factory.syncCount.toString())
-  log.debug("syncCount: {}", [factory.syncCount.toString()])
-  factory.syncCount = factory.syncCount.plus(ONE_BI)
+  // log.debug("syncCount: {}", [factory.syncCount.toString()])
+  // factory.syncCount = factory.syncCount.plus(ONE_BI)
   newSyncs.push(sync.id)
   transaction.syncs = newSyncs
   transaction.save()
   // update with new values
-  exchange.baseBalance = amount0
-  exchange.targetBalance = amount1
+  // exchange.baseBalance = amount0
+  // exchange.targetBalance = amount1
   exchange.save()
 }
 
