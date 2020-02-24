@@ -63,6 +63,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     factory.uniswapHistoryEntityCount = ZERO_BI
     factory.tokenHistoryEntityCount = ZERO_BI   
     factory.reserveEntityCount = ZERO_BI
+    factory.totalTokenBuys = ZERO_BI
     factory.totalTokenSells = ZERO_BI
     factory.totalAddLiquidity = ZERO_BI
     factory.totalRemoveLiquidity = ZERO_BI
