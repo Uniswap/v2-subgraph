@@ -141,12 +141,12 @@ export function handleSync(event: Sync): void {
     transaction.burns = []
     transaction.syncs = []
   }
-  const newSyncs = transaction.syncs
-  const sync = new SyncEvent(factory.syncCount.toString())
+  // const newSyncs = transaction.syncs
+  // const sync = new SyncEvent(factory.syncCount.toString())
   // log.debug("syncCount: {}", [factory.syncCount.toString()])
   // factory.syncCount = factory.syncCount.plus(ONE_BI)
-  newSyncs.push(sync.id)
-  transaction.syncs = newSyncs
+  // newSyncs.push(sync.id)
+  // transaction.syncs = newSyncs
   transaction.save()
   // update with new values
   // exchange.baseBalance = amount0
