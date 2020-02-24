@@ -135,6 +135,9 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.target = token1.id
     exchange.startTime = event.block.timestamp.toI32()
     exchange.totalTxsCount = ZERO_BI
+    exchange.baseLiquidity = ZERO_BD
+    exchange.targetLiquidity = ZERO_BD
+    exchange.ethBalance = ZERO_BD
     exchange.baseBalance = ZERO_BD
     exchange.targetBalance = ZERO_BD
     exchange.combinedBalanceETH = ZERO_BD
@@ -145,6 +148,14 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.tradeVolumeUSD = ZERO_BD
     exchange.basePrice = ZERO_BD
     exchange.targetPrice = ZERO_BD
+    exchange.lastPrice = ZERO_BD
+    exchange.price = ZERO_BD
+    exchange.totalValue = ZERO_BD
+    exchange.weightedAvgPrice = ZERO_BD
+    exchange.priceUSD = ZERO_BD
+    exchange.lastPriceUSD = ZERO_BD
+    exchange.weightedAvgPriceUSD = ZERO_BD
+    exchange.tokenHolders = []
 
     // update totals
     const allExchanges = totals.exchanges
