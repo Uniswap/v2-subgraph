@@ -24,7 +24,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     totals.totalVolumeUSD = ZERO_BD
     totals.totalLiquidityUSD = ZERO_BD
     totals.totalTokenBuys = ZERO_BI
-    totals.totalTokenBuys = ZERO_BI
+    totals.totalTokenSells = ZERO_BI
     totals.totalAddLiquidity = ZERO_BI
     totals.totalRemoveLiquidity = ZERO_BI
     totals.totalMints = ZERO_BI
