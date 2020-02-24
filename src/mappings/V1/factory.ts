@@ -118,6 +118,7 @@ export function handleNewExchange(event: NewExchange): void {
   if (factory == null) {
     factory = new UniswapFactory('1')
     factory.address = event.address;
+    factory.version = 1
     factory.exchangeCount = 0
     factory.exchanges = []
     factory.totalVolumeETH = ZERO_BD
