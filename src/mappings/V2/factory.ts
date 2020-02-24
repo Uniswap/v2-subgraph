@@ -36,6 +36,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     totals.tokenHistoryEntityCount = ZERO_BI
     totals.reserveEntityCount = ZERO_BI
     totals.txCount = ZERO_BI
+    totals.mostLiquidTokens = []
   }
   totals.totalExchangeCount = totals.totalExchangeCount + 1
   totals.save()
@@ -45,7 +46,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
 
   // if no factory yet, set up blank initial
   if (factory == null) {
-    factory = new UniswapFactory('2')
+    factory = new UniswapFactory('1')
     factory.address = event.address;
     factory.exchangeCount = 0
     factory.exchanges = []
@@ -59,7 +60,13 @@ export function handleNewExchange(event: ExchangeCreated): void {
     factory.syncCount = ZERO_BI
     factory.exchangeHistoryEntityCount = ZERO_BI
     factory.uniswapHistoryEntityCount = ZERO_BI
+    factory.tokenHistoryEntityCount = ZERO_BI   
+    factory.reserveEntityCount = ZERO_BI
+    factory.totalTokenSells = ZERO_BI
+    factory.totalAddLiquidity = ZERO_BI
+    factory.totalRemoveLiquidity = ZERO_BI
     factory.txCount = ZERO_BI
+    factory.mostLiquidTokens = []
   }
   factory.exchangeCount = factory.exchangeCount + 1
   factory.save()
