@@ -106,6 +106,7 @@ export function handleNewExchange(event: NewExchange): void {
     totals.tokenHistoryEntityCount = ZERO_BI
     totals.reserveEntityCount = ZERO_BI
     totals.txCount = ZERO_BI
+    totals.mostLiquidTokens = []
   }
   totals.totalExchangeCount = totals.totalExchangeCount + 1
   totals.save()
@@ -129,7 +130,13 @@ export function handleNewExchange(event: NewExchange): void {
     factory.syncCount = ZERO_BI
     factory.exchangeHistoryEntityCount = ZERO_BI
     factory.uniswapHistoryEntityCount = ZERO_BI
+    factory.tokenHistoryEntityCount = ZERO_BI   
+    factory.reserveEntityCount = ZERO_BI
+    factory.totalTokenSells = ZERO_BI
+    factory.totalAddLiquidity = ZERO_BI
+    factory.totalRemoveLiquidity = ZERO_BI
     factory.txCount = ZERO_BI
+    factory.mostLiquidTokens = []
   }
   factory.exchangeCount = factory.exchangeCount + 1
   factory.save()
