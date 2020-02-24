@@ -25,9 +25,13 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
   exchange.combinedBalanceUSD = ZERO_BD
   exchange.totalUniToken = ZERO_BD
 
-  exchange.mintCount = ZERO_BI
-  exchange.burnCount = ZERO_BI
-  exchange.swapCount = ZERO_BI
+  exchange.buyTokenCount = ZERO_BI
+  exchange.sellTokenCount = ZERO_BI
+  exchange.addLiquidityCount = ZERO_BI
+  exchange.removeLiquidityCount = ZERO_BI
+  exchange.mintCount = ZERO_BI              
+  exchange.burnCount = ZERO_BI           
+  exchange.swapCount = ZERO_BI                
   exchange.syncCount = ZERO_BI
 
   exchange.lastPrice = ZERO_BD

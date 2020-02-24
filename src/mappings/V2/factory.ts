@@ -144,6 +144,14 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.combinedBalanceETH = ZERO_BD
     exchange.combinedBalanceUSD = ZERO_BD
     exchange.totalUniToken = ZERO_BD
+    exchange.buyTokenCount = ZERO_BI
+    exchange.sellTokenCount = ZERO_BI
+    exchange.addLiquidityCount = ZERO_BI
+    exchange.removeLiquidityCount = ZERO_BI
+    exchange.mintCount = ZERO_BI              
+    exchange.burnCount = ZERO_BI           
+    exchange.swapCount = ZERO_BI                
+    exchange.syncCount = ZERO_BI  
     exchange.tradeVolumeBase = ZERO_BD
     exchange.tradeVolumeTarget = ZERO_BD
     exchange.tradeVolumeETH = ZERO_BD
