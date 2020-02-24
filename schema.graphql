@@ -266,8 +266,8 @@ type Transaction @entity {
     syncs: [Sync]!
     block: Int!
     timestamp: Int!
-    user: User!
-    fee: BigDecimal!
+    # user: User!
+    fee: BigDecimal
 }
 
 interface TransactionEvent {
