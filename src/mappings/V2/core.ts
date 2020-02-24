@@ -135,7 +135,7 @@ export function handleSync(event: Sync): void {
   } else {
     transaction = new Transaction(txn)
     transaction.block = event.block.number.toI32()
-    // transaction.timestamp = event.block.timestamp.toI32()
+    transaction.timestamp = event.block.timestamp.toI32()
     transaction.mints = []
     transaction.swaps = []
     transaction.burns = []
