@@ -112,15 +112,15 @@ export function handleSync(event: Sync): void {
     // log.debug("reserveEntityCount: {}", [factory.reserveEntityCount.toString()])
     // factory.reserveEntityCount = factory.reserveEntityCount.plus(ONE_BI)
     factory.save()
-    const newReserves = new Reserve(factory.reserveEntityCount.toString())
-    newReserves.reserve0 = amount0
-    newReserves.reserve1 = amount1
-    newReserves.save()
+    // const newReserves = new Reserve(factory.reserveEntityCount.toString())
+    // newReserves.reserve0 = amount0
+    // newReserves.reserve1 = amount1
+    // newReserves.save()
     const mints = transaction.mints
     if (mints.length > 0) {
       const latestMint = MintEvent.load(mints[mints.length - 1])
       if (latestMint.reservesPost == null) {
-        latestMint.reservesPost = newReserves.id
+        // latestMint.reservesPost = newReserves.id
         latestMint.save()
       }
     }
@@ -128,7 +128,7 @@ export function handleSync(event: Sync): void {
     if (burns.length > 0) {
       const latestBurn = BurnEvent.load(burns[burns.length - 1])
       if (latestBurn.reservesPost == null) {
-        latestBurn.reservesPost = newReserves.id
+        // latestBurn.reservesPost = newReserves.id
         latestBurn.save()
       }
     }
