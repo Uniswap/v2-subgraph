@@ -93,6 +93,10 @@ export function handleNewExchange(event: NewExchange): void {
     totals.totalLiquidityETH = ZERO_BD
     totals.totalVolumeUSD = ZERO_BD
     totals.totalLiquidityUSD = ZERO_BD
+    totals.totalTokenBuys = ZERO_BI
+    totals.totalTokenBuys = ZERO_BI
+    totals.totalAddLiquidity = ZERO_BI
+    totals.totalRemoveLiquidity = ZERO_BI
     totals.totalMints = ZERO_BI
     totals.totalBurns = ZERO_BI
     totals.totalSwaps = ZERO_BI

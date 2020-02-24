@@ -111,6 +111,7 @@ type Exchange @entity {
     target: Asset!                          # token for V1 Exchanges, token1 for V2 exchanges
     targetBalance: BigDecimal!              # token balance for V1 Exchanges, token1 balance for V2 exchanges
     targetLiquidity: BigDecimal!            # Equals the target token liquidity provided. Will likely be different thatn targetBalance
+    v1Equivalent: Exchange
     # TODO - determine how to structure fees in schema to work for V1 and V2 fee structure
     fee: BigDecimal!                        # Always 0.3% for v1 uniswap
     startTime: Int!                         # Time exchange was created
@@ -211,6 +212,10 @@ type LiquidityTokenTransfer @entity {
 type Migration @entity {
     id: ID!
     transaction: Transaction!
+    totalV1LiquidityRemovedETH: BigInt
+    totalV1LiquidityRemovedToken: BigInt
+    totalV2LiquidityAddedBase: BigInt
+    totalV2LiquidityAddedTarget: BigInt
 }
 
 # trading and liquidity data around a user and their activity on a given exchange 
