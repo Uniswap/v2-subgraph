@@ -109,8 +109,8 @@ export function handleSync(event: Sync): void {
   const txn = event.transaction.hash.toHexString()
   let transaction = Transaction.load(txn)
   if (transaction !== null) {
-    log.debug("reserveEntityCount: {}", [factory.reserveEntityCount.toString()])
-    factory.reserveEntityCount = factory.reserveEntityCount.plus(ONE_BI)
+    // log.debug("reserveEntityCount: {}", [factory.reserveEntityCount.toString()])
+    // factory.reserveEntityCount = factory.reserveEntityCount.plus(ONE_BI)
     factory.save()
     const newReserves = new Reserve(factory.reserveEntityCount.toString())
     newReserves.reserve0 = amount0
