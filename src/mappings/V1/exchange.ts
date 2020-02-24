@@ -264,7 +264,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     transaction.tokenPurchaseEvents = tokenPurchaseEvents
     transaction.block = event.block.number.toI32()
     transaction.timestamp = event.block.timestamp.toI32()
-    transaction.user = event.params.buyer
+    transaction.user = event.params.buyer.toHex()
     transaction.fee = fee
     transaction.save()
 
@@ -490,7 +490,7 @@ export function handleEthPurchase(event: EthPurchase): void {
     transaction.ethPurchaseEvents = ethPurchaseEvents
     transaction.block = event.block.number.toI32()
     transaction.timestamp = event.block.timestamp.toI32()
-    transaction.user = event.params.buyer
+    transaction.user = event.params.buyer.toHex()
     transaction.fee = fee
     transaction.save()
 
@@ -704,7 +704,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     transaction.addLiquidityEvents = addLiquidityEvents
     transaction.block = event.block.number.toI32()
     transaction.timestamp = event.block.timestamp.toI32()
-    transaction.user = event.params.provider
+    transaction.user = event.params.provider.toHex()
     transaction.fee = ZERO_BD
     transaction.save()
 
@@ -900,7 +900,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     transaction.removeLiquidityEvents = removeLiquidityEvents
     transaction.block = event.block.number.toI32()
     transaction.timestamp = event.block.timestamp.toI32()
-    transaction.user = event.params.provider
+    transaction.user = event.params.provider.toHex()
     transaction.fee = ZERO_BD
 
     transaction.save()

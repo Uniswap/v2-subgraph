@@ -100,22 +100,22 @@ export function handleSync(event: Sync): void {
   const exchange = Exchange.load(exchangeId)
   const token0 = Asset.load(exchange.base)
   const token1 = Asset.load(exchange.target)
-  // log.debug("reserve0: {}", [event.params.reserve0.toString()])
-  // log.debug("reserve1: {}", [event.params.reserve1.toString()])
-  // const amount0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
-  // const amount1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
-  // log.debug("amount0: {}", [amount0.toString()])
-  // log.debug("amount1: {}", [amount1.toString()])
+  log.debug("reserve0: {}", [event.params.reserve0.toString()])
+  log.debug("reserve1: {}", [event.params.reserve1.toString()])
+  const amount0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
+  const amount1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
+  log.debug("amount0: {}", [amount0.toString()])
+  log.debug("amount1: {}", [amount1.toString()])
   const txn = event.transaction.hash.toHexString()
   let transaction = Transaction.load(txn)
   if (transaction !== null) {
-    // log.debug("reserveEntityCount: {}", [factory.reserveEntityCount.toString()])
-    // factory.reserveEntityCount = factory.reserveEntityCount.plus(ONE_BI)
+    log.debug("reserveEntityCount: {}", [factory.reserveEntityCount.toString()])
+    factory.reserveEntityCount = factory.reserveEntityCount.plus(ONE_BI)
     factory.save()
-    // const newReserves = new Reserve(factory.reserveEntityCount.toString())
-    // newReserves.reserve0 = amount0
-    // newReserves.reserve1 = amount1
-    // newReserves.save()
+    const newReserves = new Reserve(factory.reserveEntityCount.toString())
+    newReserves.reserve0 = amount0
+    newReserves.reserve1 = amount1
+    newReserves.save()
     const mints = transaction.mints
     if (mints.length > 0) {
       const latestMint = MintEvent.load(mints[mints.length - 1])
@@ -137,7 +137,7 @@ export function handleSync(event: Sync): void {
     transaction.block = event.block.number.toI32()
     transaction.timestamp = event.block.timestamp.toI32()
     createUser(event.transaction.from)
-    transaction.user = event.transaction.from.toHexString()
+    transaction.user = event.transaction.from.toHex()
     transaction.mints = []
     transaction.swaps = []
     transaction.burns = []
