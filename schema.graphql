@@ -266,7 +266,7 @@ type Transaction @entity {
     syncs: [Sync]!
     block: Int!
     timestamp: Int!
-    user: Bytes!
+    user: User!
     fee: BigDecimal!
 }
 
