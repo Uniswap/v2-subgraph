@@ -142,6 +142,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.baseBalance = ZERO_BD
     exchange.targetBalance = ZERO_BD
     exchange.combinedBalanceETH = ZERO_BD
+    exchange.combinedBalanceUSD = ZERO_BD
     exchange.totalUniToken = ZERO_BD
     exchange.tradeVolumeBase = ZERO_BD
     exchange.tradeVolumeTarget = ZERO_BD
