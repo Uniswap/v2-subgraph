@@ -337,6 +337,8 @@ export function handleMint(event: Mint): void {
     // update exchange info (except balances, sync will cover that)
     const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
     const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
+    log.debug("exchange: {}, targetBalance: {}", [exchangeId, exchange.targetBalance.toString()])
+    log.debug("exchange: {}, baseBalance: {}", [exchangeId, exchange.baseBalance.toString()])
     exchange.basePrice = exchange.baseBalance.div(exchange.targetBalance).truncate(18)
     exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
     exchange.totalTxsCount = exchange.totalTxsCount.plus(ONE_BI)
