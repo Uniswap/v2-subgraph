@@ -46,7 +46,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
 
   // if no factory yet, set up blank initial
   if (factory == null) {
-    factory = new UniswapFactory('1')
+    factory = new UniswapFactory('2')
     factory.address = event.address;
     factory.version = 2
     factory.exchangeCount = 0

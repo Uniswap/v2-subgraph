@@ -376,14 +376,14 @@ export function handleMint(event: Mint): void {
     // const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
     // update global liquidity
-    // log.debug("factory.totalLiquidityETH: {}", [factory.totalLiquidityETH.toString()])
-    // factory.totalLiquidityETH = factory.totalLiquidityETH.plus(amountTotalETH)
+    log.debug("factory.totalLiquidityETH: {}", [factory.totalLiquidityETH.toString()])
+    factory.totalLiquidityETH = factory.totalLiquidityETH.plus(amountTotalETH)
     
     // uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
 
     // update exchange liquidity
-    // log.debug("exchange.combinedBalanceETH: {}", [exchange.combinedBalanceETH.toString()])
-    // exchange.combinedBalanceETH = exchange.combinedBalanceETH.plus(amountTotalETH)
+    log.debug("exchange.combinedBalanceETH: {}", [exchange.combinedBalanceETH.toString()])
+    exchange.combinedBalanceETH = exchange.combinedBalanceETH.plus(amountTotalETH)
     
     token0.save()
     token1.save()
