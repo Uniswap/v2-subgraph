@@ -143,12 +143,12 @@ export function handleSync(event: Sync): void {
     transaction.burns = []
     transaction.syncs = []
   }
-  // const newSyncs = transaction.syncs
-  // const sync = new SyncEvent(factory.syncCount.toString())
-  // log.debug("syncCount: {}", [factory.syncCount.toString()])
-  // factory.syncCount = factory.syncCount.plus(ONE_BI)
-  // newSyncs.push(sync.id)
-  // transaction.syncs = newSyncs
+  const newSyncs = transaction.syncs
+  const sync = new SyncEvent(factory.syncCount.toString())
+  log.debug("syncCount: {}", [factory.syncCount.toString()])
+  factory.syncCount = factory.syncCount.plus(ONE_BI)
+  newSyncs.push(sync.id)
+  transaction.syncs = newSyncs
   transaction.save()
   // update with new values
   exchange.baseBalance = amount0
@@ -204,6 +204,7 @@ export function handleTransfer(event: Transfer): void {
 
   if (transaction == null) {
     transaction = new Transaction(txn)
+    transaction.user = from.toHexString()
     transaction.block = event.block.number.toI32()
     transaction.timestamp = event.block.timestamp.toI32()
     transaction.addLiquidityEvents = []
