@@ -280,6 +280,7 @@ interface TransactionEvent {
 # Note - No fee to provide liqidity
 type AddLiquidityEvent implements TransactionEvent  @entity {
     id: ID!                 # Incrementing ID, 1, 2, etc, as txhashes can contain multiple events
+    exchange: Exchange!
     transaction: Transaction! @derivedFrom(field: "addLiquidityEvents")
     ethAmount: BigDecimal!
     tokenAmount: BigDecimal!
@@ -289,6 +290,7 @@ type AddLiquidityEvent implements TransactionEvent  @entity {
 # Note - No fee to provide liqidity
 type RemoveLiquidityEvent implements TransactionEvent @entity {
     id: ID!                 # Incrementing ID, 1, 2, etc, as txhashes can contain multiple events
+    exchange: Exchange!
     transaction: Transaction! @derivedFrom(field: "removeLiquidityEvents")
     ethAmount: BigDecimal!
     tokenAmount: BigDecimal!
@@ -297,6 +299,7 @@ type RemoveLiquidityEvent implements TransactionEvent @entity {
 
 type TokenPurchaseEvent implements TransactionEvent @entity {
     id: ID!                 # Incrementing ID, 1, 2, etc, as txhashes can contain multiple events
+    exchange: Exchange!
     transaction: Transaction! @derivedFrom(field: "tokenPurchaseEvents")
     # Monetary Values. Positive or negative determined by the TradeType
     ethAmount: BigDecimal!
@@ -307,6 +310,7 @@ type TokenPurchaseEvent implements TransactionEvent @entity {
 
 type EthPurchaseEvent implements TransactionEvent @entity {
     id: ID!                 # Incrementing ID, 1, 2, etc, as txhashes can contain multiple events
+    exchange: Exchange!
     transaction: Transaction! @derivedFrom(field: "ethPurchaseEvents")
     # Monetary Values. Positive or negative determined by the TradeType
     ethAmount: BigDecimal!
