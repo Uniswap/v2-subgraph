@@ -335,12 +335,15 @@ export function handleMint(event: Mint): void {
     const token1 = Asset.load(exchange.target)
 
     // update exchange info (except balances, sync will cover that)
+    log.debug("token0Amount: {}", [event.params.amount0.toString()])
+    log.debug("token1Amount: {}", [event.params.amount0.toString()])
     const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
     const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
     log.debug("exchange: {}, targetBalance: {}", [exchangeId, exchange.targetBalance.toString()])
     log.debug("exchange: {}, baseBalance: {}", [exchangeId, exchange.baseBalance.toString()])
     exchange.basePrice = exchange.baseBalance.div(exchange.targetBalance).truncate(18)
     exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
+    log.debug("totalTxsCount: {}", [exchange.totalTxsCount.toString()])
     exchange.totalTxsCount = exchange.totalTxsCount.plus(ONE_BI)
     exchange.save()
 
@@ -351,28 +354,35 @@ export function handleMint(event: Mint): void {
 
     // update global token0 info
     const ethPerToken0 = findEthPerToken(token0 as Asset, false)
+    log.debug("ethPerToken0: {}", [ethPerToken0.toString()])
     // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
+    log.debug("token0.totalLiquidityToken: {}", [token0.totalLiquidityToken.toString()])
     token0.totalLiquidityToken = token0.totalLiquidityToken.plus(token0Amount)
     token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
 
     // update global token1 info
     const ethPerToken1 = findEthPerToken(token1 as Asset, false)
+    log.debug("ethPerToken1: {}", [ethPerToken0.toString()])
     // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
+    log.debug("token1.totalLiquidityToken: {}", [token1.totalLiquidityToken.toString()])
     token1.totalLiquidityToken = token1.totalLiquidityToken.plus(token1Amount)
     token1.totalLiquidityETH = token1.totalLiquidityToken.times(ethPerToken1)
 
     // get new amounts of USD and ETH for tracking
     const amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
+    log.debug("amountTotalETH: {}", [amountTotalETH.toString()])
     // const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
     // update global liquidity
     factory.totalLiquidityETH = factory.totalLiquidityETH.plus(amountTotalETH)
+    log.debug("factory.totalLiquidityETH: {}", [factory.totalLiquidityETH.toString()])
     // uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
 
     // update exchange liquidity
     exchange.combinedBalanceETH = exchange.combinedBalanceETH.plus(amountTotalETH)
+    log.debug("exchange.combinedBalanceETH: {}", [exchange.combinedBalanceETH.toString()])
     token0.save()
     token1.save()
     exchange.save()
