@@ -171,156 +171,156 @@ export function handleSync(event: Sync): void {
  *    transfer must have been the fee transfer).
  */
 export function handleTransfer(event: Transfer): void {
-  // const exchangeId = event.address.toHex()
-  // const factory = UniswapFactory.load('2')
-  // const txn = event.transaction.hash.toHexString()
-  // const from = event.params.from
-  // createUser(from);
-  // const to = event.params.to
-  // createUser(to);
+  const exchangeId = event.address.toHex()
+  const factory = UniswapFactory.load('2')
+  const txn = event.transaction.hash.toHexString()
+  const from = event.params.from
+  createUser(from);
+  const to = event.params.to
+  createUser(to);
 
 
-  // const transferId = exchangeId + "-" + txn + "-" + from.toHex() + "-" + to.toHex()
-  // let liquidityTokenTransfer = new LiquidityTokenTransfer(transferId);
-  // liquidityTokenTransfer.exchange = exchangeId;
-  // liquidityTokenTransfer.fromUser = from.toHex();
-  // liquidityTokenTransfer.toUser = to.toHex();
-  // liquidityTokenTransfer.amount = event.params.value;
-  // liquidityTokenTransfer.transferType = "transfer"
-  // liquidityTokenTransfer.timestamp = event.block.timestamp;
-  // liquidityTokenTransfer.transaction = txn;
-  // let exchangeContract = ExchangeContract.bind(event.address);
-  // liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply();
-  // liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
-  // let fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
-  // let toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
-  // // TODO: Get token reserves and save to the liquidity event
-  // // let token0Reserve, token1Reserve, blockTimestampLast = exchangeContract.getReserves();
-  // liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = fromUserLiquidityTokenBalanceAfter;
-  // liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = toUserLiquidityTokenBalanceAfter;
+  const transferId = exchangeId + "-" + txn + "-" + from.toHex() + "-" + to.toHex()
+  let liquidityTokenTransfer = new LiquidityTokenTransfer(transferId);
+  liquidityTokenTransfer.exchange = exchangeId;
+  liquidityTokenTransfer.fromUser = from.toHex();
+  liquidityTokenTransfer.toUser = to.toHex();
+  liquidityTokenTransfer.amount = event.params.value;
+  liquidityTokenTransfer.transferType = "transfer"
+  liquidityTokenTransfer.timestamp = event.block.timestamp;
+  liquidityTokenTransfer.transaction = txn;
+  let exchangeContract = ExchangeContract.bind(event.address);
+  liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply();
+  liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
+  let fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
+  let toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
+  // TODO: Get token reserves and save to the liquidity event
+  // let token0Reserve, token1Reserve, blockTimestampLast = exchangeContract.getReserves();
+  liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = fromUserLiquidityTokenBalanceAfter;
+  liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = toUserLiquidityTokenBalanceAfter;
 
-  // const poolTokenAmount = convertTokenToDecimal(event.params.value, 18)
-  // let transaction = Transaction.load(txn)
+  const poolTokenAmount = convertTokenToDecimal(event.params.value, 18)
+  let transaction = Transaction.load(txn)
 
-  // if (transaction == null) {
-  //   transaction = new Transaction(txn)
-  //   transaction.block = event.block.number.toI32()
-  //   transaction.timestamp = event.block.timestamp.toI32()
-  //   transaction.addLiquidityEvents = []
-  //   transaction.removeLiquidityEvents = []
-  //   transaction.ethPurchaseEvents = []
-  //   transaction.tokenPurchaseEvents = []
-  //   transaction.mints = []
-  //   transaction.swaps = []
-  //   transaction.burns = []
-  //   transaction.syncs = []
-  // }
-  // transaction.isMigration = false;
+  if (transaction == null) {
+    transaction = new Transaction(txn)
+    transaction.block = event.block.number.toI32()
+    transaction.timestamp = event.block.timestamp.toI32()
+    transaction.addLiquidityEvents = []
+    transaction.removeLiquidityEvents = []
+    transaction.ethPurchaseEvents = []
+    transaction.tokenPurchaseEvents = []
+    transaction.mints = []
+    transaction.swaps = []
+    transaction.burns = []
+    transaction.syncs = []
+  }
+  transaction.isMigration = false;
 
-  // // mint
-  // if (from.toHexString() == '0x0000000000000000000000000000000000000000') {
-  //   liquidityTokenTransfer.transferType = "mint"
-  //   liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(event.params.value);
-  //   let mints = transaction.mints
-  //   if (mints.length === 0 || isCompleteMint(mints[mints.length - 1])) {
-  //     factory.mintCount = factory.mintCount.plus(ONE_BI)
-  //     const mintId = factory.mintCount.toString()
-  //     const mint = new MintEvent(mintId)
-  //     mint.exchange = exchangeId
-  //     mint.timestamp = event.block.timestamp.toI32()
-  //     mint.logIndex = event.logIndex
-  //     mint.to = to
-  //     mint.liquidity = poolTokenAmount
-  //     const newMints = transaction.mints
-  //     newMints.push(mint.id)
-  //     transaction.mints = newMints
-  //     factory.save()
-  //     mint.save()
-  //   } else {
-  //     // second transfer before mint, overwrite old values
-  //     const mintId = factory.mintCount.toString()
-  //     const mint = MintEvent.load(mintId)
-  //     mint.feeTo = mint.to
-  //     mint.feeLiquidity = mint.liquidity
-  //     mint.to = to
-  //     mint.liquidity = poolTokenAmount
-  //     mint.save()
-  //   }
-  //   if(transaction.removeLiquidityEvents.length > 0) {
-  //     transaction.isMigration = true
-  //     const migration = new Migration(txn)
-  //     migration.save()
-  //   }
-  // }
-  // else {
-  //   const fromUserLiquidityPosition = createLiquidityPosition(event.address, from);
-  //   fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityTokenBalanceAfter;
-  //   fromUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
-  //   if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
-  //     fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
-  //   } else {
-  //     fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(fromUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
-  //   }
-  //   fromUserLiquidityPosition.save();
-  //   liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = fromUserLiquidityTokenBalanceAfter.plus(event.params.value);
-  // }
-  // // burn
-  // if (to.toHexString() == '0x0000000000000000000000000000000000000000') {
-  //   liquidityTokenTransfer.transferType = "mint"
-  //   liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(event.params.value);
-  //   let burns = transaction.burns
-  //   if (burns.length === 0 || isCompleteBurn(burns[burns.length - 1])) {
-  //     factory.burnCount = factory.burnCount.plus(ONE_BI)
-  //     const burnId = factory.burnCount.toString()
-  //     const burn = new BurnEvent(burnId)
-  //     burn.exchange = exchangeId
-  //     burn.timestamp = event.block.timestamp.toI32()
-  //     burn.logIndex = event.logIndex
-  //     burn.liquidity = poolTokenAmount
-  //     const newBurns = transaction.burns
-  //     newBurns.push(burn.id)
-  //     transaction.burns = newBurns
-  //     factory.save()
-  //     burn.save()
-  //   } else {
-  //     // second transfer before burn, overwrite old values
-  //     const burnId = factory.burnCount.toString()
-  //     const burn = BurnEvent.load(burnId)
-  //     burn.feeTo = burn.from
-  //     burn.feeLiquidity = burn.liquidity
-  //     burn.from = from
-  //     burn.liquidity = poolTokenAmount
-  //     burn.save()
-  //   }
-  // } else {
-  //   const toUserLiquidityPosition = createLiquidityPosition(event.address, from);
-  //   toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityTokenBalanceAfter;
-  //   toUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
-  //   if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
-  //     toUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
-  //   } else {
-  //     toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(toUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
-  //   }
-  //   toUserLiquidityPosition.save();
-  //   liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = toUserLiquidityTokenBalanceAfter.minus(event.params.value);
-  // }
-  // if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
-  //   liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
-  //   liquidityTokenTransfer.toUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
-  // } else {
-  //   liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
-  //   liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
-  // }
+  // mint
+  if (from.toHexString() == '0x0000000000000000000000000000000000000000') {
+    liquidityTokenTransfer.transferType = "mint"
+    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(event.params.value);
+    let mints = transaction.mints
+    if (mints.length === 0 || isCompleteMint(mints[mints.length - 1])) {
+      factory.mintCount = factory.mintCount.plus(ONE_BI)
+      const mintId = factory.mintCount.toString()
+      const mint = new MintEvent(mintId)
+      mint.exchange = exchangeId
+      mint.timestamp = event.block.timestamp.toI32()
+      mint.logIndex = event.logIndex
+      mint.to = to
+      mint.liquidity = poolTokenAmount
+      const newMints = transaction.mints
+      newMints.push(mint.id)
+      transaction.mints = newMints
+      factory.save()
+      mint.save()
+    } else {
+      // second transfer before mint, overwrite old values
+      const mintId = factory.mintCount.toString()
+      const mint = MintEvent.load(mintId)
+      mint.feeTo = mint.to
+      mint.feeLiquidity = mint.liquidity
+      mint.to = to
+      mint.liquidity = poolTokenAmount
+      mint.save()
+    }
+    if(transaction.removeLiquidityEvents.length > 0) {
+      transaction.isMigration = true
+      const migration = new Migration(txn)
+      migration.save()
+    }
+  }
+  else {
+    const fromUserLiquidityPosition = createLiquidityPosition(event.address, from);
+    fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityTokenBalanceAfter;
+    fromUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
+    if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+      fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
+    } else {
+      fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(fromUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+    }
+    fromUserLiquidityPosition.save();
+    liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = fromUserLiquidityTokenBalanceAfter.plus(event.params.value);
+  }
+  // burn
+  if (to.toHexString() == '0x0000000000000000000000000000000000000000') {
+    liquidityTokenTransfer.transferType = "mint"
+    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(event.params.value);
+    let burns = transaction.burns
+    if (burns.length === 0 || isCompleteBurn(burns[burns.length - 1])) {
+      factory.burnCount = factory.burnCount.plus(ONE_BI)
+      const burnId = factory.burnCount.toString()
+      const burn = new BurnEvent(burnId)
+      burn.exchange = exchangeId
+      burn.timestamp = event.block.timestamp.toI32()
+      burn.logIndex = event.logIndex
+      burn.liquidity = poolTokenAmount
+      const newBurns = transaction.burns
+      newBurns.push(burn.id)
+      transaction.burns = newBurns
+      factory.save()
+      burn.save()
+    } else {
+      // second transfer before burn, overwrite old values
+      const burnId = factory.burnCount.toString()
+      const burn = BurnEvent.load(burnId)
+      burn.feeTo = burn.from
+      burn.feeLiquidity = burn.liquidity
+      burn.from = from
+      burn.liquidity = poolTokenAmount
+      burn.save()
+    }
+  } else {
+    const toUserLiquidityPosition = createLiquidityPosition(event.address, from);
+    toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityTokenBalanceAfter;
+    toUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
+    if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+      toUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
+    } else {
+      toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(toUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+    }
+    toUserLiquidityPosition.save();
+    liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = toUserLiquidityTokenBalanceAfter.minus(event.params.value);
+  }
+  if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
+    liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
+    liquidityTokenTransfer.toUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
+  } else {
+    liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+    liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+  }
 
-  // if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
-  //   liquidityTokenTransfer.fromUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
-  //   liquidityTokenTransfer.toUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
-  // } else {
-  //   liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
-  //   liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
-  // }
-  // transaction.save()
-  // liquidityTokenTransfer.save();
+  if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+    liquidityTokenTransfer.fromUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
+    liquidityTokenTransfer.toUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
+  } else {
+    liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+    liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+  }
+  transaction.save()
+  liquidityTokenTransfer.save();
 }
 
 export function handleMint(event: Mint): void {
