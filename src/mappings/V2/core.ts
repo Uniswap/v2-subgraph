@@ -120,7 +120,7 @@ export function handleSync(event: Sync): void {
     if (mints.length > 0) {
       const latestMint = MintEvent.load(mints[mints.length - 1])
       if (latestMint.reservesPost == null) {
-        // latestMint.reservesPost = newReserves.id
+        latestMint.reservesPost = newReserves.id
         latestMint.save()
       }
     }
@@ -128,7 +128,7 @@ export function handleSync(event: Sync): void {
     if (burns.length > 0) {
       const latestBurn = BurnEvent.load(burns[burns.length - 1])
       if (latestBurn.reservesPost == null) {
-        // latestBurn.reservesPost = newReserves.id
+        latestBurn.reservesPost = newReserves.id
         latestBurn.save()
       }
     }
@@ -151,8 +151,8 @@ export function handleSync(event: Sync): void {
   // transaction.syncs = newSyncs
   transaction.save()
   // update with new values
-  // exchange.baseBalance = amount0
-  // exchange.targetBalance = amount1
+  exchange.baseBalance = amount0
+  exchange.targetBalance = amount1
   exchange.save()
 }
 
