@@ -13,7 +13,7 @@ import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals 
 export function handleNewExchange(event: ExchangeCreated): void {
   //setup factory if needed
   let totals = Uniswap.load('1')
-  let v1Equivalent = null
+  let v1Equivalent: string = null
 
   // if no totals entity yet, set up blank initial
   if (totals == null) {
