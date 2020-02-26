@@ -9,7 +9,18 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
   const exchange = new Exchange(exchangeAddress) as Exchange
 
   const tokenAddressStringed = tokenAddress.toHexString()
+  const ethStringed = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
   const asset = new Asset(tokenAddressStringed);
+  let eth = Asset.load(ethStringed)
+  if (eth == null) {
+    eth = new Asset(ethStringed)
+    eth.isToken = false
+    eth.name = "ETH"
+    eth.symbol = "ETH"
+    eth.decimals = 18
+    eth.save()
+  } 
+  exchange.base = ethStringed;
   exchange.target = tokenAddressStringed;
 
   exchange.fee = BigDecimal.fromString('0.003')
@@ -18,7 +29,6 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
 
   exchange.baseLiquidity = ZERO_BD
   exchange.targetLiquidity = ZERO_BD
-  exchange.ethBalance = ZERO_BD
   exchange.baseBalance = ZERO_BD
   exchange.targetBalance = ZERO_BD
   exchange.combinedBalanceETH = ZERO_BD

@@ -138,7 +138,6 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.totalTxsCount = ZERO_BI
     exchange.baseLiquidity = ZERO_BD
     exchange.targetLiquidity = ZERO_BD
-    exchange.ethBalance = ZERO_BD
     exchange.baseBalance = ZERO_BD
     exchange.targetBalance = ZERO_BD
     exchange.combinedBalanceETH = ZERO_BD

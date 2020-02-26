@@ -90,8 +90,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     } else {
       tokenAmount = convertTokenToDecimal(event.params.tokens_bought, asset.decimals)
     }
-    // TODO determine if ethBalance is still needed for V2 or if can remove
-    exchange.ethBalance = exchange.ethBalance.plus(ethAmount)
+
     exchange.baseBalance = exchange.baseBalance.plus(ethAmount)
     exchange.targetBalance = exchange.targetBalance.minus(tokenAmount)
     // TODO determine if needed or how to restructure to also work for V2
@@ -331,8 +330,7 @@ export function handleEthPurchase(event: EthPurchase): void {
     } else {
       tokenAmount = convertTokenToDecimal(event.params.tokens_sold, asset.decimals)
     }
-    // TODO determine if ethBalance needed for V2
-    exchange.ethBalance = exchange.ethBalance.minus(ethAmount)
+
     exchange.baseBalance = exchange.baseBalance.minus(ethAmount)
     exchange.targetBalance = exchange.targetBalance.plus(tokenAmount)
     exchange.sellTokenCount = exchange.sellTokenCount.plus(oneBigInt())
@@ -564,7 +562,6 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     } else {
       tokenAmount = convertTokenToDecimal(event.params.token_amount, asset.decimals)
     }
-    exchange.ethBalance = exchange.ethBalance.plus(ethAmount)
     exchange.baseBalance = exchange.baseBalance.plus(ethAmount)
     exchange.targetBalance = exchange.targetBalance.plus(tokenAmount)
     exchange.baseLiquidity = exchange.baseLiquidity.plus(ethAmount)
@@ -772,7 +769,6 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     } else {
       tokenAmount = convertTokenToDecimal(event.params.token_amount, asset.decimals)
     }
-    exchange.ethBalance = exchange.ethBalance.minus(ethAmount)
     exchange.baseBalance = exchange.baseBalance.minus(ethAmount)
     exchange.targetBalance = exchange.targetBalance.minus(tokenAmount)
     exchange.baseLiquidity = exchange.baseLiquidity.minus(ethAmount)

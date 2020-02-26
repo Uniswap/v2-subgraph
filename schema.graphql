@@ -81,7 +81,6 @@ type Asset @entity {
     symbol: String                     
     name: String                       
     decimals: Int
-    address: Bytes
 
     # derived prices
     derivedETH: BigDecimal # eth per token
@@ -115,9 +114,6 @@ type Exchange @entity {
     # TODO - determine how to structure fees in schema to work for V1 and V2 fee structure
     fee: BigDecimal!                        # Always 0.3% for v1 uniswap
     startTime: Int!                         # Time exchange was created
-    
-    # TODO - determine if this is still needed
-    ethBalance: BigDecimal!                 # Equals the ether balance of the contract
 
     combinedBalanceETH: BigDecimal!       # Equal to ethBalance + (tokenBalance/price). Stored to simplify users calculating their own personal return. because the ratio may have changes a lot in one direction
     combinedBalanceUSD: BigDecimal!       # Equal to combinedBalanceInUSD * DAI/ETH
