@@ -55,6 +55,9 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
   exchange.swapCount = ZERO_BI                
   exchange.syncCount = ZERO_BI
 
+  exchange.basePrice = ZERO_BD
+  exchange.targetPrice = ZERO_BD
+
   exchange.lastPrice = ZERO_BD
   exchange.price = ZERO_BD
   exchange.tradeVolumeBase = ZERO_BD
