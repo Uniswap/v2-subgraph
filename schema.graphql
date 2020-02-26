@@ -86,12 +86,12 @@ type Asset @entity {
     derivedETH: BigDecimal # eth per token
 
     # token specific volume
-    tradeVolumeToken: BigDecimal!
+    tradeVolume: BigDecimal!
     tradeVolumeETH: BigDecimal!
     tradeVolumeUSD: BigDecimal!   
 
     # liquidity across all pairs 
-    totalLiquidityToken: BigDecimal!          
+    totalLiquidity: BigDecimal!          
     totalLiquidityETH: BigDecimal!  
 
     # address of weth exchange if exists 

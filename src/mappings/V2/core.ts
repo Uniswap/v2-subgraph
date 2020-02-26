@@ -358,18 +358,18 @@ export function handleMint(event: Mint): void {
     log.debug("ethPerToken0: {}", [ethPerToken0.toString()])
     // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
-    log.debug("token0.totalLiquidityToken: {}", [token0.totalLiquidityToken.toString()])
-    token0.totalLiquidityToken = token0.totalLiquidityToken.plus(token0Amount)
-    token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
+    log.debug("token0.totalLiquidityToken: {}", [token0.totalLiquidity.toString()])
+    token0.totalLiquidity = token0.totalLiquidity.plus(token0Amount)
+    token0.totalLiquidityETH = token0.totalLiquidity.times(ethPerToken0)
 
     // update global token1 info
     const ethPerToken1 = findEthPerToken(token1 as Asset, false)
     log.debug("ethPerToken1: {}", [ethPerToken0.toString()])
     // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
-    log.debug("token1.totalLiquidityToken: {}", [token1.totalLiquidityToken.toString()])
-    token1.totalLiquidityToken = token1.totalLiquidityToken.plus(token1Amount)
-    token1.totalLiquidityETH = token1.totalLiquidityToken.times(ethPerToken1)
+    log.debug("token1.totalLiquidityToken: {}", [token1.totalLiquidity.toString()])
+    token1.totalLiquidity = token1.totalLiquidity.plus(token1Amount)
+    token1.totalLiquidityETH = token1.totalLiquidity.times(ethPerToken1)
 
     // get new amounts of USD and ETH for tracking
     const amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
@@ -463,15 +463,15 @@ export function handleBurn(event: Burn): void {
     const ethPerToken0 = findEthPerToken(token0 as Asset, false)
     // const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
     token0.derivedETH = ethPerToken0
-    token0.totalLiquidityToken = token0.totalLiquidityToken.minus(token0Amount)
-    token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
+    token0.totalLiquidity = token0.totalLiquidity.minus(token0Amount)
+    token0.totalLiquidityETH = token0.totalLiquidity.times(ethPerToken0)
 
     // update global token1 info
     const ethPerToken1 = findEthPerToken(token1 as Asset, false)
     // const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
     token1.derivedETH = ethPerToken1
-    token1.totalLiquidityToken = token1.totalLiquidityToken.minus(token1Amount)
-    token1.totalLiquidityETH = token1.totalLiquidityToken.times(ethPerToken1)
+    token1.totalLiquidity = token1.totalLiquidity.minus(token1Amount)
+    token1.totalLiquidityETH = token1.totalLiquidity.times(ethPerToken1)
 
     // get new amounts of USD and ETH for tracking
     const amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
@@ -587,16 +587,16 @@ export function handleSwap(event: Swap): void {
     // const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
     // update token0 volume and liquidity stats
-    token0.totalLiquidityToken = token0.totalLiquidityToken.plus(token0AmountSigned)
-    token0.totalLiquidityETH = token0.totalLiquidityToken.times(ethPerToken0)
-    token0.tradeVolumeToken = token0.tradeVolumeToken.plus(token0Amount)
+    token0.totalLiquidity = token0.totalLiquidity.plus(token0AmountSigned)
+    token0.totalLiquidityETH = token0.totalLiquidity.times(ethPerToken0)
+    token0.tradeVolume = token0.tradeVolume.plus(token0Amount)
     token0.tradeVolumeETH = token0.tradeVolumeETH.plus(token0Amount.times(ethPerToken0))
     // token0.tradeVolumeUSD = token0.tradeVolumeUSD.plus(token0AmountSigned.times(usdPerToken0))
 
     // update token1 volume and liquidity stats
-    token1.totalLiquidityToken = token1.totalLiquidityToken.plus(token1AmountSigned)
-    token1.totalLiquidityETH = token1.totalLiquidityToken.times(ethPerToken1)
-    token1.tradeVolumeToken = token1.tradeVolumeToken.plus(token1Amount)
+    token1.totalLiquidity = token1.totalLiquidity.plus(token1AmountSigned)
+    token1.totalLiquidityETH = token1.totalLiquidity.times(ethPerToken1)
+    token1.tradeVolume = token1.tradeVolume.plus(token1Amount)
     token1.tradeVolumeETH = token1.tradeVolumeETH.plus(token1Amount.times(ethPerToken1))
     // token1.tradeVolumeUSD = token0.tradeVolumeUSD.plus(token1AmountSigned.times(usdPerToken1))
 

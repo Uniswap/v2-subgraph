@@ -85,10 +85,10 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token0.name = fetchTokenName(event.params.token0)
     token0.decimals = fetchTokenDecimals(event.params.token0)
     token0.derivedETH = ZERO_BD
-    token0.tradeVolumeToken = ZERO_BD
+    token0.tradeVolume = ZERO_BD
     token0.tradeVolumeETH = ZERO_BD
     token0.tradeVolumeUSD = ZERO_BD
-    token0.totalLiquidityToken = ZERO_BD
+    token0.totalLiquidity = ZERO_BD
     token0.totalLiquidityETH = ZERO_BD
     token0.allExchanges = []
     // token0.mostLiquidPairs = []
@@ -102,10 +102,10 @@ export function handleNewExchange(event: ExchangeCreated): void {
     token1.name = fetchTokenName(event.params.token1)
     token1.decimals = fetchTokenDecimals(event.params.token1)
     token1.derivedETH = ZERO_BD
-    token1.tradeVolumeToken = ZERO_BD
+    token1.tradeVolume = ZERO_BD
     token1.tradeVolumeETH = ZERO_BD
     token1.tradeVolumeUSD = ZERO_BD
-    token1.totalLiquidityToken = ZERO_BD
+    token1.totalLiquidity = ZERO_BD
     token1.totalLiquidityETH = ZERO_BD
     token1.allExchanges = []
     // token1.mostLiquidPairs = []

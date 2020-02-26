@@ -11,6 +11,11 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
   const tokenAddressStringed = tokenAddress.toHexString()
   const ethStringed = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
   const asset = new Asset(tokenAddressStringed);
+  asset.tradeVolume = ZERO_BD
+  asset.tradeVolumeETH = ZERO_BD
+  asset.tradeVolumeUSD = ZERO_BD
+  asset.totalLiquidity = ZERO_BD
+  asset.totalLiquidityETH = ZERO_BD
   let eth = Asset.load(ethStringed)
   if (eth == null) {
     eth = new Asset(ethStringed)
@@ -18,6 +23,11 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
     eth.name = "ETH"
     eth.symbol = "ETH"
     eth.decimals = 18
+    eth.tradeVolume = ZERO_BD
+    eth.tradeVolumeETH = ZERO_BD
+    eth.tradeVolumeUSD = ZERO_BD
+    eth.totalLiquidity = ZERO_BD
+    eth.totalLiquidityETH = ZERO_BD
     eth.save()
   } 
   exchange.base = ethStringed;
