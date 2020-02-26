@@ -11,6 +11,7 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
   const tokenAddressStringed = tokenAddress.toHexString()
   const ethStringed = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
   const asset = new Asset(tokenAddressStringed);
+  asset.v1Exchange = exchangeAddress
   asset.tradeVolume = ZERO_BD
   asset.tradeVolumeETH = ZERO_BD
   asset.tradeVolumeUSD = ZERO_BD

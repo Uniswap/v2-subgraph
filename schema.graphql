@@ -95,7 +95,10 @@ type Asset @entity {
     totalLiquidityETH: BigDecimal!  
 
     # address of weth exchange if exists 
-    wethExchange: Bytes
+    wethExchange: Exchange
+
+    # address of V1 eth exchange
+    v1Exchange: Exchange
 
     # all exchanges an asset is part of
     allExchanges: [Exchange!]

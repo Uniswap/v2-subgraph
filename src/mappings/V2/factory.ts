@@ -13,6 +13,7 @@ import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals 
 export function handleNewExchange(event: ExchangeCreated): void {
   //setup factory if needed
   let totals = Uniswap.load('1')
+  let v1Equivalent = null
 
   // if no totals entity yet, set up blank initial
   if (totals == null) {
@@ -113,10 +114,12 @@ export function handleNewExchange(event: ExchangeCreated): void {
 
   const wethAddress = Address.fromString('0xc778417E063141139Fce010982780140Aa0cD5Ab')
   if (event.params.token0 == wethAddress) {
-    token1.wethExchange = event.params.exchange
+    token1.wethExchange = event.params.exchange.toHex()
+    v1Equivalent = token1.v1Exchange
   }
   if (event.params.token1 == wethAddress) {
-    token0.wethExchange = event.params.exchange
+    token0.wethExchange = event.params.exchange.toHex()
+    v1Equivalent = token0.v1Exchange
   }
 
   const newAllPairsArray0 = token0.allExchanges
@@ -131,6 +134,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     // create the Pair
     const exchange = new Exchange(event.params.exchange.toHexString()) as Exchange
     exchange.version = 2
+    exchange.v1Equivalent = v1Equivalent
     exchange.fee = ZERO_BD
     exchange.base = token0.id
     exchange.target = token1.id

@@ -44,7 +44,7 @@ import { convertTokenToDecimal, ONE_BI, ZERO_BD, equalToZero, createUser, create
  **/
 function findEthPerToken(token: Asset, maxDepthReached: boolean): BigDecimal {
   if (token.wethExchange != null) {
-    const wethExchange = Exchange.load(token.wethExchange.toHexString())
+    const wethExchange = Exchange.load(token.wethExchange)
     if (wethExchange.base == token.id) {
       // our token is token 0
       return wethExchange.targetPrice
