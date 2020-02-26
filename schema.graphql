@@ -259,10 +259,10 @@ type Transaction @entity {
     removeLiquidityEvents: [RemoveLiquidityEvent!]
     tokenPurchaseEvents: [TokenPurchaseEvent!]
     ethPurchaseEvents: [EthPurchaseEvent!]
-    mints: [Mint]
-    burns: [Burn] 
-    swaps: [Swap]
-    syncs: [Sync]
+    mints: [Mint]!
+    burns: [Burn]! 
+    swaps: [Swap]!
+    syncs: [Sync]!
     block: Int!
     timestamp: Int!
     user: User!

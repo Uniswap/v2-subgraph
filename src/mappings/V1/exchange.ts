@@ -266,6 +266,10 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     transaction.timestamp = event.block.timestamp.toI32()
     transaction.user = event.params.buyer.toHex()
     transaction.fee = fee
+    transaction.mints = []
+    transaction.burns = []
+    transaction.swaps = []
+    transaction.syncs = []
     transaction.save()
 
     /************************************
@@ -492,6 +496,10 @@ export function handleEthPurchase(event: EthPurchase): void {
     transaction.timestamp = event.block.timestamp.toI32()
     transaction.user = event.params.buyer.toHex()
     transaction.fee = fee
+    transaction.mints = []
+    transaction.burns = []
+    transaction.swaps = []
+    transaction.syncs = []
     transaction.save()
 
     /************************************
@@ -706,6 +714,10 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     transaction.timestamp = event.block.timestamp.toI32()
     transaction.user = event.params.provider.toHex()
     transaction.fee = ZERO_BD
+    transaction.mints = []
+    transaction.burns = []
+    transaction.swaps = []
+    transaction.syncs = []
     transaction.save()
 
     /************************************
@@ -902,7 +914,10 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     transaction.timestamp = event.block.timestamp.toI32()
     transaction.user = event.params.provider.toHex()
     transaction.fee = ZERO_BD
-
+    transaction.mints = []
+    transaction.burns = []
+    transaction.swaps = []
+    transaction.syncs = []
     transaction.save()
 
     /************************************
