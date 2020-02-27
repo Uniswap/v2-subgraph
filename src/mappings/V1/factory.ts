@@ -58,19 +58,18 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
   exchange.basePrice = ZERO_BD
   exchange.targetPrice = ZERO_BD
 
-  exchange.lastPrice = ZERO_BD
-  exchange.price = ZERO_BD
+  // exchange.lastPrice = ZERO_BD
   exchange.tradeVolumeBase = ZERO_BD
   exchange.tradeVolumeTarget = ZERO_BD
   exchange.tradeVolumeETH = ZERO_BD
   exchange.tradeVolumeUSD = ZERO_BD
-  exchange.totalValue = ZERO_BD
-  exchange.weightedAvgPrice = ZERO_BD
+  // exchange.totalValue = ZERO_BD
+  // exchange.weightedAvgPrice = ZERO_BD
   exchange.totalTxsCount = oneBigInt()
 
-  exchange.priceUSD = ZERO_BD
-  exchange.lastPriceUSD = ZERO_BD
-  exchange.weightedAvgPriceUSD = ZERO_BD
+  // exchange.priceUSD = ZERO_BD
+  // exchange.lastPriceUSD = ZERO_BD
+  // exchange.weightedAvgPriceUSD = ZERO_BD
   exchange.tokenHolders = []
 
   for (let i = 0; i < hardcodedExchanges.length; i++) {

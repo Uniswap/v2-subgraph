@@ -161,13 +161,12 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.tradeVolumeUSD = ZERO_BD
     exchange.basePrice = ZERO_BD
     exchange.targetPrice = ZERO_BD
-    exchange.lastPrice = ZERO_BD
-    exchange.price = ZERO_BD
-    exchange.totalValue = ZERO_BD
-    exchange.weightedAvgPrice = ZERO_BD
-    exchange.priceUSD = ZERO_BD
-    exchange.lastPriceUSD = ZERO_BD
-    exchange.weightedAvgPriceUSD = ZERO_BD
+    // exchange.lastPrice = ZERO_BD
+    // exchange.totalValue = ZERO_BD
+    // exchange.weightedAvgPrice = ZERO_BD
+    // exchange.priceUSD = ZERO_BD
+    // exchange.lastPriceUSD = ZERO_BD
+    // exchange.weightedAvgPriceUSD = ZERO_BD
     exchange.tokenHolders = []
 
     // update totals

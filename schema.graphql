@@ -127,31 +127,19 @@ type Exchange @entity {
     sellTokenCount: BigInt!
     addLiquidityCount: BigInt!
     removeLiquidityCount: BigInt!
-    mintCount: BigInt!              
+    mintCount: BigInt!
     burnCount: BigInt!           
     swapCount: BigInt!                
     syncCount: BigInt!                  
 
     # Price in terms of the asset pair
-    basePrice: BigDecimal!
-    targetPrice: BigDecimal!
-
-    # Price values using eth
-    lastPrice: BigDecimal!                  # The last trade price
-    price: BigDecimal!                      # Price is the total amount of tokens that equal one ETH. i.e. if ETH was 100 USD, price for DAI would be 100
+    basePrice: BigDecimal!                  # Price of base asset in terms of target asset
+    targetPrice: BigDecimal!                # Price of target asset in terms of base asset
     tradeVolumeBase: BigDecimal!            # Total base traded EVER
     tradeVolumeTarget: BigDecimal!          # Total target traded EVER
     tradeVolumeETH: BigDecimal!             # Total eth traded EVER
     tradeVolumeUSD: BigDecimal!             # Total USD traded EVER, accumulated at each trade with current token usd price * amount
-    totalValue: BigDecimal!                 # totalValue is accumulation of trade price * trade volume. i.e. TV = tokensSold * priceTokensSold
-    weightedAvgPrice: BigDecimal!           # Avg price of all trades since inception. WAP = totalValue / totalVolume
-
     totalTxsCount: BigInt!                  # Total tx count EVER
-
-    # Price values uing usd
-    lastPriceUSD: BigDecimal!               # The last trade price in USD
-    priceUSD: BigDecimal!                   # USD / token
-    weightedAvgPriceUSD: BigDecimal!        # weightAvgPriceUSD = ( $1 of ETH in ETH ) / weightedAvgPrice
 
     # Fields used to help derived relationship
     factory: UniswapFactory! @derivedFrom(field: "exchanges")
@@ -246,7 +234,10 @@ enum EventType {
     AddLiquidity,
     RemoveLiquidity,
     TokenPurchase,
-    EthPurchase
+    EthPurchase,
+    mint,
+    burn,
+    swap
 }
 
 type Transaction @entity {
@@ -395,23 +386,27 @@ type ExchangeHistoricalData @entity {
     type: EventType!
     timestamp: Int!
 
-    ethLiquidity: BigDecimal!               # Equals the liquidty provided. Will likely be different than ethBalance
-    tokenLiquidity: BigDecimal!             # Equals the token liquidity provided. Will likely be different thatn tokenBalance
-    ethBalance: BigDecimal!                 # Equals the ether balance of the contract
-    tokenBalance: BigDecimal!               # Equals the token balance of the contract
-    combinedBalanceInEth: BigDecimal!       # Equal to ethBalance + (tokenBalance/price). Stored to simplify users calculating their own personal return. because the ratio may have changes a lot in one direction
-    combinedBalanceInUSD: BigDecimal!       # Equal to combinedBalanceInUSD * DAI/ETH.  USD price at time of transaction
-    totalUniToken: BigDecimal!              # Count of the unilying unitokens that represent liquidity provided ownership
+    # liquidity
+    baseBalance: BigDecimal!
+    baseLiquidity: BigDecimal!     
+    targetBalance: BigDecimal!
+    targetLiquidity: BigDecimal!           
+    combinedBalanceUSD: BigDecimal!  
+    combinedBalanceETH: BigDecimal!      
+    totalUniToken: BigDecimal!   
 
-    tokenPriceUSD: BigDecimal!              # USD / token. USD price at time of transaction
-    price: BigDecimal!                      # Price is the total amount of tokens that equal one ETH. i.e. if ETH was 100 USD, price for DAI would be 100
+    # volume
+    tradeVolumeBase: BigDecimal!           
+    tradeVolumeTarget: BigDecimal!           
+    tradeVolumeETH: BigDecimal!  
+    tradeVolumeUSD: BigDecimal!             
 
-    tradeVolumeToken: BigDecimal!           # Total tokens traded EVER. i.e. cumulative
-    tradeVolumeEth: BigDecimal!             # Total eth traded EVER. i.e. cumulative
-    tradeVolumeUSD: BigDecimal!             # Total USD traded EVER - cumulative with price at time of trade
+    # pricing
+    basePrice: BigDecimal!            
+    targetPrice: BigDecimal!    
 
-    totalTxsCount: BigInt!                  # Total tx count EVER
-    feeInEth: BigDecimal!
+    # txns
+    totalTxsCount: BigInt! 
 }
 
 # Data accumulated and condensed into day stats for each exchange

@@ -95,23 +95,23 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     exchange.targetBalance = exchange.targetBalance.minus(tokenAmount)
     // TODO determine if needed or how to restructure to also work for V2
     exchange.buyTokenCount = exchange.buyTokenCount.plus(oneBigInt())
-    exchange.lastPrice = exchange.price
+    // exchange.lastPrice = exchange.price
 
     if (!equalToZero(exchange.baseBalance)) {
-      exchange.price = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
+      exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
     }
 
-    if (!equalToZero(exchange.price)) {
-      exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.price)).truncate(18)
+    if (!equalToZero(exchange.targetPrice)) {
+      exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.targetPrice)).truncate(18)
     }
 
     exchange.tradeVolumeTarget = exchange.tradeVolumeTarget.plus(tokenAmount)
     exchange.tradeVolumeETH = exchange.tradeVolumeETH.plus(ethAmount)
-    exchange.totalValue = exchange.totalValue.plus(tokenAmount.times(exchange.price)).truncate(18)
+    // exchange.totalValue = exchange.totalValue.plus(tokenAmount.times(exchange.price)).truncate(18)
 
-    if (!equalToZero(exchange.tradeVolumeTarget)) {
-      exchange.weightedAvgPrice = exchange.totalValue.div(exchange.tradeVolumeTarget).truncate(18)
-    }
+    // if (!equalToZero(exchange.tradeVolumeTarget)) {
+    //   exchange.weightedAvgPrice = exchange.totalValue.div(exchange.tradeVolumeTarget).truncate(18)
+    // }
 
     exchange.totalTxsCount = exchange.totalTxsCount.plus(oneBigInt())
 
@@ -144,32 +144,32 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     userExchangeData.ethFeesPaid = userExchangeData.ethFeesPaid.plus(fee)
 
     /****** Get ETH in USD Uniswap USD Tokens ******/
-    const oneUSDInEth = uniswapUSDOracle(event.block.number)
-    if (!equalToZero(oneUSDInEth)) {
-      exchange.lastPriceUSD = exchange.priceUSD
-      if (equalToZero(exchange.price)) {
-        exchange.priceUSD = ZERO_BD
-      } else {
-        exchange.priceUSD = BigDecimal.fromString('1')
-          .div(oneUSDInEth)
-          .div(exchange.price)
-          .truncate(18)
-        exchange.combinedBalanceUSD = exchange.combinedBalanceETH.div(oneUSDInEth).truncate(18)
-      }
-      if (!equalToZero(exchange.weightedAvgPrice)) {
-        exchange.weightedAvgPriceUSD = bigDecimalExp18()
-          .div(oneUSDInEth)
-          .div(exchange.weightedAvgPrice)
-          .truncate(18)
-      }
-      userExchangeData.ethFeesInUSD = bigDecimalExp18()
-        .times(userExchangeData.ethFeesPaid)
-        .div(oneUSDInEth)
-        .truncate(18)
-    }
+    // const oneUSDInEth = uniswapUSDOracle(event.block.number)
+    // if (!equalToZero(oneUSDInEth)) {
+    //   exchange.lastPriceUSD = exchange.priceUSD
+    //   if (equalToZero(exchange.price)) {
+    //     exchange.priceUSD = ZERO_BD
+    //   } else {
+    //     exchange.priceUSD = BigDecimal.fromString('1')
+    //       .div(oneUSDInEth)
+    //       .div(exchange.price)
+    //       .truncate(18)
+    //     exchange.combinedBalanceUSD = exchange.combinedBalanceETH.div(oneUSDInEth).truncate(18)
+    //   }
+    //   if (!equalToZero(exchange.weightedAvgPrice)) {
+    //     exchange.weightedAvgPriceUSD = bigDecimalExp18()
+    //       .div(oneUSDInEth)
+    //       .div(exchange.weightedAvgPrice)
+    //       .truncate(18)
+    //   }
+    //   userExchangeData.ethFeesInUSD = bigDecimalExp18()
+    //     .times(userExchangeData.ethFeesPaid)
+    //     .div(oneUSDInEth)
+    //     .truncate(18)
+    // }
 
     // update now that we have usd price
-    exchange.tradeVolumeUSD = exchange.tradeVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
+    // exchange.tradeVolumeUSD = exchange.tradeVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
 
     exchange.save()
     userExchangeData.save()
@@ -187,7 +187,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     /****** Update Global Values ******/
     const uniswap = Uniswap.load('1')
     uniswap.totalVolumeETH = uniswap.totalVolumeETH.plus(ethAmount)
-    uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
+    // uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
     uniswap.totalTokenBuys = uniswap.totalTokenBuys.plus(oneBigInt())
     uniswap.exchangeHistoryEntityCount = uniswap.exchangeHistoryEntityCount.plus(oneBigInt())
     uniswap.uniswapHistoryEntityCount = uniswap.uniswapHistoryEntityCount.plus(oneBigInt())
@@ -196,7 +196,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
 
     const factory = UniswapFactory.load('1')
     factory.totalVolumeETH = factory.totalVolumeETH.plus(ethAmount)
-    factory.totalVolumeUSD = factory.totalVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
+    // factory.totalVolumeUSD = factory.totalVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
     factory.totalTokenBuys = uniswap.totalTokenBuys.plus(oneBigInt())
     factory.exchangeHistoryEntityCount = uniswap.exchangeHistoryEntityCount.plus(oneBigInt())
     factory.uniswapHistoryEntityCount = uniswap.uniswapHistoryEntityCount.plus(oneBigInt())
@@ -226,9 +226,9 @@ export function handleTokenPurchase(event: TokenPurchase): void {
 
     // save info
     uniswapDayData.dailyVolumeInETH = uniswapDayData.dailyVolumeInETH.plus(ethAmount)
-    uniswapDayData.dailyVolumeInUSD = uniswapDayData.dailyVolumeInUSD.plus(
-      ethAmount.times(exchange.price.times(exchange.priceUSD))
-    )
+    // uniswapDayData.dailyVolumeInUSD = uniswapDayData.dailyVolumeInUSD.plus(
+    //   ethAmount.times(exchange.price.times(exchange.priceUSD))
+    // )
     uniswapDayData.totalVolumeETH = uniswap.totalVolumeETH
     uniswapDayData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
@@ -280,19 +280,20 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     eh.exchangeAddress = event.address
     eh.timestamp = event.block.timestamp.toI32()
     eh.type = 'TokenPurchase'
-    eh.ethLiquidity = exchange.baseLiquidity
-    eh.tokenLiquidity = exchange.targetLiquidity
+    eh.baseLiquidity = exchange.baseLiquidity
+    eh.targetLiquidity = exchange.targetLiquidity
     eh.tradeVolumeUSD = exchange.tradeVolumeUSD
-    eh.ethBalance = exchange.baseBalance
-    eh.tokenBalance = exchange.targetBalance
-    eh.combinedBalanceInEth = exchange.combinedBalanceETH
-    eh.combinedBalanceInUSD = exchange.combinedBalanceUSD
+    eh.baseBalance = exchange.baseBalance
+    eh.targetBalance = exchange.targetBalance
+    eh.combinedBalanceETH = exchange.combinedBalanceETH
+    eh.combinedBalanceUSD = exchange.combinedBalanceUSD
     eh.totalUniToken = exchange.totalUniToken
-    eh.tokenPriceUSD = exchange.priceUSD
-    eh.price = exchange.price
-    eh.tradeVolumeToken = exchange.tradeVolumeTarget
-    eh.tradeVolumeEth = exchange.tradeVolumeBase
-    eh.feeInEth = fee
+    // eh.tokenPriceUSD = exchange.priceUSD
+    eh.basePrice = exchange.basePrice
+    eh.targetPrice = exchange.targetPrice
+    eh.tradeVolumeTarget = exchange.tradeVolumeTarget
+    eh.tradeVolumeBase = exchange.tradeVolumeBase
+    // eh.feeInEth = fee
     eh.totalTxsCount = exchange.totalTxsCount
     eh.save()
 
@@ -315,7 +316,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
       exchangeDayData.marginalEthRate = exchange.targetBalance.div(exchange.baseBalance).truncate(8)
     }
     exchangeDayData.ethVolume = exchangeDayData.ethVolume.plus(ethAmount)
-    exchangeDayData.tokenPriceUSD = exchange.priceUSD
+    // exchangeDayData.tokenPriceUSD = exchange.priceUSD
     exchangeDayData.totalEvents = exchangeDayData.totalEvents.plus(oneBigInt())
     exchangeDayData.save()
   }
@@ -338,24 +339,24 @@ export function handleEthPurchase(event: EthPurchase): void {
     exchange.baseBalance = exchange.baseBalance.minus(ethAmount)
     exchange.targetBalance = exchange.targetBalance.plus(tokenAmount)
     exchange.sellTokenCount = exchange.sellTokenCount.plus(oneBigInt())
-    exchange.lastPrice = exchange.price
+    // exchange.lastPrice = exchange.price
 
     // Here we must handle div by zero, because someone could have bought all the eth or all the tokens
     if (equalToZero(exchange.baseBalance)) {
-      exchange.price = ZERO_BD
+      exchange.targetPrice = ZERO_BD
     } else {
-      exchange.price = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
-      if (!equalToZero(exchange.price)) {
-        exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.price)).truncate(18)
+      exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
+      if (!equalToZero(exchange.targetPrice)) {
+        exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.targetPrice)).truncate(18)
       }
     }
 
     exchange.tradeVolumeTarget = exchange.tradeVolumeTarget.plus(tokenAmount)
     exchange.tradeVolumeETH = exchange.tradeVolumeETH.plus(ethAmount)
-    exchange.totalValue = exchange.totalValue.plus(tokenAmount.times(exchange.price)).truncate(18)
-    if (!equalToZero(exchange.tradeVolumeTarget)) {
-      exchange.weightedAvgPrice = exchange.totalValue.div(exchange.tradeVolumeTarget).truncate(18)
-    }
+    // exchange.totalValue = exchange.totalValue.plus(tokenAmount.times(exchange.price)).truncate(18)
+    // if (!equalToZero(exchange.tradeVolumeTarget)) {
+    //   exchange.weightedAvgPrice = exchange.totalValue.div(exchange.tradeVolumeTarget).truncate(18)
+    // }
     exchange.totalTxsCount = exchange.totalTxsCount.plus(oneBigInt())
 
     /****** Update User ******/
@@ -386,31 +387,31 @@ export function handleEthPurchase(event: EthPurchase): void {
     userExchangeData.tokenFeesPaid = userExchangeData.tokenFeesPaid.plus(fee)
 
     /****** Get ETH in USD Uniswap USD Tokens ******/
-    const oneUSDInEth = uniswapUSDOracle(event.block.number)
-    if (!equalToZero(oneUSDInEth)) {
-      exchange.lastPriceUSD = exchange.priceUSD
-      if (equalToZero(exchange.price)) {
-        exchange.priceUSD = ZERO_BD
-      } else {
-        exchange.priceUSD = BigDecimal.fromString('1')
-          .div(oneUSDInEth)
-          .div(exchange.price)
-        exchange.combinedBalanceUSD = exchange.combinedBalanceETH.div(oneUSDInEth)
-      }
-      if (!equalToZero(exchange.weightedAvgPrice)) {
-        exchange.weightedAvgPriceUSD = bigDecimalExp18()
-          .div(oneUSDInEth)
-          .div(exchange.weightedAvgPrice)
-      }
-      if (!equalToZero(exchange.price)) {
-        userExchangeData.tokenFeesInUSD = bigDecimalExp18()
-          .times(userExchangeData.tokenFeesPaid)
-          .div(oneUSDInEth)
-          .div(exchange.price)
-      }
-    }
+    // const oneUSDInEth = uniswapUSDOracle(event.block.number)
+    // if (!equalToZero(oneUSDInEth)) {
+    //   exchange.lastPriceUSD = exchange.priceUSD
+    //   if (equalToZero(exchange.price)) {
+    //     exchange.priceUSD = ZERO_BD
+    //   } else {
+    //     exchange.priceUSD = BigDecimal.fromString('1')
+    //       .div(oneUSDInEth)
+    //       .div(exchange.price)
+    //     exchange.combinedBalanceUSD = exchange.combinedBalanceETH.div(oneUSDInEth)
+    //   }
+    //   if (!equalToZero(exchange.weightedAvgPrice)) {
+    //     exchange.weightedAvgPriceUSD = bigDecimalExp18()
+    //       .div(oneUSDInEth)
+    //       .div(exchange.weightedAvgPrice)
+    //   }
+    //   if (!equalToZero(exchange.price)) {
+    //     userExchangeData.tokenFeesInUSD = bigDecimalExp18()
+    //       .times(userExchangeData.tokenFeesPaid)
+    //       .div(oneUSDInEth)
+    //       .div(exchange.price)
+    //   }
+    // }
     // update now that we have usd price
-    exchange.tradeVolumeUSD = exchange.tradeVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
+    // exchange.tradeVolumeUSD = exchange.tradeVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
 
     exchange.save()
     userExchangeData.save()
@@ -428,7 +429,7 @@ export function handleEthPurchase(event: EthPurchase): void {
     /****** Update Global Values ******/
     const uniswap = Uniswap.load('1')
     uniswap.totalVolumeETH = uniswap.totalVolumeETH.plus(ethAmount)
-    uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
+    // uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(ethAmount.times(exchange.price.times(exchange.priceUSD)))
     uniswap.totalTokenSells = uniswap.totalTokenSells.plus(oneBigInt())
     uniswap.exchangeHistoryEntityCount = uniswap.exchangeHistoryEntityCount.plus(oneBigInt())
     uniswap.uniswapHistoryEntityCount = uniswap.uniswapHistoryEntityCount.plus(oneBigInt())
@@ -456,9 +457,9 @@ export function handleEthPurchase(event: EthPurchase): void {
     uniswapHistoricalData.save()
 
     uniswapDayData.dailyVolumeInETH = uniswapDayData.dailyVolumeInETH.plus(ethAmount)
-    uniswapDayData.dailyVolumeInUSD = uniswapDayData.dailyVolumeInUSD.plus(
-      ethAmount.times(exchange.price.times(exchange.priceUSD))
-    )
+    // uniswapDayData.dailyVolumeInUSD = uniswapDayData.dailyVolumeInUSD.plus(
+    //   ethAmount.times(exchange.price.times(exchange.priceUSD))
+    // )
     uniswapDayData.totalVolumeETH = uniswap.totalVolumeETH
     uniswapDayData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
@@ -510,26 +511,21 @@ export function handleEthPurchase(event: EthPurchase): void {
     eh.exchangeAddress = event.address
     eh.timestamp = event.block.timestamp.toI32()
     eh.type = 'EthPurchase'
-    eh.ethLiquidity = exchange.baseLiquidity
-    eh.tokenLiquidity = exchange.targetLiquidity
+    eh.baseLiquidity = exchange.baseLiquidity
+    eh.targetLiquidity = exchange.targetLiquidity
     eh.tradeVolumeUSD = exchange.tradeVolumeUSD
-    eh.ethBalance = exchange.baseBalance
-    eh.tokenBalance = exchange.targetBalance
-    eh.combinedBalanceInEth = exchange.combinedBalanceETH
-    eh.combinedBalanceInUSD = exchange.combinedBalanceUSD
+    eh.baseBalance = exchange.baseBalance
+    eh.targetBalance = exchange.targetBalance
+    eh.combinedBalanceETH = exchange.combinedBalanceETH
+    eh.combinedBalanceUSD = exchange.combinedBalanceUSD
     eh.totalUniToken = exchange.totalUniToken
-    eh.tokenPriceUSD = exchange.priceUSD
-    eh.price = exchange.price
-    eh.tradeVolumeToken = exchange.tradeVolumeTarget
-    eh.tradeVolumeEth = exchange.tradeVolumeETH
-    eh.feeInEth = fee
+    eh.basePrice = exchange.basePrice
+    eh.targetPrice = exchange.targetPrice
+    eh.tradeVolumeTarget = exchange.tradeVolumeTarget
+    eh.tradeVolumeBase = exchange.tradeVolumeETH
+    // eh.feeInEth = fee
     eh.totalTxsCount = exchange.totalTxsCount
-    if (equalToZero(exchange.price)) {
-      eh.feeInEth = ZERO_BD // Fee isn't actually zero here, but its hard to calculate this value
-    } else {
-      eh.feeInEth = fee.div(exchange.price).truncate(18)
-      eh.save()
-    }
+    eh.save()
 
     let exchangeDayData = ExchangeDayData.load(id)
     if (exchangeDayData == null) {
@@ -549,7 +545,7 @@ export function handleEthPurchase(event: EthPurchase): void {
       exchangeDayData.marginalEthRate = exchange.targetBalance.div(exchange.baseBalance).truncate(8)
     }
     exchangeDayData.ethVolume = exchangeDayData.ethVolume.plus(ethAmount)
-    exchangeDayData.tokenPriceUSD = exchange.priceUSD
+    // exchangeDayData.tokenPriceUSD = exchange.priceUSD
     exchangeDayData.totalEvents = exchangeDayData.totalEvents.plus(oneBigInt())
     exchangeDayData.save()
   }
@@ -576,14 +572,14 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     exchange.targetLiquidity = exchange.targetLiquidity.plus(tokenAmount)
     exchange.addLiquidityCount = exchange.addLiquidityCount.plus(oneBigInt())
     exchange.totalTxsCount = exchange.totalTxsCount.plus(oneBigInt())
-    exchange.lastPrice = exchange.price
+    // exchange.lastPrice = exchange.price
 
     // Don't need check to divide by zero here, adding liquidity would make it impossible
     if (!equalToZero(exchange.baseBalance)) {
-      exchange.price = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
+      exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
     }
-    if (!equalToZero(exchange.price)) {
-      exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.price)).truncate(18)
+    if (!equalToZero(exchange.targetPrice)) {
+      exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.targetPrice)).truncate(18)
     }
 
     /****** Update User ******/
@@ -614,18 +610,18 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     userExchangeData.tokensDeposited = userExchangeData.tokensDeposited.plus(tokenAmount)
 
     /****** Get ETH in USD Uniswap USD Tokens ******/
-    const oneUSDInEth = uniswapUSDOracle(event.block.number)
-    if (!equalToZero(oneUSDInEth)) {
-      exchange.lastPriceUSD = exchange.priceUSD
-      if (equalToZero(exchange.price)) {
-        exchange.priceUSD = ZERO_BD
-      } else {
-        exchange.priceUSD = BigDecimal.fromString('1')
-          .div(oneUSDInEth)
-          .div(exchange.price)
-        exchange.combinedBalanceUSD = exchange.combinedBalanceETH.div(oneUSDInEth)
-      }
-    }
+    // const oneUSDInEth = uniswapUSDOracle(event.block.number)
+    // if (!equalToZero(oneUSDInEth)) {
+    //   exchange.lastPriceUSD = exchange.priceUSD
+    //   if (equalToZero(exchange.price)) {
+    //     exchange.priceUSD = ZERO_BD
+    //   } else {
+    //     exchange.priceUSD = BigDecimal.fromString('1')
+    //       .div(oneUSDInEth)
+    //       .div(exchange.price)
+    //     exchange.combinedBalanceUSD = exchange.combinedBalanceETH.div(oneUSDInEth)
+    //   }
+    // }
 
     exchange.save()
     userExchangeData.save()
@@ -644,9 +640,9 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     const uniswap = Uniswap.load('1')
     // times 2, because equal eth and tokens are always added or removed for liquidity
     uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.plus(ethAmount.times(BigDecimal.fromString('2')))
-    if (!equalToZero(exchange.price) && !equalToZero(exchange.priceUSD)) {
-      uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(exchange.price).times(exchange.priceUSD)
-    }
+    // if (!equalToZero(exchange.price) && !equalToZero(exchange.priceUSD)) {
+    //   uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(exchange.price).times(exchange.priceUSD)
+    // }
     uniswap.totalAddLiquidity = uniswap.totalAddLiquidity.plus(oneBigInt())
     uniswap.exchangeHistoryEntityCount = uniswap.exchangeHistoryEntityCount.plus(oneBigInt())
     uniswap.uniswapHistoryEntityCount = uniswap.uniswapHistoryEntityCount.plus(oneBigInt())
@@ -727,19 +723,20 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     eh.exchangeAddress = event.address
     eh.timestamp = event.block.timestamp.toI32()
     eh.type = 'AddLiquidity'
-    eh.ethLiquidity = exchange.baseLiquidity
-    eh.tokenLiquidity = exchange.targetLiquidity
+    eh.baseLiquidity = exchange.baseLiquidity
+    eh.targetLiquidity = exchange.targetLiquidity
     eh.tradeVolumeUSD = exchange.tradeVolumeUSD
-    eh.ethBalance = exchange.baseBalance
-    eh.tokenBalance = exchange.targetBalance
-    eh.combinedBalanceInEth = exchange.combinedBalanceETH
-    eh.combinedBalanceInUSD = exchange.combinedBalanceUSD
+    eh.baseBalance = exchange.baseBalance
+    eh.targetBalance = exchange.targetBalance
+    eh.combinedBalanceETH = exchange.combinedBalanceETH
+    eh.combinedBalanceUSD = exchange.combinedBalanceUSD
     eh.totalUniToken = exchange.totalUniToken
-    eh.tokenPriceUSD = exchange.priceUSD
-    eh.price = exchange.price
-    eh.tradeVolumeToken = exchange.tradeVolumeTarget
-    eh.tradeVolumeEth = exchange.tradeVolumeBase
-    eh.feeInEth = ZERO_BD
+    // eh.tokenPriceUSD = exchange.priceUSD
+    eh.basePrice = exchange.basePrice
+    eh.targetPrice = exchange.targetPrice
+    eh.tradeVolumeTarget = exchange.tradeVolumeTarget
+    eh.tradeVolumeBase = exchange.tradeVolumeBase
+    // eh.feeInEth = ZERO_BD
     eh.totalTxsCount = exchange.totalTxsCount
     eh.save()
 
@@ -760,7 +757,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     if (!equalToZero(exchange.baseBalance)) {
       exchangeDayData.marginalEthRate = exchange.targetBalance.div(exchange.baseBalance).truncate(8)
     }
-    exchangeDayData.tokenPriceUSD = exchange.priceUSD
+    // exchangeDayData.tokenPriceUSD = exchange.priceUSD
     exchangeDayData.totalEvents = exchangeDayData.totalEvents.plus(oneBigInt())
     exchangeDayData.save()
   }
@@ -787,17 +784,17 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     exchange.targetLiquidity = exchange.targetLiquidity.minus(tokenAmount)
     exchange.removeLiquidityCount = exchange.removeLiquidityCount.plus(oneBigInt())
     exchange.totalTxsCount = exchange.totalTxsCount.plus(oneBigInt())
-    exchange.lastPrice = exchange.price
+    // exchange.lastPrice = exchange.price
     // Here we must handle div by zero, because someone could have bought all the eth or all the tokens
     if (equalToZero(exchange.baseBalance)) {
-      exchange.price = ZERO_BD
+      exchange.targetPrice = ZERO_BD
       exchange.combinedBalanceETH = exchange.baseBalance
     } else {
-      exchange.price = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
-      if (equalToZero(exchange.price)) {
+      exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
+      if (equalToZero(exchange.targetPrice)) {
         exchange.combinedBalanceETH = exchange.baseBalance
       } else {
-        exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.price)).truncate(18)
+        exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.targetPrice)).truncate(18)
       }
     }
     /****** Update UserExchangeData ******/
@@ -812,18 +809,18 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     userExchangeData.ethWithdrawn = userExchangeData.ethWithdrawn.plus(ethAmount)
     userExchangeData.tokensWithdrawn = userExchangeData.tokensWithdrawn.plus(tokenAmount)
     /****** Get ETH in USD Uniswap USD Tokens ******/
-    const oneUSDInEth = uniswapUSDOracle(event.block.number)
-    if (!equalToZero(oneUSDInEth)) {
-      exchange.lastPriceUSD = exchange.priceUSD
-      if (equalToZero(exchange.price)) {
-        exchange.priceUSD = ZERO_BD
-      } else {
-        exchange.priceUSD = BigDecimal.fromString('1')
-          .div(oneUSDInEth)
-          .div(exchange.price)
-        exchange.combinedBalanceUSD = exchange.combinedBalanceETH.div(oneUSDInEth)
-      }
-    }
+    // const oneUSDInEth = uniswapUSDOracle(event.block.number)
+    // if (!equalToZero(oneUSDInEth)) {
+    //   exchange.lastPriceUSD = exchange.priceUSD
+    //   if (equalToZero(exchange.price)) {
+    //     exchange.priceUSD = ZERO_BD
+    //   } else {
+    //     exchange.priceUSD = BigDecimal.fromString('1')
+    //       .div(oneUSDInEth)
+    //       .div(exchange.price)
+    //     exchange.combinedBalanceUSD = exchange.combinedBalanceETH.div(oneUSDInEth)
+    //   }
+    // }
 
     exchange.save()
     userExchangeData.save()
@@ -842,9 +839,9 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     const uniswap = Uniswap.load('1')
     // times 2, because equal eth and tokens are always added or removed for liquidity
     uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.minus(ethAmount.times(BigDecimal.fromString('2')))
-    if (!equalToZero(exchange.price) && !equalToZero(exchange.priceUSD)) {
-      uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(exchange.price).times(exchange.priceUSD)
-    }
+    // if (!equalToZero(exchange.price) && !equalToZero(exchange.priceUSD)) {
+    //   uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(exchange.price).times(exchange.priceUSD)
+    // }
     uniswap.totalRemoveLiquidity = uniswap.totalRemoveLiquidity.plus(oneBigInt())
     uniswap.exchangeHistoryEntityCount = uniswap.exchangeHistoryEntityCount.plus(oneBigInt())
     uniswap.uniswapHistoryEntityCount = uniswap.uniswapHistoryEntityCount.plus(oneBigInt())
@@ -927,19 +924,20 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     eh.exchangeAddress = event.address
     eh.timestamp = event.block.timestamp.toI32()
     eh.type = 'RemoveLiquidity'
-    eh.ethLiquidity = exchange.baseLiquidity
-    eh.tokenLiquidity = exchange.targetLiquidity
+    eh.baseLiquidity = exchange.baseLiquidity
+    eh.targetLiquidity = exchange.targetLiquidity
     eh.tradeVolumeUSD = exchange.tradeVolumeUSD
-    eh.ethBalance = exchange.baseBalance
-    eh.tokenBalance = exchange.targetBalance
-    eh.combinedBalanceInEth = exchange.combinedBalanceETH
-    eh.combinedBalanceInUSD = exchange.combinedBalanceUSD
+    eh.baseBalance = exchange.baseBalance
+    eh.targetBalance = exchange.targetBalance
+    eh.combinedBalanceETH = exchange.combinedBalanceETH
+    eh.combinedBalanceUSD = exchange.combinedBalanceUSD
     eh.totalUniToken = exchange.totalUniToken
-    eh.tokenPriceUSD = exchange.priceUSD
-    eh.price = exchange.price
-    eh.tradeVolumeToken = exchange.tradeVolumeTarget
-    eh.tradeVolumeEth = exchange.tradeVolumeBase
-    eh.feeInEth = ZERO_BD
+    // eh.tokenPriceUSD = exchange.priceUSD
+    eh.basePrice = exchange.basePrice
+    eh.targetPrice = exchange.targetPrice
+    eh.tradeVolumeTarget = exchange.tradeVolumeTarget
+    eh.tradeVolumeBase = exchange.tradeVolumeBase
+    // eh.feeInEth = ZERO_BD
     eh.totalTxsCount = exchange.totalTxsCount
     eh.save()
 
@@ -960,7 +958,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     if (!equalToZero(exchange.baseBalance)) {
       exchangeDayData.marginalEthRate = exchange.targetBalance.div(exchange.baseBalance).truncate(8)
     }
-    exchangeDayData.tokenPriceUSD = exchange.priceUSD
+    // exchangeDayData.tokenPriceUSD = exchange.priceUSD
     exchangeDayData.totalEvents = exchangeDayData.totalEvents.plus(oneBigInt())
     exchangeDayData.save()
   }
