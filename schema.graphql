@@ -426,7 +426,7 @@ type UniswapDayData @entity {
     totalLiquidityUSD: BigDecimal!
 
      # daily top tokens in liquidity 
-    maxStored: Int!
+    maxStored: Int
     mostLiquidTokens: [TokenDayData!]!
 
     txCount: BigInt!
