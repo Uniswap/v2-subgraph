@@ -293,6 +293,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     eh.targetPrice = exchange.targetPrice
     eh.tradeVolumeTarget = exchange.tradeVolumeTarget
     eh.tradeVolumeBase = exchange.tradeVolumeBase
+    eh.tradeVolumeETH = exchange.tradeVolumeETH
     // eh.feeInEth = fee
     eh.totalTxsCount = exchange.totalTxsCount
     eh.save()
@@ -522,7 +523,8 @@ export function handleEthPurchase(event: EthPurchase): void {
     eh.basePrice = exchange.basePrice
     eh.targetPrice = exchange.targetPrice
     eh.tradeVolumeTarget = exchange.tradeVolumeTarget
-    eh.tradeVolumeBase = exchange.tradeVolumeETH
+    eh.tradeVolumeBase = exchange.tradeVolumeBase
+    eh.tradeVolumeETH = exchange.tradeVolumeETH
     // eh.feeInEth = fee
     eh.totalTxsCount = exchange.totalTxsCount
     eh.save()
@@ -736,6 +738,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     eh.targetPrice = exchange.targetPrice
     eh.tradeVolumeTarget = exchange.tradeVolumeTarget
     eh.tradeVolumeBase = exchange.tradeVolumeBase
+    eh.tradeVolumeETH = exchange.tradeVolumeETH
     // eh.feeInEth = ZERO_BD
     eh.totalTxsCount = exchange.totalTxsCount
     eh.save()
@@ -937,6 +940,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     eh.targetPrice = exchange.targetPrice
     eh.tradeVolumeTarget = exchange.tradeVolumeTarget
     eh.tradeVolumeBase = exchange.tradeVolumeBase
+    eh.tradeVolumeETH = exchange.tradeVolumeETH
     // eh.feeInEth = ZERO_BD
     eh.totalTxsCount = exchange.totalTxsCount
     eh.save()
