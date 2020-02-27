@@ -114,14 +114,12 @@ type Exchange @entity {
     targetBalance: BigDecimal!              # token balance for V1 Exchanges, token1 balance for V2 exchanges
     targetLiquidity: BigDecimal!            # Equals the target token liquidity provided. Will likely be different thatn targetBalance
     v1Equivalent: Exchange
-    # TODO - determine how to structure fees in schema to work for V1 and V2 fee structure
     fee: BigDecimal!                        # Always 0.3% for v1 uniswap
     startTime: Int!                         # Time exchange was created
 
     combinedBalanceETH: BigDecimal!       # Equal to ethBalance + (tokenBalance/price). Stored to simplify users calculating their own personal return. because the ratio may have changes a lot in one direction
     combinedBalanceUSD: BigDecimal!       # Equal to combinedBalanceInUSD * DAI/ETH
     
-    # TODO - determine if this is still needed with new way of tracking pool ownership
     totalUniToken: BigDecimal!              # Count of the underlying unitokens that represent liquidity provided ownership
 
     # Counting Events
@@ -448,6 +446,17 @@ type UniswapDayData @entity {
     totalRemoveLiquidity: BigInt!           # Total events where liquidity have been removed
 
     txCount: BigInt!
+}
+
+# stores for USD calculations 
+type Bundle @entity {
+  id: ID!
+  ethPrice: BigDecimal! # price of ETH usd
+  # daiPrice: BigDecimal! # price of ETH in DAI
+
+  # add these later
+  # USDC: BigDecimal! # price of ETH is usdc 
+  # TUSD: BigDecimal! # price of ETH in TUSD
 }
 
 # Data checkpointed at each timestamp for 24hour data
