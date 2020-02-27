@@ -477,6 +477,25 @@ type UniswapHistoricalData @entity {
     txCount: BigInt!
 }
 
+type TokenHistoricalData @entity {
+  id: ID!
+  token: Asset!
+  timestamp: Int!
+  
+  # volume
+  tradeVolumeToken: BigDecimal!           
+  tradeVolumeETH: BigDecimal!           
+  tradeVolumeUSD: BigDecimal! 
+
+  totalLiquidityToken: BigDecimal!        
+  totalLiquidityETH: BigDecimal!            
+  totalLiquidityUSD: BigDecimal!            
+
+  # pricing
+  priceETH: BigDecimal            
+  priceUSD: BigDecimal            
+}
+
 type TokenDayData @entity {
   id: ID!                              
   date: Int!                           

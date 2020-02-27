@@ -1,6 +1,6 @@
 import { BigDecimal, Address } from '@graphprotocol/graph-ts'
 import { NewExchange } from '../../types/FactoryV1Contract/FactoryV1Contract'
-import { Uniswap, UniswapFactory, Exchange, Asset } from '../../types/schema'
+import { Uniswap, UniswapFactory, Bundle, Exchange, Asset } from '../../types/schema'
 import { ExchangeV1Contract as ExchangeContract } from '../../types/templates'
 import { hardcodedExchanges } from './hardcodedExchanges'
 import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals, oneBigInt } from './helpers'
@@ -135,6 +135,10 @@ export function handleNewExchange(event: NewExchange): void {
     totals.reserveEntityCount = ZERO_BI
     totals.txCount = ZERO_BI
     totals.mostLiquidTokens = []
+
+    const bundle = new Bundle('1')
+    bundle.ethPrice = ZERO_BD
+    bundle.save()
   }
   totals.totalExchangeCount = totals.totalExchangeCount + 1
   totals.save()
