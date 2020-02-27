@@ -43,36 +43,28 @@ function createUserDataEntity(id: string, user: Address, exchange: Address): voi
   userExchangeData.user = user.toHex()
   userExchangeData.exchange = exchange.toHexString()
 
-  userExchangeData.ethDeposited = ZERO_BD
-  userExchangeData.tokensDeposited = ZERO_BD
-  userExchangeData.ethWithdrawn = ZERO_BD
-  userExchangeData.tokensWithdrawn = ZERO_BD
+  userExchangeData.baseDeposited = ZERO_BD
+  userExchangeData.targetDeposited = ZERO_BD
+  userExchangeData.baseWithdrawn = ZERO_BD
+  userExchangeData.targetWithdrawn = ZERO_BD
   userExchangeData.uniTokenBalance = ZERO_BD
 
-  userExchangeData.ethBought = ZERO_BD
-  userExchangeData.ethSold = ZERO_BD
-  userExchangeData.tokensBought = ZERO_BD
-  userExchangeData.tokensSold = ZERO_BD
-  userExchangeData.ethFeesPaid = ZERO_BD
-  userExchangeData.tokenFeesPaid = ZERO_BD
-  userExchangeData.ethFeesInUSD = ZERO_BD
-  userExchangeData.tokenFeesInUSD = ZERO_BD
+  userExchangeData.baseBought = ZERO_BD
+  userExchangeData.baseSold = ZERO_BD
+  userExchangeData.targetBought = ZERO_BD
+  userExchangeData.targetSold = ZERO_BD
   userExchangeData.save()
 }
 
 function createUniswapDayData(dayID: i32, dayStartTimestamp: i32): void {
   const uniswapDayData = new UniswapDayData(dayID.toString())
   uniswapDayData.date = dayStartTimestamp
-  uniswapDayData.dailyVolumeInETH = ZERO_BD
-  uniswapDayData.dailyVolumeInUSD = ZERO_BD
+  uniswapDayData.dailyVolumeETH = ZERO_BD
+  uniswapDayData.dailyVolumeUSD = ZERO_BD
   uniswapDayData.totalVolumeETH = ZERO_BD
   uniswapDayData.totalLiquidityETH = ZERO_BD
   uniswapDayData.totalVolumeUSD = ZERO_BD
   uniswapDayData.totalLiquidityUSD = ZERO_BD
-  uniswapDayData.totalTokenSells = ZERO_BI
-  uniswapDayData.totalTokenBuys = ZERO_BI
-  uniswapDayData.totalAddLiquidity = ZERO_BI
-  uniswapDayData.totalRemoveLiquidity = ZERO_BI
   uniswapDayData.txCount = ZERO_BI
   uniswapDayData.save()
 }
@@ -93,8 +85,6 @@ export function handleTokenPurchase(event: TokenPurchase): void {
 
     exchange.baseBalance = exchange.baseBalance.plus(ethAmount)
     exchange.targetBalance = exchange.targetBalance.minus(tokenAmount)
-    // TODO determine if needed or how to restructure to also work for V2
-    exchange.buyTokenCount = exchange.buyTokenCount.plus(oneBigInt())
     // exchange.lastPrice = exchange.price
 
     if (!equalToZero(exchange.baseBalance)) {
@@ -136,12 +126,12 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     }
 
     //update values
-    userExchangeData.ethSold = userExchangeData.ethSold.plus(ethAmount)
-    userExchangeData.tokensBought = userExchangeData.tokensBought.plus(tokenAmount)
+    userExchangeData.baseSold = userExchangeData.baseSold.plus(ethAmount)
+    userExchangeData.targetBought = userExchangeData.targetBought.plus(tokenAmount)
 
     const originalEthValue = ethAmount.div(BigDecimal.fromString('1').minus(exchange.fee))
     const fee = originalEthValue.minus(ethAmount).truncate(18)
-    userExchangeData.ethFeesPaid = userExchangeData.ethFeesPaid.plus(fee)
+    // userExchangeData.ethFeesPaid = userExchangeData.ethFeesPaid.plus(fee)
 
     /****** Get ETH in USD Uniswap USD Tokens ******/
     // const oneUSDInEth = uniswapUSDOracle(event.block.number)
@@ -217,15 +207,11 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     uniswapHistoricalData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapHistoricalData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapHistoricalData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-    uniswapHistoricalData.totalTokenSells = uniswap.totalTokenSells
-    uniswapHistoricalData.totalTokenBuys = uniswap.totalTokenBuys
-    uniswapHistoricalData.totalAddLiquidity = uniswap.totalAddLiquidity
-    uniswapHistoricalData.totalRemoveLiquidity = uniswap.totalRemoveLiquidity
     uniswapHistoricalData.txCount = uniswap.txCount
     uniswapHistoricalData.save()
 
     // save info
-    uniswapDayData.dailyVolumeInETH = uniswapDayData.dailyVolumeInETH.plus(ethAmount)
+    uniswapDayData.dailyVolumeETH = uniswapDayData.dailyVolumeETH.plus(ethAmount)
     // uniswapDayData.dailyVolumeInUSD = uniswapDayData.dailyVolumeInUSD.plus(
     //   ethAmount.times(exchange.price.times(exchange.priceUSD))
     // )
@@ -233,10 +219,6 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     uniswapDayData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-    uniswapDayData.totalTokenSells = uniswap.totalTokenSells
-    uniswapDayData.totalTokenBuys = uniswap.totalTokenBuys
-    uniswapDayData.totalAddLiquidity = uniswap.totalAddLiquidity
-    uniswapDayData.totalRemoveLiquidity = uniswap.totalRemoveLiquidity
     uniswapDayData.txCount = uniswap.txCount
     uniswapDayData.save()
 
@@ -339,7 +321,6 @@ export function handleEthPurchase(event: EthPurchase): void {
 
     exchange.baseBalance = exchange.baseBalance.minus(ethAmount)
     exchange.targetBalance = exchange.targetBalance.plus(tokenAmount)
-    exchange.sellTokenCount = exchange.sellTokenCount.plus(oneBigInt())
     // exchange.lastPrice = exchange.price
 
     // Here we must handle div by zero, because someone could have bought all the eth or all the tokens
@@ -379,13 +360,13 @@ export function handleEthPurchase(event: EthPurchase): void {
       userExchangeData = UserExchangeData.load(userExchangeID) // reload here
     }
 
-    userExchangeData.ethBought = userExchangeData.ethBought.plus(ethAmount)
-    userExchangeData.tokensSold = userExchangeData.tokensSold.plus(tokenAmount)
+    userExchangeData.baseBought = userExchangeData.baseBought.plus(ethAmount)
+    userExchangeData.targetSold = userExchangeData.targetSold.plus(tokenAmount)
 
     // Fee Calculations
     const originalTokenValue = tokenAmount.div(BigDecimal.fromString('1').minus(exchange.fee))
     const fee = originalTokenValue.minus(tokenAmount).truncate(18)
-    userExchangeData.tokenFeesPaid = userExchangeData.tokenFeesPaid.plus(fee)
+    // userExchangeData.tokenFeesPaid = userExchangeData.tokenFeesPaid.plus(fee)
 
     /****** Get ETH in USD Uniswap USD Tokens ******/
     // const oneUSDInEth = uniswapUSDOracle(event.block.number)
@@ -450,14 +431,10 @@ export function handleEthPurchase(event: EthPurchase): void {
     uniswapHistoricalData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapHistoricalData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapHistoricalData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-    uniswapHistoricalData.totalTokenSells = uniswap.totalTokenSells
-    uniswapHistoricalData.totalTokenBuys = uniswap.totalTokenBuys
-    uniswapHistoricalData.totalAddLiquidity = uniswap.totalAddLiquidity
-    uniswapHistoricalData.totalRemoveLiquidity = uniswap.totalRemoveLiquidity
     uniswapHistoricalData.txCount = uniswap.txCount
     uniswapHistoricalData.save()
 
-    uniswapDayData.dailyVolumeInETH = uniswapDayData.dailyVolumeInETH.plus(ethAmount)
+    uniswapDayData.dailyVolumeETH = uniswapDayData.dailyVolumeETH.plus(ethAmount)
     // uniswapDayData.dailyVolumeInUSD = uniswapDayData.dailyVolumeInUSD.plus(
     //   ethAmount.times(exchange.price.times(exchange.priceUSD))
     // )
@@ -465,10 +442,6 @@ export function handleEthPurchase(event: EthPurchase): void {
     uniswapDayData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-    uniswapDayData.totalTokenSells = uniswap.totalTokenSells
-    uniswapDayData.totalTokenBuys = uniswap.totalTokenBuys
-    uniswapDayData.totalAddLiquidity = uniswap.totalAddLiquidity
-    uniswapDayData.totalRemoveLiquidity = uniswap.totalRemoveLiquidity
     uniswapDayData.txCount = uniswap.txCount
     uniswapDayData.save()
 
@@ -572,7 +545,6 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     exchange.targetBalance = exchange.targetBalance.plus(tokenAmount)
     exchange.baseLiquidity = exchange.baseLiquidity.plus(ethAmount)
     exchange.targetLiquidity = exchange.targetLiquidity.plus(tokenAmount)
-    exchange.addLiquidityCount = exchange.addLiquidityCount.plus(oneBigInt())
     exchange.totalTxsCount = exchange.totalTxsCount.plus(oneBigInt())
     // exchange.lastPrice = exchange.price
 
@@ -601,15 +573,10 @@ export function handleAddLiquidity(event: AddLiquidity): void {
       createUserDataEntity(userExchangeID, event.params.provider, event.address)
       userExchangeData = UserExchangeData.load(userExchangeID) // reload here
     }
-
-    // add liquidity provider to list of token holders
-    const holders = exchange.tokenHolders
-    holders.push(userExchangeData.id)
-    exchange.tokenHolders = holders
     exchange.save()
 
-    userExchangeData.ethDeposited = userExchangeData.ethDeposited.plus(ethAmount)
-    userExchangeData.tokensDeposited = userExchangeData.tokensDeposited.plus(tokenAmount)
+    userExchangeData.baseDeposited = userExchangeData.baseDeposited.plus(ethAmount)
+    userExchangeData.targetDeposited = userExchangeData.targetDeposited.plus(tokenAmount)
 
     /****** Get ETH in USD Uniswap USD Tokens ******/
     // const oneUSDInEth = uniswapUSDOracle(event.block.number)
@@ -664,10 +631,6 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     uniswapHistoricalData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapHistoricalData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapHistoricalData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-    uniswapHistoricalData.totalTokenSells = uniswap.totalTokenSells
-    uniswapHistoricalData.totalTokenBuys = uniswap.totalTokenBuys
-    uniswapHistoricalData.totalAddLiquidity = uniswap.totalAddLiquidity
-    uniswapHistoricalData.totalRemoveLiquidity = uniswap.totalRemoveLiquidity
     uniswapHistoricalData.txCount = uniswap.txCount
     uniswapHistoricalData.save()
 
@@ -675,10 +638,6 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     uniswapDayData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-    uniswapDayData.totalTokenSells = uniswap.totalTokenSells
-    uniswapDayData.totalTokenBuys = uniswap.totalTokenBuys
-    uniswapDayData.totalAddLiquidity = uniswap.totalAddLiquidity
-    uniswapDayData.totalRemoveLiquidity = uniswap.totalRemoveLiquidity
     uniswapDayData.txCount = uniswap.txCount
     uniswapDayData.save()
 
@@ -785,7 +744,6 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     exchange.targetBalance = exchange.targetBalance.minus(tokenAmount)
     exchange.baseLiquidity = exchange.baseLiquidity.minus(ethAmount)
     exchange.targetLiquidity = exchange.targetLiquidity.minus(tokenAmount)
-    exchange.removeLiquidityCount = exchange.removeLiquidityCount.plus(oneBigInt())
     exchange.totalTxsCount = exchange.totalTxsCount.plus(oneBigInt())
     // exchange.lastPrice = exchange.price
     // Here we must handle div by zero, because someone could have bought all the eth or all the tokens
@@ -809,8 +767,8 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
       createUserDataEntity(userExchangeID, event.params.provider, event.address)
       userExchangeData = UserExchangeData.load(userExchangeID) // reload here
     }
-    userExchangeData.ethWithdrawn = userExchangeData.ethWithdrawn.plus(ethAmount)
-    userExchangeData.tokensWithdrawn = userExchangeData.tokensWithdrawn.plus(tokenAmount)
+    userExchangeData.baseWithdrawn = userExchangeData.baseWithdrawn.plus(ethAmount)
+    userExchangeData.targetWithdrawn = userExchangeData.targetWithdrawn.plus(tokenAmount)
     /****** Get ETH in USD Uniswap USD Tokens ******/
     // const oneUSDInEth = uniswapUSDOracle(event.block.number)
     // if (!equalToZero(oneUSDInEth)) {
@@ -864,10 +822,6 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     uniswapHistoricalData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapHistoricalData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapHistoricalData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-    uniswapHistoricalData.totalTokenSells = uniswap.totalTokenSells
-    uniswapHistoricalData.totalTokenBuys = uniswap.totalTokenBuys
-    uniswapHistoricalData.totalAddLiquidity = uniswap.totalAddLiquidity
-    uniswapHistoricalData.totalRemoveLiquidity = uniswap.totalRemoveLiquidity
     uniswapHistoricalData.txCount = uniswap.txCount
     uniswapHistoricalData.save()
 
@@ -875,10 +829,6 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     uniswapDayData.totalLiquidityETH = uniswap.totalLiquidityETH
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-    uniswapDayData.totalTokenSells = uniswap.totalTokenSells
-    uniswapDayData.totalTokenBuys = uniswap.totalTokenBuys
-    uniswapDayData.totalAddLiquidity = uniswap.totalAddLiquidity
-    uniswapDayData.totalRemoveLiquidity = uniswap.totalRemoveLiquidity
     uniswapDayData.txCount = uniswap.txCount
     uniswapDayData.save()
 
@@ -1028,11 +978,11 @@ export function handleTransfer(event: Transfer): void {
       }
 
       // Note - a transfer is considered a direct buy and sell of eth and tokens from 1 user to another
-      userTo.ethBought = userTo.ethBought.plus(ethTransferred)
-      userTo.tokensBought = userTo.tokensBought.plus(tokenTransferred)
+      userTo.baseBought = userTo.baseBought.plus(ethTransferred)
+      userTo.targetBought = userTo.targetBought.plus(tokenTransferred)
       userTo.uniTokenBalance = userTo.uniTokenBalance.plus(uniTokens)
-      userFrom.ethBought = userTo.ethBought.minus(ethTransferred)
-      userFrom.tokensBought = userTo.tokensBought.minus(tokenTransferred)
+      userFrom.baseBought = userTo.baseBought.minus(ethTransferred)
+      userFrom.targetBought = userTo.targetBought.minus(tokenTransferred)
       userFrom.uniTokenBalance = userTo.uniTokenBalance.minus(uniTokens)
       userTo.save()
       userFrom.save()
