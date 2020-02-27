@@ -159,7 +159,6 @@ export function handleNewExchange(event: ExchangeCreated): void {
     // exchange.priceUSD = ZERO_BD
     // exchange.lastPriceUSD = ZERO_BD
     // exchange.weightedAvgPriceUSD = ZERO_BD
-    exchange.tokenHolders = []
 
     // update totals
     const allExchanges = totals.exchanges
