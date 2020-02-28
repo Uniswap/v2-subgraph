@@ -731,6 +731,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
 
 // Note - function removeLiquidity() will emit events log.AddLiquidity and log.Transfer back to back
 export function handleRemoveLiquidity(event: RemoveLiquidity): void {
+  log.debug("Remove liquidity event triggered - transaction: {}", [event.transaction.hash.toHex()])
   /****** Update Exchange ******/
   const exchangeID = event.address.toHex()
   const exchange = Exchange.load(exchangeID)
@@ -852,7 +853,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     removeLiquidityEvent.uniTokensBurned = uniBurned
 
     removeLiquidityEvent.save()
-
+    log.debug("Remove liquidity event saved: {}", [eventID.toString().concat('-rl')])
     /****** Update Transaction ******/
     const txId = event.transaction.hash
       .toHexString()
