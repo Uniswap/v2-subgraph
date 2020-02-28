@@ -840,6 +840,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 
     /** Create Liquidity Event */
     const eventID = uniswap.totalAddLiquidity.plus(uniswap.totalRemoveLiquidity)
+    log.debug("RL eventID: {}", [eventID.toString()])
     const removeLiquidityEvent = new RemoveLiquidityEvent(eventID.toString().concat('-rl'))
     removeLiquidityEvent.exchange = event.address.toHex()
     removeLiquidityEvent.ethAmount = ethAmount
