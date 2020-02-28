@@ -115,11 +115,15 @@ export function handleNewExchange(event: ExchangeCreated): void {
   const wethAddress = Address.fromString('0xc778417E063141139Fce010982780140Aa0cD5Ab')
   if (event.params.token0 == wethAddress) {
     token1.wethExchange = event.params.exchange.toHex()
-    v1Equivalent = token1.v1Exchange
+    if(token1.v1Exchange != null) {
+      v1Equivalent = token1.v1Exchange
+    }
   }
   if (event.params.token1 == wethAddress) {
     token0.wethExchange = event.params.exchange.toHex()
-    v1Equivalent = token0.v1Exchange
+    if(token0.v1Exchange != null) {
+      v1Equivalent = token1.v1Exchange
+    }
   }
 
   const newAllPairsArray0 = token0.allExchanges
@@ -130,7 +134,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
   newAllPairsArray1.push(event.params.exchange.toHexString())
   token1.allExchanges = newAllPairsArray1
 
-  // if (token0.decimals !== null && token1.decimals !== null) {
+  if (token0.decimals !== null && token1.decimals !== null) {
     // create the Pair
     const exchange = new Exchange(event.params.exchange.toHexString()) as Exchange
     exchange.version = 2
@@ -179,5 +183,5 @@ export function handleNewExchange(event: ExchangeCreated): void {
     exchange.save()
     totals.save()
     factory.save()
-  // }
+  }
 }
