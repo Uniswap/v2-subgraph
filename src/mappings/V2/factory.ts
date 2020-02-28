@@ -1,4 +1,4 @@
-import { Address } from '@graphprotocol/graph-ts'
+import { log, Address } from '@graphprotocol/graph-ts'
 import { 
   Uniswap, 
   UniswapFactory,
@@ -11,9 +11,10 @@ import { ExchangeV2Contract as ExchangeContract } from '../../types/templates'
 import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from './helpers'
 
 export function handleNewExchange(event: ExchangeCreated): void {
+  log.debug("New Exchange: {}", [event.params.exchange.toHex()])
   //setup factory if needed
   let totals = Uniswap.load('1')
-  let v1Equivalent: string = null
+  // let v1Equivalent: string = null
 
   // if no totals entity yet, set up blank initial
   if (totals == null) {
@@ -115,15 +116,15 @@ export function handleNewExchange(event: ExchangeCreated): void {
   const wethAddress = Address.fromString('0xc778417E063141139Fce010982780140Aa0cD5Ab')
   if (event.params.token0 == wethAddress) {
     token1.wethExchange = event.params.exchange.toHex()
-    if(token1.v1Exchange != null) {
-      v1Equivalent = token1.v1Exchange
-    }
+    // if(token1.v1Exchange != null) {
+    //   v1Equivalent = token1.v1Exchange
+    // }
   }
   if (event.params.token1 == wethAddress) {
     token0.wethExchange = event.params.exchange.toHex()
-    if(token0.v1Exchange != null) {
-      v1Equivalent = token1.v1Exchange
-    }
+    // if(token0.v1Exchange != null) {
+    //   v1Equivalent = token1.v1Exchange
+    // }
   }
 
   const newAllPairsArray0 = token0.allExchanges
@@ -134,11 +135,13 @@ export function handleNewExchange(event: ExchangeCreated): void {
   newAllPairsArray1.push(event.params.exchange.toHexString())
   token1.allExchanges = newAllPairsArray1
 
+  log.debug("Made it to decimals check for: {}", [event.params.exchange.toHex()])
   if (token0.decimals !== null && token1.decimals !== null) {
+    log.debug("Made it past decimals check for: {}", [event.params.exchange.toHex()])
     // create the Pair
     const exchange = new Exchange(event.params.exchange.toHexString()) as Exchange
     exchange.version = 2
-    exchange.v1Equivalent = v1Equivalent
+    // exchange.v1Equivalent = v1Equivalent
     exchange.fee = ZERO_BD
     exchange.base = token0.id
     exchange.target = token1.id
@@ -176,7 +179,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
 
     // create the tracked contract based on the template
     ExchangeContract.create(event.params.exchange)
-
+    log.debug("Exchange template created for: {}", [event.params.exchange.toHex()])
     // save updated values
     token0.save()
     token1.save()
