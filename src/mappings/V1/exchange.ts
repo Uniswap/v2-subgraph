@@ -66,6 +66,7 @@ function createUniswapDayData(dayID: i32, dayStartTimestamp: i32): void {
   uniswapDayData.totalVolumeUSD = ZERO_BD
   uniswapDayData.totalLiquidityUSD = ZERO_BD
   uniswapDayData.txCount = ZERO_BI
+  uniswapDayData.mostLiquidTokens = []
   uniswapDayData.save()
 }
 export function handleTokenPurchase(event: TokenPurchase): void {
@@ -220,6 +221,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
     uniswapDayData.txCount = uniswap.txCount
+    uniswapDayData.mostLiquidTokens = []
     uniswapDayData.save()
 
     /******** CREATE TRADE EVENT  ********/
@@ -443,6 +445,7 @@ export function handleEthPurchase(event: EthPurchase): void {
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
     uniswapDayData.txCount = uniswap.txCount
+    uniswapDayData.mostLiquidTokens = []
     uniswapDayData.save()
 
     /*** Create Trade Event ******/
@@ -639,6 +642,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
     uniswapDayData.txCount = uniswap.txCount
+    uniswapDayData.mostLiquidTokens = []
     uniswapDayData.save()
 
     /** Create Liquidity Event */
@@ -830,6 +834,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     uniswapDayData.totalVolumeUSD = uniswap.totalVolumeUSD
     uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
     uniswapDayData.txCount = uniswap.txCount
+    uniswapDayData.mostLiquidTokens = []
     uniswapDayData.save()
 
     /** Create Liquidity Event */
