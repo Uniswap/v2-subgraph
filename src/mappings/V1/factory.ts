@@ -78,7 +78,8 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
   }
 
   // only save for tokens with non null decimals
-  if (asset.decimals !== null) {
+  // TODO: Uncomment for mainnet
+  // if (asset.decimals !== null) {
     // add the exchange for the derived relationship
     const totals = Uniswap.load('1')
     // update totals
@@ -95,7 +96,7 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
     factory.save()
     exchange.save()
     asset.save()
-  }
+  // }
 }
 
 export function handleNewExchange(event: NewExchange): void {
