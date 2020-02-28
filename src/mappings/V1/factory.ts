@@ -70,16 +70,16 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
       asset.isToken = true
       break
     } else {
-      asset.symbol = 'unknown'
-      asset.name = 'unknown'
-      asset.decimals = null
+      // TODO: handle null cases
+      asset.symbol = fetchTokenSymbol(tokenAddress)
+      asset.name = fetchTokenName(tokenAddress)
+      asset.decimals = fetchTokenDecimals(tokenAddress)
       asset.isToken = true
     }
   }
 
   // only save for tokens with non null decimals
-  // TODO: Uncomment for mainnet
-  // if (asset.decimals !== null) {
+  if (asset.decimals !== null) {
     // add the exchange for the derived relationship
     const totals = Uniswap.load('1')
     // update totals
@@ -96,7 +96,7 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
     factory.save()
     exchange.save()
     asset.save()
-  // }
+  }
 }
 
 export function handleNewExchange(event: NewExchange): void {
