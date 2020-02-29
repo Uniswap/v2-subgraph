@@ -10,13 +10,19 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
 
   const tokenAddressStringed = tokenAddress.toHexString()
   const ethStringed = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-  const asset = new Asset(tokenAddressStringed);
-  asset.v1Exchange = exchangeAddress
-  asset.tradeVolume = ZERO_BD
-  asset.tradeVolumeETH = ZERO_BD
-  asset.tradeVolumeUSD = ZERO_BD
-  asset.totalLiquidity = ZERO_BD
-  asset.totalLiquidityETH = ZERO_BD
+  let asset = Asset.load(tokenAddressStringed);
+  if(asset == null){
+    asset = new Asset(tokenAddressStringed)
+    asset.v1Exchange = exchangeAddress
+    asset.tradeVolume = ZERO_BD
+    asset.tradeVolumeETH = ZERO_BD
+    asset.tradeVolumeUSD = ZERO_BD
+    asset.totalLiquidity = ZERO_BD
+    asset.totalLiquidityETH = ZERO_BD
+    asset.derivedETH = ZERO_BD
+    asset.allExchanges = []
+  }
+  asset.allExchanges.push(exchangeAddress)
   let eth = Asset.load(ethStringed)
   if (eth == null) {
     eth = new Asset(ethStringed)
@@ -29,6 +35,7 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
     eth.tradeVolumeUSD = ZERO_BD
     eth.totalLiquidity = ZERO_BD
     eth.totalLiquidityETH = ZERO_BD
+    eth.derivedETH = ZERO_BD
     eth.save()
   } 
   exchange.base = ethStringed;
@@ -70,10 +77,9 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
       asset.isToken = true
       break
     } else {
-      // TODO: handle null cases
-      asset.symbol = fetchTokenSymbol(tokenAddress)
-      asset.name = fetchTokenName(tokenAddress)
-      asset.decimals = fetchTokenDecimals(tokenAddress)
+      asset.symbol = "unknown"
+      asset.name = "unknown"
+      asset.decimals = null
       asset.isToken = true
     }
   }
