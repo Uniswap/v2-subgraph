@@ -127,11 +127,20 @@ type Exchange @entity {
     totalTxsCount: BigInt!                  # Total tx count EVER
 
     # Fields used to help derived relationship
+    # transactions: [Transaction!]
     factory: UniswapFactory! @derivedFrom(field: "exchanges")
     totals: Uniswap! @derivedFrom(field: "exchanges")
     tokenHolders: [UserExchangeData!] @derivedFrom(field: "exchange")
     liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "exchange")
     liquidityTokenTransfers: [LiquidityTokenTransfer!] @derivedFrom(field: "exchange")
+    addLiquidityEvents: [AddLiquidityEvent!] @derivedFrom(field: "exchange")
+    removeLiquidityEvents: [RemoveLiquidityEvent!] @derivedFrom(field: "exchange")
+    tokenPurchaseEvents: [TokenPurchaseEvent!] @derivedFrom(field: "exchange")
+    ethPurchaseEvents: [EthPurchaseEvent!] @derivedFrpm(field: "exchange")
+    mints: [Mint!] @derivedFrom(field: "exchange")
+    burns: [Burn!] @derivedFrom(field: "exchange")
+    swaps: [Swap!] @derivedFrom(field: "exchange")
+    syncs: [Sync!] @derivedFrom(field: "exchange")
 }
 
 type User @entity {

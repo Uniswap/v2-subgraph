@@ -103,7 +103,6 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     // if (!equalToZero(exchange.tradeVolumeTarget)) {
     //   exchange.weightedAvgPrice = exchange.totalValue.div(exchange.tradeVolumeTarget).truncate(18)
     // }
-
     exchange.totalTxsCount = exchange.totalTxsCount.plus(oneBigInt())
 
     /****** Update User ******/
@@ -235,10 +234,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     tokenPurchaseEvent.save()
 
     /****** Update Transaction ******/
-    const txId = event.transaction.hash
-      .toHexString()
-      .concat('-')
-      .concat(event.address.toHexString())
+    const txId = event.transaction.hash.toHexString()
     let transaction = Transaction.load(txId)
     if (transaction == null) {
       transaction = new Transaction(txId)
@@ -459,10 +455,7 @@ export function handleEthPurchase(event: EthPurchase): void {
     ethPurchaseEvent.save()
 
     /****** Update Transaction ******/
-    const txId = event.transaction.hash
-      .toHexString()
-      .concat('-')
-      .concat(event.address.toHexString())
+    const txId = event.transaction.hash.toHexString()
     let transaction = Transaction.load(txId)
     if (transaction == null) {
       transaction = new Transaction(txId)
@@ -660,10 +653,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     addLiquidityEvent.save()
 
     /****** Update Transaction ******/
-    const txId = event.transaction.hash
-      .toHexString()
-      .concat('-')
-      .concat(event.address.toHexString())
+    const txId = event.transaction.hash.toHexString()
     let transaction = Transaction.load(txId)
     if (transaction == null) {
       transaction = new Transaction(txId)
@@ -856,10 +846,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     removeLiquidityEvent.save()
     log.debug("Remove liquidity event saved: {}", [eventID.toString().concat('-rl')])
     /****** Update Transaction ******/
-    const txId = event.transaction.hash
-      .toHexString()
-      .concat('-')
-      .concat(event.address.toHexString())
+    const txId = event.transaction.hash.toHexString()
     let transaction = Transaction.load(txId)
     if (transaction == null) {
       transaction = new Transaction(txId)
