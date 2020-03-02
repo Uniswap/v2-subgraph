@@ -251,8 +251,11 @@ export function handleTransfer(event: Transfer): void {
       }
       let totalV1LiquidityRemoved = BigDecimal.fromString("0")
       let transactionRemoveLiquidityEvents = transaction.removeLiquidityEvents as Array<string>
+      log.debug("Migration: {}", [txn])
       for(let i = 0; i < transactionRemoveLiquidityEvents.length; i++) {
+        log.debug("Migration RL Iter: {}", [i.toString()])
         let removeLiquidityEvent = RemoveLiquidityEvent.load(transactionRemoveLiquidityEvents[i])
+        log.debug("Migration Remove Liquidity - Transaction: {}, Liquidity Id: {}, Iter: {}, UniTokens: {}", [txn, transactionRemoveLiquidityEvents[i], i.toString(), removeLiquidityEvent.uniTokensBurned.toString()])
         totalV1LiquidityRemoved.plus(removeLiquidityEvent.uniTokensBurned)
       }
       let totalV2LiquidityAdded = BigDecimal.fromString("0")
