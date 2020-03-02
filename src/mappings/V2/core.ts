@@ -19,7 +19,14 @@ import {
   RemoveLiquidityEvent,
   LiquidityTokenTransfer
 } from '../../types/schema'
-import { ExchangeV2Contract as ExchangeContract, Mint, Burn, Swap, Transfer, Sync } from '../../types/templates/ExchangeV2Contract/ExchangeV2Contract'
+import { 
+  ExchangeV2Contract as ExchangeContract, 
+  Mint, 
+  Burn, 
+  Swap, 
+  Transfer, 
+  Sync 
+} from '../../types/templates/ExchangeV2Contract/ExchangeV2Contract'
 // import {
 //   updateUniswapHistoricalData,
 //   updateExchangeHistoricalData,

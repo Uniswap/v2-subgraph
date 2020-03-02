@@ -107,8 +107,9 @@ type Exchange @entity {
     baseLiquidity: BigDecimal!              # Equals the base liquidity provided. Will likely be different than baseBalance
     target: Asset!                          # token for V1 Exchanges, token1 for V2 exchanges
     targetBalance: BigDecimal!              # token balance for V1 Exchanges, token1 balance for V2 exchanges
-    targetLiquidity: BigDecimal!            # Equals the target token liquidity provided. Will likely be different thatn targetBalance
+    targetLiquidity: BigDecimal!            # Equals the target token liquidity provided. Will likely be different than targetBalance
     v1Equivalent: Exchange                  # If exchange is v2 exchange, returns the v1 equivalent exchange (if it exists)
+    v2Equivalent: Exchange                  # If exchange is v1 exchange, returns the v2 equivalent exchange (if it exists)
     fee: BigDecimal!                        # Always 0.3% for v1 uniswap
     startTime: Int!                         # Time exchange was created
 

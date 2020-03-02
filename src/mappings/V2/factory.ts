@@ -141,7 +141,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
     // create the Pair
     const exchange = new Exchange(event.params.exchange.toHexString()) as Exchange
     exchange.version = 2
-    // exchange.v1Equivalent = v1Equivalent
+    exchange.v1Equivalent = v1Equivalent
     exchange.fee = ZERO_BD
     exchange.base = token0.id
     exchange.target = token1.id
@@ -180,6 +180,14 @@ export function handleNewExchange(event: ExchangeCreated): void {
     // create the tracked contract based on the template
     ExchangeContract.create(event.params.exchange)
     log.debug("Exchange template created for: {}", [event.params.exchange.toHex()])
+    
+    // update v2 equivalent for v1 exchanges
+    if(v1Equivalent != null) {
+      const v1Exchange = Exchange.load(v1Equivalent)
+      v1Exchange.v2Equivalent = event.params.exchange.toHexString()
+      v1Exchange.save()
+    }
+    
     // save updated values
     token0.save()
     token1.save()

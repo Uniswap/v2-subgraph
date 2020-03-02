@@ -1,5 +1,6 @@
 import { BigInt, BigDecimal, Address, log } from '@graphprotocol/graph-ts'
 import {
+  ExchangeV1Contract as ExchangeContract,
   TokenPurchase,
   EthPurchase,
   AddLiquidity,
@@ -21,6 +22,7 @@ import {
   RemoveLiquidityEvent,
   TokenPurchaseEvent,
   EthPurchaseEvent,
+  LiquidityTokenTransfer,
   UniswapDayData,
   UniswapHistoricalData
 } from '../../types/schema'
@@ -33,9 +35,12 @@ import {
   oneBigInt,
   convertEthToDecimal,
   convertTokenToDecimal,
-  equalToZero
+  createUser,
+  equalToZero,
+  createLiquidityPosition
 } from './helpers'
 
+// TODO: convert to use createUser for all instances
 function createUserDataEntity(id: string, user: Address, exchange: Address): void {
   const userExchangeData = new UserExchangeData(id)
 
@@ -913,9 +918,32 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 }
 
 export function handleTransfer(event: Transfer): void {
-  const exchangeID = event.address.toHex()
-  const exchange = Exchange.load(exchangeID)
+  const exchangeId = event.address.toHex()
+  const txn = event.transaction.hash.toHexString()
+  const exchange = Exchange.load(exchangeId)
+  const from = event.params._from
+  createUser(from);
+  const to = event.params._to
+  createUser(to);
   if (exchange !== null) {
+    const transferId = exchangeId + "-" + txn + "-" + from.toHex() + "-" + to.toHex()
+    const liquidityTokenTransfer = new LiquidityTokenTransfer(transferId);
+    liquidityTokenTransfer.exchange = exchangeId;
+    liquidityTokenTransfer.fromUser = from.toHex();
+    liquidityTokenTransfer.toUser = to.toHex();
+    liquidityTokenTransfer.amount = event.params._value;
+    liquidityTokenTransfer.transferType = "transfer"
+    liquidityTokenTransfer.timestamp = event.block.timestamp;
+    liquidityTokenTransfer.transaction = txn;
+    const exchangeContract = ExchangeContract.bind(event.address);
+    liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply();
+    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
+    const fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
+    const toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
+    // TODO: Get token reserves and save to the liquidity event
+    // let token0Reserve, token1Reserve, blockTimestampLast = exchangeContract.getReserves();
+    liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = fromUserLiquidityTokenBalanceAfter;
+    liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = toUserLiquidityTokenBalanceAfter;
     const userToID = exchange.target
       .concat('-')
       .concat(event.params._to.toHex())
@@ -924,9 +952,15 @@ export function handleTransfer(event: Transfer): void {
       .concat(event.params._from.toHex())
     const uniTokens = convertEthToDecimal(event.params._value)
 
+    let isMint = false
+    let isBurn = false
     // Handle Minting Case
     if (event.params._from.toHex() == '0x0000000000000000000000000000000000000000') {
-      exchange.totalUniToken = exchange.totalUniToken.plus(uniTokens)
+      isMint = true
+      liquidityTokenTransfer.transferType = "mint"
+      liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(event.params._value);
+      // exchange.totalUniToken = exchange.totalUniToken.plus(uniTokens)
+      exchange.totalUniToken = convertEthToDecimal(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter)
       let userTo = UserExchangeData.load(userToID)
       if (userTo == null) {
         createUserDataEntity(userToID, event.params._to, event.address)
@@ -936,9 +970,27 @@ export function handleTransfer(event: Transfer): void {
       exchange.save()
       userTo.save()
 
-      // Handle Burning Case
-    } else if (event.params._to.toHex() == '0x0000000000000000000000000000000000000000') {
-      exchange.totalUniToken = exchange.totalUniToken.minus(uniTokens)
+      
+    } else {
+      const fromUserLiquidityPosition = createLiquidityPosition(event.address, from);
+      fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityTokenBalanceAfter;
+      fromUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
+      if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+        fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
+      } else {
+        fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(fromUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+      }
+      fromUserLiquidityPosition.save();
+      liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = fromUserLiquidityTokenBalanceAfter.plus(event.params._value);
+    } 
+    
+    // Handle Burning Case
+    if (event.params._to.toHex() == '0x0000000000000000000000000000000000000000') {
+      isBurn = true
+      // exchange.totalUniToken = exchange.totalUniToken.minus(uniTokens)
+      liquidityTokenTransfer.transferType = "burn"
+      liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(event.params._value);
+      exchange.totalUniToken = convertEthToDecimal(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter)
       let userFrom = UserExchangeData.load(userFromID)
       if (userFrom == null) {
         createUserDataEntity(userFromID, event.params._from, event.address)
@@ -949,8 +1001,20 @@ export function handleTransfer(event: Transfer): void {
       exchange.save()
       userFrom.save()
 
-      // Handle normal transfer cases
     } else {
+      const toUserLiquidityPosition = createLiquidityPosition(event.address, from);
+      toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityTokenBalanceAfter;
+      toUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
+      if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+        toUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
+      } else {
+        toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(toUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+      }
+      toUserLiquidityPosition.save();
+      liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = toUserLiquidityTokenBalanceAfter.minus(event.params._value);
+    }
+    // Handle normal transfer cases
+    if(!isMint && !isBurn) {
       if (equalToZero(exchange.totalUniToken)) {
         log.error('exchange.totalUniToken is zero, ignoring transfer', [])
         return
@@ -981,17 +1045,21 @@ export function handleTransfer(event: Transfer): void {
       userTo.save()
       userFrom.save()
     }
-
-    /****** Create User  Entities ******/
-    let userFromEntity = User.load(event.params._from.toHex())
-    if (userFromEntity == null) {
-      userFromEntity = new User(event.params._from.toHex())
-      userFromEntity.save()
+    if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
+      liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
+      liquidityTokenTransfer.toUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
+    } else {
+      liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+      liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
     }
-    let userToEntity = User.load(event.params._to.toHex())
-    if (userToEntity == null) {
-      userToEntity = new User(event.params._to.toHex())
-      userToEntity.save()
+  
+    if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+      liquidityTokenTransfer.fromUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
+      liquidityTokenTransfer.toUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
+    } else {
+      liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+      liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
     }
+    liquidityTokenTransfer.save();
   }
 }
