@@ -960,7 +960,7 @@ export function handleTransfer(event: Transfer): void {
       liquidityTokenTransfer.transferType = "mint"
       liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(event.params._value);
       // exchange.totalUniToken = exchange.totalUniToken.plus(uniTokens)
-      exchange.totalUniToken = convertEthToDecimal(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter)
+      exchange.totalUniToken = convertEthToDecimal(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter as BigInt)
       let userTo = UserExchangeData.load(userToID)
       if (userTo == null) {
         createUserDataEntity(userToID, event.params._to, event.address)
@@ -990,7 +990,7 @@ export function handleTransfer(event: Transfer): void {
       // exchange.totalUniToken = exchange.totalUniToken.minus(uniTokens)
       liquidityTokenTransfer.transferType = "burn"
       liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(event.params._value);
-      exchange.totalUniToken = convertEthToDecimal(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter)
+      exchange.totalUniToken = convertEthToDecimal(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter as BigInt)
       let userFrom = UserExchangeData.load(userFromID)
       if (userFrom == null) {
         createUserDataEntity(userFromID, event.params._from, event.address)
