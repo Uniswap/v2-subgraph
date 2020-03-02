@@ -8,6 +8,20 @@ export class AsExchange {
 
 export const hardcodedExchanges: Array<AsExchange> = [
   {
+    symbol: "IAN",
+    name: "IanCoin",
+    tokenAddress: "0xd58ed19c0a8430b81a655e6c51a0165432f8162c",
+    tokenDecimals: 18,
+    exchangeAddress: "0xeb9c8cda45b97bb7a94f0a3ae19a83074ae3be12"
+  },
+  {
+    symbol: "HALFETH",
+    name: "Half Eth Per Token Coin",
+    tokenAddress: "0x0a2c9aeb943d4be25c586ca1a3cc60df908db531",
+    tokenDecimals: 18,
+    exchangeAddress: "0x70b4aa67ffa8501105a85547a3074307762907ec"
+  },
+  {
     symbol: 'OCEAN',
     name: 'OceanToken',
     tokenAddress: '0xb9e52bc9c8f39ae354154130d861cba010e7cd7f',
@@ -745,9 +759,9 @@ export const hardcodedExchanges: Array<AsExchange> = [
   {
     symbol: 'DAI',
     name: 'Dai Stablecoin',
-    tokenAddress: '0x2448ee2641d78cc42d7ad76498917359d961a783',
+    tokenAddress: '0xc7ad46e0b8a400bb3c915120d284aafba8fc4735',
     tokenDecimals: 18,
-    exchangeAddress: '0x77db9c915809e7be439d2ab21032b1b8b58f6891'
+    exchangeAddress: '0x9c92a4582ad8e3d731a73b47b2c6e32cc0fe9cd9'
   },
   {
     symbol: 'GNO',

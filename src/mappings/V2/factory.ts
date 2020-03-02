@@ -14,7 +14,7 @@ export function handleNewExchange(event: ExchangeCreated): void {
   log.debug("New Exchange: {}", [event.params.exchange.toHex()])
   //setup factory if needed
   let totals = Uniswap.load('1')
-  // let v1Equivalent: string = null
+  let v1Equivalent: string = null
 
   // if no totals entity yet, set up blank initial
   if (totals == null) {
@@ -116,15 +116,15 @@ export function handleNewExchange(event: ExchangeCreated): void {
   const wethAddress = Address.fromString('0xc778417E063141139Fce010982780140Aa0cD5Ab')
   if (event.params.token0 == wethAddress) {
     token1.wethExchange = event.params.exchange.toHex()
-    // if(token1.v1Exchange != null) {
-    //   v1Equivalent = token1.v1Exchange
-    // }
+    if(token1.v1Exchange != null) {
+      v1Equivalent = token1.v1Exchange
+    }
   }
   if (event.params.token1 == wethAddress) {
     token0.wethExchange = event.params.exchange.toHex()
-    // if(token0.v1Exchange != null) {
-    //   v1Equivalent = token1.v1Exchange
-    // }
+    if(token0.v1Exchange != null) {
+      v1Equivalent = token1.v1Exchange
+    }
   }
 
   const newAllPairsArray0 = token0.allExchanges
