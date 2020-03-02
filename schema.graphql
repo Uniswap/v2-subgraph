@@ -137,10 +137,10 @@ type Exchange @entity {
     removeLiquidityEvents: [RemoveLiquidityEvent!] @derivedFrom(field: "exchange")
     tokenPurchaseEvents: [TokenPurchaseEvent!] @derivedFrom(field: "exchange")
     ethPurchaseEvents: [EthPurchaseEvent!] @derivedFrpm(field: "exchange")
-    mints: [Mint!] @derivedFrom(field: "exchange")
-    burns: [Burn!] @derivedFrom(field: "exchange")
-    swaps: [Swap!] @derivedFrom(field: "exchange")
-    syncs: [Sync!] @derivedFrom(field: "exchange")
+    mints: [MintEvent!] @derivedFrom(field: "exchange")
+    burns: [BurnEvent!] @derivedFrom(field: "exchange")
+    swaps: [SwapEvent!] @derivedFrom(field: "exchange")
+    syncs: [SyncEvent!] @derivedFrom(field: "exchange")
 }
 
 type User @entity {
@@ -191,10 +191,8 @@ type LiquidityTokenTransfer @entity {
 type Migration @entity {
     id: ID!
     transaction: Transaction!
-    totalV1LiquidityRemovedETH: BigInt
-    totalV1LiquidityRemovedToken: BigInt
-    totalV2LiquidityAddedBase: BigInt
-    totalV2LiquidityAddedTarget: BigInt
+    totalV1LiquidityRemoved: BigDecimal
+    totalV2LiquidityAdded: BigDecimal
 }
 
 # trading and liquidity data around a user and their activity on a given exchange 
@@ -223,9 +221,9 @@ enum EventType {
     RemoveLiquidity,
     TokenPurchase,
     EthPurchase,
-    mint,
-    burn,
-    swap
+    MintEvent,
+    BurnEvent,
+    SwapEvent
 }
 
 type Transaction @entity {
@@ -236,10 +234,10 @@ type Transaction @entity {
     removeLiquidityEvents: [RemoveLiquidityEvent!]
     tokenPurchaseEvents: [TokenPurchaseEvent!]
     ethPurchaseEvents: [EthPurchaseEvent!]
-    mints: [Mint]!
-    burns: [Burn]! 
-    swaps: [Swap]!
-    syncs: [Sync]!
+    mints: [MintEvent]!
+    burns: [BurnEvent]! 
+    swaps: [SwapEvent]!
+    syncs: [SyncEvent]!
     block: Int!
     timestamp: Int!
     user: User!
@@ -299,7 +297,7 @@ interface exchangeEvent {
   id: ID!
 }
 
-type Mint implements exchangeEvent @entity{
+type MintEvent implements exchangeEvent @entity{
   id: ID!
   timestamp: Int!
   exchange: Exchange
@@ -320,7 +318,7 @@ type Mint implements exchangeEvent @entity{
   sender: Bytes 
 }
 
-type Burn @entity{
+type BurnEvent @entity{
   id: ID!
   exchange: Exchange
   timestamp: Int!
@@ -341,7 +339,7 @@ type Burn @entity{
   sender: Bytes 
 }
 
-type Swap @entity{
+type SwapEvent @entity{
   id: ID!
   exchange: Exchange
   timestamp: Int!
@@ -357,7 +355,7 @@ type Swap @entity{
   sender: Bytes
 }
 
-type Sync @entity{
+type SyncEvent @entity{
   id: ID!
   tx: Transaction!  @derivedFrom(field: "syncs")
   exchange: Exchange

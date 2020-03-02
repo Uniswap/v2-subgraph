@@ -10,12 +10,13 @@ import {
   // UniswapDayData,
   // ExchangeDayData,
   // TokenDayData,
-  Mint as MintEvent,
+  MintEvent,
   Reserve,
-  Sync as SyncEvent,
-  Burn as BurnEvent,
-  Swap as SwapEvent,
+  SyncEvent,
+  BurnEvent,
+  SwapEvent,
   Bundle,
+  RemoveLiquidityEvent,
   LiquidityTokenTransfer
 } from '../../types/schema'
 import { ExchangeV2Contract as ExchangeContract, Mint, Burn, Swap, Transfer, Sync } from '../../types/templates/ExchangeV2Contract/ExchangeV2Contract'
@@ -244,8 +245,24 @@ export function handleTransfer(event: Transfer): void {
     }
     if(transaction.removeLiquidityEvents.length > 0) {
       transaction.isMigration = true
-      const migrationId = txn + "-" + event.logIndex.toString()
-      const migration = new Migration(migrationId)
+      let migration = Migration.load(txn)
+      if(migration == null) {
+        migration = new Migration(txn)
+      }
+      let totalV1LiquidityRemoved = BigDecimal.fromString("0")
+      let transactionRemoveLiquidityEvents = transaction.removeLiquidityEvents as Array<string>
+      for(let i = 0; i < transactionRemoveLiquidityEvents.length; i++) {
+        let removeLiquidityEvent = RemoveLiquidityEvent.load(transactionRemoveLiquidityEvents[i])
+        totalV1LiquidityRemoved.plus(removeLiquidityEvent.uniTokensBurned)
+      }
+      let totalV2LiquidityAdded = BigDecimal.fromString("0")
+      let transactionMints = transaction.mints as Array<string>
+      for(let i = 0; i < transactionMints.length; i++) {
+        let mintEvent = MintEvent.load(transactionMints[i])
+        totalV2LiquidityAdded.plus(mintEvent.liquidity)
+      }
+      migration.totalV1LiquidityRemoved = totalV1LiquidityRemoved
+      migration.totalV2LiquidityAdded = totalV2LiquidityAdded
       migration.transaction = txn
       migration.save()
     }
