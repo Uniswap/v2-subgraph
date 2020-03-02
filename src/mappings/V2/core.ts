@@ -244,7 +244,7 @@ export function handleTransfer(event: Transfer): void {
     }
     if(transaction.removeLiquidityEvents.length > 0) {
       transaction.isMigration = true
-      const migrationId = txn + "-" + event.logIndex
+      const migrationId = txn + "-" + event.logIndex.toString()
       const migration = new Migration(migrationId)
       migration.transaction = txn
       migration.save()
