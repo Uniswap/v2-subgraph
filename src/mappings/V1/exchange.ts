@@ -98,7 +98,9 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     }
 
     if (!equalToZero(exchange.targetPrice)) {
-      exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.targetPrice)).truncate(18)
+      exchange.combinedBalanceETH = exchange.baseBalance
+        .plus(exchange.targetBalance.div(exchange.targetPrice))
+        .truncate(18)
     }
 
     exchange.tradeVolumeTarget = exchange.tradeVolumeTarget.plus(tokenAmount)
@@ -119,9 +121,7 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     }
 
     /****** Update UserExchangeData ******/
-    const userExchangeID = exchange.target
-      .concat('-')
-      .concat(event.params.buyer.toHex())
+    const userExchangeID = exchange.target.concat('-').concat(event.params.buyer.toHex())
     let userExchangeData = UserExchangeData.load(userExchangeID)
 
     // if no userExchangeData yet create new one
@@ -247,14 +247,11 @@ export function handleTokenPurchase(event: TokenPurchase): void {
     const tokenPurchaseEvents = transaction.tokenPurchaseEvents || []
     tokenPurchaseEvents.push(tokenPurchaseEvent.id)
     transaction.tokenPurchaseEvents = tokenPurchaseEvents
-    transaction.block = event.block.number.toI32()
-    transaction.timestamp = event.block.timestamp.toI32()
-    transaction.user = event.params.buyer.toHex()
-    transaction.fee = fee
+    transaction.blockNumber = event.block.number
+    transaction.timestamp = event.block.timestamp
     transaction.mints = []
     transaction.burns = []
     transaction.swaps = []
-    transaction.syncs = []
     transaction.save()
 
     /************************************
@@ -332,7 +329,9 @@ export function handleEthPurchase(event: EthPurchase): void {
     } else {
       exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
       if (!equalToZero(exchange.targetPrice)) {
-        exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.targetPrice)).truncate(18)
+        exchange.combinedBalanceETH = exchange.baseBalance
+          .plus(exchange.targetBalance.div(exchange.targetPrice))
+          .truncate(18)
       }
     }
 
@@ -354,9 +353,7 @@ export function handleEthPurchase(event: EthPurchase): void {
     }
 
     /****** Update UserExchangeData ******/
-    const userExchangeID = exchange.target
-      .concat('-')
-      .concat(event.params.buyer.toHex())
+    const userExchangeID = exchange.target.concat('-').concat(event.params.buyer.toHex())
     let userExchangeData = UserExchangeData.load(userExchangeID)
     if (userExchangeData == null) {
       createUserDataEntity(userExchangeID, event.params.buyer, event.address)
@@ -468,14 +465,11 @@ export function handleEthPurchase(event: EthPurchase): void {
     const ethPurchaseEvents = transaction.ethPurchaseEvents || []
     ethPurchaseEvents.push(ethPurchaseEvent.id)
     transaction.ethPurchaseEvents = ethPurchaseEvents
-    transaction.block = event.block.number.toI32()
-    transaction.timestamp = event.block.timestamp.toI32()
-    transaction.user = event.params.buyer.toHex()
-    transaction.fee = fee
+    transaction.blockNumber = event.block.number
+    transaction.timestamp = event.block.timestamp
     transaction.mints = []
     transaction.burns = []
     transaction.swaps = []
-    transaction.syncs = []
     transaction.save()
 
     /************************************
@@ -554,7 +548,9 @@ export function handleAddLiquidity(event: AddLiquidity): void {
       exchange.targetPrice = exchange.targetBalance.div(exchange.baseBalance).truncate(18)
     }
     if (!equalToZero(exchange.targetPrice)) {
-      exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.targetPrice)).truncate(18)
+      exchange.combinedBalanceETH = exchange.baseBalance
+        .plus(exchange.targetBalance.div(exchange.targetPrice))
+        .truncate(18)
     }
 
     /****** Update User ******/
@@ -566,9 +562,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     }
 
     /****** Update UserExchangeData ******/
-    const userExchangeID = exchange.target
-      .concat('-')
-      .concat(event.params.provider.toHexString())
+    const userExchangeID = exchange.target.concat('-').concat(event.params.provider.toHexString())
     let userExchangeData = UserExchangeData.load(userExchangeID)
     if (userExchangeData == null) {
       createUserDataEntity(userExchangeID, event.params.provider, event.address)
@@ -666,14 +660,11 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     const addLiquidityEvents = transaction.addLiquidityEvents || []
     addLiquidityEvents.push(addLiquidityEvent.id)
     transaction.addLiquidityEvents = addLiquidityEvents
-    transaction.block = event.block.number.toI32()
-    transaction.timestamp = event.block.timestamp.toI32()
-    transaction.user = event.params.provider.toHex()
-    transaction.fee = ZERO_BD
+    transaction.blockNumber = event.block.number
+    transaction.timestamp = event.block.timestamp
     transaction.mints = []
     transaction.burns = []
     transaction.swaps = []
-    transaction.syncs = []
     transaction.save()
 
     /************************************
@@ -726,7 +717,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
 
 // Note - function removeLiquidity() will emit events log.AddLiquidity and log.Transfer back to back
 export function handleRemoveLiquidity(event: RemoveLiquidity): void {
-  log.debug("Remove liquidity event triggered - transaction: {}", [event.transaction.hash.toHex()])
+  log.debug('Remove liquidity event triggered - transaction: {}', [event.transaction.hash.toHex()])
   /****** Update Exchange ******/
   const exchangeID = event.address.toHex()
   const exchange = Exchange.load(exchangeID)
@@ -755,13 +746,13 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
       if (equalToZero(exchange.targetPrice)) {
         exchange.combinedBalanceETH = exchange.baseBalance
       } else {
-        exchange.combinedBalanceETH = exchange.baseBalance.plus(exchange.targetBalance.div(exchange.targetPrice)).truncate(18)
+        exchange.combinedBalanceETH = exchange.baseBalance
+          .plus(exchange.targetBalance.div(exchange.targetPrice))
+          .truncate(18)
       }
     }
     /****** Update UserExchangeData ******/
-    const userExchangeID = exchange.target
-      .concat('-')
-      .concat(event.params.provider.toHex())
+    const userExchangeID = exchange.target.concat('-').concat(event.params.provider.toHex())
     let userExchangeData = UserExchangeData.load(userExchangeID)
     if (userExchangeData == null) {
       createUserDataEntity(userExchangeID, event.params.provider, event.address)
@@ -834,8 +825,8 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     uniswapDayData.save()
 
     /** Create Liquidity Event */
-    const eventID = event.transaction.hash.toHex() + "-" + event.transactionLogIndex.toString()
-    log.debug("RL eventID: {}", [eventID])
+    const eventID = event.transaction.hash.toHex() + '-' + event.transactionLogIndex.toString()
+    log.debug('RL eventID: {}', [eventID])
     const removeLiquidityEvent = new RemoveLiquidityEvent(eventID.concat('-rl'))
     removeLiquidityEvent.exchange = event.address.toHex()
     removeLiquidityEvent.ethAmount = ethAmount
@@ -849,7 +840,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     removeLiquidityEvent.uniTokensBurned = uniBurned
 
     removeLiquidityEvent.save()
-    log.debug("Remove liquidity event saved: {}", [eventID.toString().concat('-rl')])
+    log.debug('Remove liquidity event saved: {}', [eventID.toString().concat('-rl')])
     /****** Update Transaction ******/
     const txId = event.transaction.hash.toHexString()
     let transaction = Transaction.load(txId)
@@ -859,14 +850,11 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     const removeLiquidityEvents = transaction.removeLiquidityEvents || []
     removeLiquidityEvents.push(removeLiquidityEvent.id)
     transaction.removeLiquidityEvents = removeLiquidityEvents
-    transaction.block = event.block.number.toI32()
-    transaction.timestamp = event.block.timestamp.toI32()
-    transaction.user = event.params.provider.toHex()
-    transaction.fee = ZERO_BD
+    transaction.blockNumber = event.block.number
+    transaction.timestamp = event.block.timestamp
     transaction.mints = []
     transaction.burns = []
     transaction.swaps = []
-    transaction.syncs = []
     transaction.save()
 
     /************************************
@@ -922,34 +910,30 @@ export function handleTransfer(event: Transfer): void {
   const txn = event.transaction.hash.toHexString()
   const exchange = Exchange.load(exchangeId)
   const from = event.params._from
-  createUser(from);
+  createUser(from)
   const to = event.params._to
-  createUser(to);
+  createUser(to)
   if (exchange !== null) {
-    const transferId = exchangeId + "-" + txn + "-" + from.toHex() + "-" + to.toHex()
-    const liquidityTokenTransfer = new LiquidityTokenTransfer(transferId);
-    liquidityTokenTransfer.exchange = exchangeId;
-    liquidityTokenTransfer.fromUser = from.toHex();
-    liquidityTokenTransfer.toUser = to.toHex();
-    liquidityTokenTransfer.amount = event.params._value;
-    liquidityTokenTransfer.transferType = "transfer"
-    liquidityTokenTransfer.timestamp = event.block.timestamp;
-    liquidityTokenTransfer.transaction = txn;
-    const exchangeContract = ExchangeContract.bind(event.address);
-    liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply();
-    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
-    const fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from);
-    const toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to);
+    const transferId = exchangeId + '-' + txn + '-' + from.toHex() + '-' + to.toHex()
+    const liquidityTokenTransfer = new LiquidityTokenTransfer(transferId)
+    liquidityTokenTransfer.exchange = exchangeId
+    liquidityTokenTransfer.fromUser = from.toHex()
+    liquidityTokenTransfer.toUser = to.toHex()
+    liquidityTokenTransfer.amount = event.params._value
+    liquidityTokenTransfer.transferType = 'transfer'
+    liquidityTokenTransfer.timestamp = event.block.timestamp
+    liquidityTokenTransfer.transaction = txn
+    const exchangeContract = ExchangeContract.bind(event.address)
+    liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply()
+    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter
+    const fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from)
+    const toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to)
     // TODO: Get token reserves and save to the liquidity event
     // let token0Reserve, token1Reserve, blockTimestampLast = exchangeContract.getReserves();
-    liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = fromUserLiquidityTokenBalanceAfter;
-    liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = toUserLiquidityTokenBalanceAfter;
-    const userToID = exchange.target
-      .concat('-')
-      .concat(event.params._to.toHex())
-    const userFromID = exchange.target
-      .concat('-')
-      .concat(event.params._from.toHex())
+    liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = fromUserLiquidityTokenBalanceAfter
+    liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = toUserLiquidityTokenBalanceAfter
+    const userToID = exchange.target.concat('-').concat(event.params._to.toHex())
+    const userFromID = exchange.target.concat('-').concat(event.params._from.toHex())
     const uniTokens = convertEthToDecimal(event.params._value)
 
     let isMint = false
@@ -957,8 +941,10 @@ export function handleTransfer(event: Transfer): void {
     // Handle Minting Case
     if (event.params._from.toHex() == '0x0000000000000000000000000000000000000000') {
       isMint = true
-      liquidityTokenTransfer.transferType = "mint"
-      liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(event.params._value);
+      liquidityTokenTransfer.transferType = 'mint'
+      liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(
+        event.params._value
+      )
       // exchange.totalUniToken = exchange.totalUniToken.plus(uniTokens)
       exchange.totalUniToken = convertEthToDecimal(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter as BigInt)
       let userTo = UserExchangeData.load(userToID)
@@ -969,27 +955,31 @@ export function handleTransfer(event: Transfer): void {
       userTo.uniTokenBalance = userTo.uniTokenBalance.plus(uniTokens)
       exchange.save()
       userTo.save()
-
-      
     } else {
-      const fromUserLiquidityPosition = createLiquidityPosition(event.address, from);
-      fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityTokenBalanceAfter;
-      fromUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
-      if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
-        fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
+      const fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
+      fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityTokenBalanceAfter
+      fromUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter
+      if (liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+        fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString('0.0')
       } else {
-        fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(fromUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+        fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance
+          .toBigDecimal()
+          .div(fromUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
       }
-      fromUserLiquidityPosition.save();
-      liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = fromUserLiquidityTokenBalanceAfter.plus(event.params._value);
-    } 
-    
+      fromUserLiquidityPosition.save()
+      liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = fromUserLiquidityTokenBalanceAfter.plus(
+        event.params._value
+      )
+    }
+
     // Handle Burning Case
     if (event.params._to.toHex() == '0x0000000000000000000000000000000000000000') {
       isBurn = true
       // exchange.totalUniToken = exchange.totalUniToken.minus(uniTokens)
-      liquidityTokenTransfer.transferType = "burn"
-      liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(event.params._value);
+      liquidityTokenTransfer.transferType = 'burn'
+      liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(
+        event.params._value
+      )
       exchange.totalUniToken = convertEthToDecimal(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter as BigInt)
       let userFrom = UserExchangeData.load(userFromID)
       if (userFrom == null) {
@@ -1000,21 +990,24 @@ export function handleTransfer(event: Transfer): void {
 
       exchange.save()
       userFrom.save()
-
     } else {
-      const toUserLiquidityPosition = createLiquidityPosition(event.address, from);
-      toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityTokenBalanceAfter;
-      toUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter;
-      if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
-        toUserLiquidityPosition.poolOwnership = BigDecimal.fromString("0.0")
+      const toUserLiquidityPosition = createLiquidityPosition(event.address, from)
+      toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityTokenBalanceAfter
+      toUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter
+      if (liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+        toUserLiquidityPosition.poolOwnership = BigDecimal.fromString('0.0')
       } else {
-        toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance.toBigDecimal().div(toUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+        toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance
+          .toBigDecimal()
+          .div(toUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
       }
-      toUserLiquidityPosition.save();
-      liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = toUserLiquidityTokenBalanceAfter.minus(event.params._value);
+      toUserLiquidityPosition.save()
+      liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = toUserLiquidityTokenBalanceAfter.minus(
+        event.params._value
+      )
     }
     // Handle normal transfer cases
-    if(!isMint && !isBurn) {
+    if (!isMint && !isBurn) {
       if (equalToZero(exchange.totalUniToken)) {
         log.error('exchange.totalUniToken is zero, ignoring transfer', [])
         return
@@ -1045,21 +1038,29 @@ export function handleTransfer(event: Transfer): void {
       userTo.save()
       userFrom.save()
     }
-    if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
-      liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
-      liquidityTokenTransfer.toUserPoolOwnershipBefore = BigDecimal.fromString("0.0");
+    if (liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
+      liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString('0.0')
+      liquidityTokenTransfer.toUserPoolOwnershipBefore = BigDecimal.fromString('0.0')
     } else {
-      liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
-      liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+      liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore
+        .toBigDecimal()
+        .div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
+      liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore
+        .toBigDecimal()
+        .div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
     }
-  
-    if(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
-      liquidityTokenTransfer.fromUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
-      liquidityTokenTransfer.toUserPoolOwnershipAfter = BigDecimal.fromString("0.0");
+
+    if (liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+      liquidityTokenTransfer.fromUserPoolOwnershipAfter = BigDecimal.fromString('0.0')
+      liquidityTokenTransfer.toUserPoolOwnershipAfter = BigDecimal.fromString('0.0')
     } else {
-      liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
-      liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter.toBigDecimal().div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+      liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter
+        .toBigDecimal()
+        .div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
+      liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter
+        .toBigDecimal()
+        .div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
     }
-    liquidityTokenTransfer.save();
+    liquidityTokenTransfer.save()
   }
 }

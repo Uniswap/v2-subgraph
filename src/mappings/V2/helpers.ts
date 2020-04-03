@@ -7,6 +7,7 @@ import { Exchange, User, LiquidityPosition, LiquidityTokenTransfer } from '../..
 /************************************
  ********** Helpers ***********
  ************************************/
+export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 
 export function exponentToBigDecimal(decimals: i32): BigDecimal {
   let bd = BigDecimal.fromString('1')
@@ -108,7 +109,10 @@ export function fetchTokenDecimals(tokenAddress: Address): i32 {
 }
 
 export function createLiquidityPosition(exchange: Address, user: Address): LiquidityPosition {
-  const id = exchange.toHexString().concat('-').concat(user.toHexString())
+  const id = exchange
+    .toHexString()
+    .concat('-')
+    .concat(user.toHexString())
   let liquidityTokenBalance = LiquidityPosition.load(id)
   if (liquidityTokenBalance === null) {
     liquidityTokenBalance = new LiquidityPosition(id)
@@ -117,7 +121,7 @@ export function createLiquidityPosition(exchange: Address, user: Address): Liqui
     liquidityTokenBalance.user = user.toHexString()
     liquidityTokenBalance.save()
   }
-  if (liquidityTokenBalance == null) log.error("LiquidityTokenBalance is null", [id])
+  if (liquidityTokenBalance == null) log.error('LiquidityTokenBalance is null', [id])
   return liquidityTokenBalance as LiquidityPosition
 }
 

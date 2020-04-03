@@ -3,15 +3,15 @@ import { NewExchange } from '../../types/FactoryV1Contract/FactoryV1Contract'
 import { Uniswap, UniswapFactory, Bundle, Exchange, Asset } from '../../types/schema'
 import { ExchangeV1Contract as ExchangeContract } from '../../types/templates'
 import { hardcodedExchanges } from './hardcodedExchanges'
-import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals, oneBigInt } from './helpers'
+import { ZERO_BD, ZERO_BI, oneBigInt } from './helpers'
 
 function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timestamp: i32): void {
   const exchange = new Exchange(exchangeAddress) as Exchange
 
   const tokenAddressStringed = tokenAddress.toHexString()
-  const ethStringed = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-  let asset = Asset.load(tokenAddressStringed);
-  if(asset == null){
+  const ethStringed = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+  let asset = Asset.load(tokenAddressStringed)
+  if (asset == null) {
     asset = new Asset(tokenAddressStringed)
     asset.v1Exchange = exchangeAddress
     asset.tradeVolume = ZERO_BD
@@ -27,8 +27,8 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
   if (eth == null) {
     eth = new Asset(ethStringed)
     eth.isToken = false
-    eth.name = "ETH"
-    eth.symbol = "ETH"
+    eth.name = 'ETH'
+    eth.symbol = 'ETH'
     eth.decimals = 18
     eth.tradeVolume = ZERO_BD
     eth.tradeVolumeETH = ZERO_BD
@@ -37,9 +37,9 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
     eth.totalLiquidityETH = ZERO_BD
     eth.derivedETH = ZERO_BD
     eth.save()
-  } 
-  exchange.base = ethStringed;
-  exchange.target = tokenAddressStringed;
+  }
+  exchange.base = ethStringed
+  exchange.target = tokenAddressStringed
 
   exchange.fee = BigDecimal.fromString('0.003')
   exchange.version = 1
@@ -77,8 +77,8 @@ function hardcodeExchange(exchangeAddress: string, tokenAddress: Address, timest
       asset.isToken = true
       break
     } else {
-      asset.symbol = "unknown"
-      asset.name = "unknown"
+      asset.symbol = 'unknown'
+      asset.name = 'unknown'
       asset.decimals = null
       asset.isToken = true
     }
@@ -124,7 +124,6 @@ export function handleNewExchange(event: NewExchange): void {
     totals.totalMints = ZERO_BI
     totals.totalBurns = ZERO_BI
     totals.totalSwaps = ZERO_BI
-    totals.totalSyncs = ZERO_BI
     totals.exchangeHistoryEntityCount = ZERO_BI
     totals.uniswapHistoryEntityCount = ZERO_BI
     totals.tokenHistoryEntityCount = ZERO_BI
@@ -139,13 +138,12 @@ export function handleNewExchange(event: NewExchange): void {
   totals.totalExchangeCount = totals.totalExchangeCount + 1
   totals.save()
 
-
   let factory = UniswapFactory.load('1')
 
   // if no factory yet, set up blank initial
   if (factory == null) {
     factory = new UniswapFactory('1')
-    factory.address = event.address;
+    factory.address = event.address
     factory.version = 1
     factory.exchangeCount = 0
     factory.exchanges = []
@@ -156,10 +154,9 @@ export function handleNewExchange(event: NewExchange): void {
     factory.mintCount = ZERO_BI
     factory.burnCount = ZERO_BI
     factory.swapCount = ZERO_BI
-    factory.syncCount = ZERO_BI
     factory.exchangeHistoryEntityCount = ZERO_BI
     factory.uniswapHistoryEntityCount = ZERO_BI
-    factory.tokenHistoryEntityCount = ZERO_BI   
+    factory.tokenHistoryEntityCount = ZERO_BI
     factory.reserveEntityCount = ZERO_BI
     factory.totalTokenBuys = ZERO_BI
     factory.totalTokenSells = ZERO_BI

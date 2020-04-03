@@ -19,7 +19,6 @@ type Uniswap @entity {
     totalSwaps: BigInt!                
     totalMints: BigInt!
     totalBurns: BigInt!           
-    totalSyncs: BigInt!   
 
     exchangeHistoryEntityCount: BigInt!     # Count of all historical entities for exchanges - used for unique ids
     uniswapHistoryEntityCount: BigInt!      # Count of all historical entities for Uniswap - used for unique ids
@@ -63,7 +62,6 @@ type UniswapFactory @entity {
   mintCount: BigInt! 
   burnCount: BigInt!
   swapCount: BigInt!
-  syncCount: BigInt!
   txCount: BigInt!     
 
   # as reference for new day datas 
@@ -141,7 +139,6 @@ type Exchange @entity {
     mints: [MintEvent!] @derivedFrom(field: "exchange")
     burns: [BurnEvent!] @derivedFrom(field: "exchange")
     swaps: [SwapEvent!] @derivedFrom(field: "exchange")
-    syncs: [SyncEvent!] @derivedFrom(field: "exchange")
 }
 
 type User @entity {
@@ -228,21 +225,23 @@ enum EventType {
 }
 
 type Transaction @entity {
-    id: ID!  # txn  hash concatenated with exchange - need this for token to token swaps
+    id: ID!  # txn hash 
+    blockNumber: BigInt!
+    timestamp: BigInt! 
+    mints: [MintEvent]!
+    burns: [BurnEvent]! 
+    swaps: [SwapEvent]!
+
+    # migration tracking 
     isMigration: Boolean
     migration: Migration
+
+    # v1
     addLiquidityEvents: [AddLiquidityEvent!]
     removeLiquidityEvents: [RemoveLiquidityEvent!]
     tokenPurchaseEvents: [TokenPurchaseEvent!]
     ethPurchaseEvents: [EthPurchaseEvent!]
-    mints: [MintEvent]!
-    burns: [BurnEvent]! 
-    swaps: [SwapEvent]!
-    syncs: [SyncEvent]!
-    block: Int!
-    timestamp: Int!
-    user: User!
-    fee: BigDecimal
+
 }
 
 interface TransactionEvent {
@@ -333,7 +332,7 @@ type BurnEvent @entity{
   logIndex: BigInt!
   feeTo: Bytes
   feeLiquidity: BigDecimal
-  from: Bytes
+  to: Bytes
   liquidity: BigDecimal!
   reservesPre: Reserve
   reservesPost: Reserve
@@ -341,27 +340,19 @@ type BurnEvent @entity{
 }
 
 type SwapEvent @entity{
+  # transaction hash + "-" + index in swaps Transaction array
   id: ID!
-  exchange: Exchange
-  timestamp: Int!
-  tx: Transaction!  @derivedFrom(field: "swaps")
-  tokenBought: Asset!
-  amountBought: BigDecimal
-  tokenSold: Asset!
-  amountSold: BigDecimal
-  valueUSD: BigDecimal
-  valueETH: BigDecimal
-  logIndex: BigInt!
-  to: Bytes!
-  sender: Bytes
-}
+  transaction: Transaction! @derivedFrom(field: "swaps")
 
-type SyncEvent @entity{
-  id: ID!
-  tx: Transaction!  @derivedFrom(field: "syncs")
   exchange: Exchange
-  reservesPre: Reserve
-  reservesPost: Reserve
+
+  # populated from the Swap event
+  sender: Bytes!
+  amount0In: BigDecimal!
+  amount1In: BigDecimal!
+  amount0Out: BigDecimal!
+  amount1Out: BigDecimal!
+  to: Bytes!
 }
 
 ##### Below are entites specifically for uniswap historical data #####

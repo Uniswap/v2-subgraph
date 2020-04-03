@@ -1,17 +1,17 @@
 import { log, Address } from '@graphprotocol/graph-ts'
-import { 
-  Uniswap, 
+import {
+  Uniswap,
   UniswapFactory,
-  Exchange, 
-  Asset, 
-  // Bundle 
+  Exchange,
+  Asset
+  // Bundle
 } from '../../types/schema'
 import { ExchangeCreated } from '../../types/FactoryV2Contract/FactoryV2Contract'
 import { ExchangeV2Contract as ExchangeContract } from '../../types/templates'
 import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from './helpers'
 
 export function handleNewExchange(event: ExchangeCreated): void {
-  log.debug("New Exchange: {}", [event.params.exchange.toHex()])
+  log.debug('New Exchange: {}', [event.params.exchange.toHex()])
   //setup factory if needed
   let totals = Uniswap.load('1')
   let v1Equivalent: string = null
@@ -32,7 +32,6 @@ export function handleNewExchange(event: ExchangeCreated): void {
     totals.totalMints = ZERO_BI
     totals.totalBurns = ZERO_BI
     totals.totalSwaps = ZERO_BI
-    totals.totalSyncs = ZERO_BI
     totals.exchangeHistoryEntityCount = ZERO_BI
     totals.uniswapHistoryEntityCount = ZERO_BI
     totals.tokenHistoryEntityCount = ZERO_BI
@@ -43,13 +42,12 @@ export function handleNewExchange(event: ExchangeCreated): void {
   totals.totalExchangeCount = totals.totalExchangeCount + 1
   totals.save()
 
-
   let factory = UniswapFactory.load('2')
 
   // if no factory yet, set up blank initial
   if (factory == null) {
     factory = new UniswapFactory('2')
-    factory.address = event.address;
+    factory.address = event.address
     factory.version = 2
     factory.exchangeCount = 0
     factory.exchanges = []
@@ -60,10 +58,9 @@ export function handleNewExchange(event: ExchangeCreated): void {
     factory.mintCount = ZERO_BI
     factory.burnCount = ZERO_BI
     factory.swapCount = ZERO_BI
-    factory.syncCount = ZERO_BI
     factory.exchangeHistoryEntityCount = ZERO_BI
     factory.uniswapHistoryEntityCount = ZERO_BI
-    factory.tokenHistoryEntityCount = ZERO_BI   
+    factory.tokenHistoryEntityCount = ZERO_BI
     factory.reserveEntityCount = ZERO_BI
     factory.totalTokenBuys = ZERO_BI
     factory.totalTokenSells = ZERO_BI
@@ -116,13 +113,13 @@ export function handleNewExchange(event: ExchangeCreated): void {
   const wethAddress = Address.fromString('0xc778417E063141139Fce010982780140Aa0cD5Ab')
   if (event.params.token0 == wethAddress) {
     token1.wethExchange = event.params.exchange.toHex()
-    if(token1.v1Exchange != null) {
+    if (token1.v1Exchange != null) {
       v1Equivalent = token1.v1Exchange
     }
   }
   if (event.params.token1 == wethAddress) {
     token0.wethExchange = event.params.exchange.toHex()
-    if(token0.v1Exchange != null) {
+    if (token0.v1Exchange != null) {
       v1Equivalent = token1.v1Exchange
     }
   }
@@ -135,9 +132,9 @@ export function handleNewExchange(event: ExchangeCreated): void {
   newAllPairsArray1.push(event.params.exchange.toHexString())
   token1.allExchanges = newAllPairsArray1
 
-  log.debug("Made it to decimals check for: {}", [event.params.exchange.toHex()])
+  log.debug('Made it to decimals check for: {}', [event.params.exchange.toHex()])
   if (token0.decimals !== null && token1.decimals !== null) {
-    log.debug("Made it past decimals check for: {}", [event.params.exchange.toHex()])
+    log.debug('Made it past decimals check for: {}', [event.params.exchange.toHex()])
     // create the Pair
     const exchange = new Exchange(event.params.exchange.toHexString()) as Exchange
     exchange.version = 2
@@ -179,15 +176,15 @@ export function handleNewExchange(event: ExchangeCreated): void {
 
     // create the tracked contract based on the template
     ExchangeContract.create(event.params.exchange)
-    log.debug("Exchange template created for: {}", [event.params.exchange.toHex()])
-    
+    log.debug('Exchange template created for: {}', [event.params.exchange.toHex()])
+
     // update v2 equivalent for v1 exchanges
-    if(v1Equivalent != null) {
+    if (v1Equivalent != null) {
       const v1Exchange = Exchange.load(v1Equivalent)
       v1Exchange.v2Equivalent = event.params.exchange.toHexString()
       v1Exchange.save()
     }
-    
+
     // save updated values
     token0.save()
     token1.save()
