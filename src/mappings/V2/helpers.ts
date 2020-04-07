@@ -2,12 +2,14 @@ import { log, BigInt, BigDecimal, Address } from '@graphprotocol/graph-ts'
 import { ERC20 } from '../../types/FactoryV2Contract/ERC20'
 import { ERC20SymbolBytes } from '../../types/FactoryV2Contract/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../../types/FactoryV2Contract/ERC20NameBytes'
-import { Exchange, User, LiquidityPosition, LiquidityTokenTransfer } from '../../types/schema'
+import { User, LiquidityPosition } from '../../types/schema'
 
 /************************************
  ********** Helpers ***********
  ************************************/
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
+
+export const FACTORY_ADDRESS = '0xF231A51299c872040C002f3E1918D806F951Efcb'
 
 export function exponentToBigDecimal(decimals: i32): BigDecimal {
   let bd = BigDecimal.fromString('1')
@@ -117,7 +119,7 @@ export function createLiquidityPosition(exchange: Address, user: Address): Liqui
   if (liquidityTokenBalance === null) {
     liquidityTokenBalance = new LiquidityPosition(id)
     liquidityTokenBalance.liquidityTokenBalance = BigInt.fromI32(0)
-    liquidityTokenBalance.exchange = exchange.toHexString()
+    liquidityTokenBalance.pair = exchange.toHexString()
     liquidityTokenBalance.user = user.toHexString()
     liquidityTokenBalance.save()
   }

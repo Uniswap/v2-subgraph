@@ -41,16 +41,11 @@ This query fetches aggredated data from all uniswap exchanges, to give a view in
     totalLiquidityInEth
     totalVolumeUSD
     totalLiquidityUSD
-
-    totalTokenBuys
-    totalTokenSells
-    totalAddLiquidity
-    totalRemoveLiquidity
   }
 }
 ```
 
-### Querying a Uniswap Exchange
+### Querying a Uniswap Pair
 
 This query fetches high level information on each uniswap exchange contract.
 
@@ -124,7 +119,7 @@ This query fetches a user trading Dai between two timestamps, and returns a maxi
 }
 ```
 
-#### User Balances on Exchanges
+#### User Balances on Pairs
 
 This query fetches a single user, and all their exchange balances.
 
@@ -157,7 +152,7 @@ This query fetches a single user, and all their exchange balances.
 
 ### Querying Historical Data
 
-#### ExchangeHistory
+#### PairHistory
 
 This query fetches historical data for the MKR exchange, ordered by time:
 

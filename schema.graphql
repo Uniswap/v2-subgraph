@@ -1,46 +1,9 @@
-# Uniswap global values across all exchanges
-type Uniswap @entity {
-    id: ID!
-    # Inclusive of V1 and V2 Exchanges
-    totalExchangeCount: Int!
-    exchanges: [Exchange!]!
-    
-    # Inclusive of V1 and V2 Exchanges
-    totalVolumeETH: BigDecimal!
-    totalVolumeUSD: BigDecimal!             # Accumulate at each trade, not just calculated off whatever totalVolume is. making it more accurate as it is a live conversion
-    totalLiquidityETH: BigDecimal!
-    totalLiquidityUSD: BigDecimal!          # Current value of liquidity in USD
-
-    # Inclusive of V1 and V2 Exchanges
-    totalTokenSells: BigInt!
-    totalTokenBuys: BigInt!
-    totalAddLiquidity: BigInt!
-    totalRemoveLiquidity: BigInt!
-    totalSwaps: BigInt!                
-    totalMints: BigInt!
-    totalBurns: BigInt!           
-
-    exchangeHistoryEntityCount: BigInt!     # Count of all historical entities for exchanges - used for unique ids
-    uniswapHistoryEntityCount: BigInt!      # Count of all historical entities for Uniswap - used for unique ids
-    tokenHistoryEntityCount: BigInt!      
-    reserveEntityCount: BigInt!
-
-    # Inclusive of V1 and V2 Exchanges
-    txCount: BigInt!
-
-    # as reference for new day datas 
-    mostLiquidTokens: [TokenDayData!]!
-}
-
-# Accumulated statistics from V1 and V2 Uniswap
 type UniswapFactory @entity {
-  id: ID!
-  version: Int! # specify whether this is the V1 or V2 factory contract
-  address: Bytes # current factory address for this version of Uniswap
+  id: ID! # exchange address
 
   # exchange info 
-  exchangeCount: Int!
-  exchanges: [Exchange]!
+  pairCount: Int!
+  pairs: [Pair]!
 
   # total volume 
   totalVolumeUSD: BigDecimal!             
@@ -49,141 +12,121 @@ type UniswapFactory @entity {
   # total liquidity
   totalLiquidityUSD: BigDecimal! 
   totalLiquidityETH: BigDecimal!
-           
-  # counters for ids               
-  exchangeHistoryEntityCount: BigInt!     
-  uniswapHistoryEntityCount: BigInt!    
-  tokenHistoryEntityCount: BigInt!      
-  reserveEntityCount: BigInt!
-  totalTokenSells: BigInt!
-  totalTokenBuys: BigInt!
-  totalAddLiquidity: BigInt!
-  totalRemoveLiquidity: BigInt!
-  mintCount: BigInt! 
-  burnCount: BigInt!
-  swapCount: BigInt!
-  txCount: BigInt!     
+
+  # transactions
+  txCount: BigInt!
 
   # as reference for new day datas 
   mostLiquidTokens: [TokenDayData!]!                   
 }
 
-type Asset @entity {
-    id: ID!
-    isToken: Boolean!
-    symbol: String                     
-    name: String                       
-    decimals: Int
+type Token @entity {
+  id: ID!
+  symbol: String                     
+  name: String                       
+  decimals: Int
 
-    # derived prices
-    derivedETH: BigDecimal # eth per token
+  # token specific volume
+  tradeVolume: BigDecimal!
+  tradeVolumeUSD: BigDecimal!   
 
-    # token specific volume
-    tradeVolume: BigDecimal!
-    tradeVolumeETH: BigDecimal!
-    tradeVolumeUSD: BigDecimal!   
+  # liquidity across all pairs 
+  totalLiquidity: BigDecimal!        
 
-    # liquidity across all pairs 
-    totalLiquidity: BigDecimal!          
-    totalLiquidityETH: BigDecimal!  
+  # derived prices
+  derivedETH: BigDecimal   
 
-    # address of weth exchange if exists 
-    wethExchange: Exchange
+  # address of weth exchange if exists 
+  wethPair: Pair
+  v1Exchange: Pair
+  allPairs: [Pair!]
 
-    # address of V1 eth exchange
-    v1Exchange: Exchange
+  # saved for historical refernce of most liquid pairs 
+  mostLiquidPairs: [PairDayData]!
 
-    # all exchanges an asset is part of
-    allExchanges: [Exchange!]
 }
 
-type Exchange @entity {
-    id: ID!                                 # Uniswap Exchange address
-    version: Int!                           # V1 or V2
-    base: Asset!                            # ETH for V1 exchanges, token0 for V2 exchanges
-    baseBalance: BigDecimal!                # ETH balance for V1 exchanges, token0 balance for V2 exchanges
-    baseLiquidity: BigDecimal!              # Equals the base liquidity provided. Will likely be different than baseBalance
-    target: Asset!                          # token for V1 Exchanges, token1 for V2 exchanges
-    targetBalance: BigDecimal!              # token balance for V1 Exchanges, token1 balance for V2 exchanges
-    targetLiquidity: BigDecimal!            # Equals the target token liquidity provided. Will likely be different than targetBalance
-    v1Equivalent: Exchange                  # If exchange is v2 exchange, returns the v1 equivalent exchange (if it exists)
-    v2Equivalent: Exchange                  # If exchange is v1 exchange, returns the v2 equivalent exchange (if it exists)
-    fee: BigDecimal!                        # Always 0.3% for v1 uniswap
-    startTime: Int!                         # Time exchange was created
+type Pair @entity {
+    # pair address
+    id: ID!                     
 
-    combinedBalanceETH: BigDecimal!       # Equal to ethBalance + (tokenBalance/price). Stored to simplify users calculating their own personal return. because the ratio may have changes a lot in one direction
-    combinedBalanceUSD: BigDecimal!       # Equal to combinedBalanceInUSD * DAI/ETH
-    
-    totalUniToken: BigDecimal!              # Count of the underlying unitokens that represent liquidity provided ownership            
+    # mirrored from the smart contract
+    token0: Token!
+    token1: Token!
+    reserve0: BigDecimal!
+    reserve1: BigDecimal!
+    totalSupply: BigDecimal!
+
+    # derived liquidity 
+    reserveUSD: BigDecimal!
 
     # Price in terms of the asset pair
-    basePrice: BigDecimal!                  # Price of base asset in terms of target asset
-    targetPrice: BigDecimal!                # Price of target asset in terms of base asset
-    tradeVolumeBase: BigDecimal!            # Total base traded EVER
-    tradeVolumeTarget: BigDecimal!          # Total target traded EVER
-    tradeVolumeETH: BigDecimal!             # Total eth traded EVER
-    tradeVolumeUSD: BigDecimal!             # Total USD traded EVER, accumulated at each trade with current token usd price * amount
-    totalTxsCount: BigInt!                  # Total tx count EVER
+    token0Price: BigDecimal!               
+    token1Price: BigDecimal!   
 
+    # lifetime volume stats
+    volumeToken0: BigDecimal!
+    volumeToken1: BigDecimal!
+    volumeUSD: BigDecimal!            
+    totalTxsCount: BigInt!                 
+
+    # creation stats
+    createdAtTimestamp: BigInt!
+    createdAtBlockNumber: BigInt!
+              
     # Fields used to help derived relationship
-    # transactions: [Transaction!]
-    factory: UniswapFactory! @derivedFrom(field: "exchanges")
-    totals: Uniswap! @derivedFrom(field: "exchanges")
-    tokenHolders: [UserExchangeData!] @derivedFrom(field: "exchange")
-    liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "exchange")
-    liquidityTokenTransfers: [LiquidityTokenTransfer!] @derivedFrom(field: "exchange")
-    addLiquidityEvents: [AddLiquidityEvent!] @derivedFrom(field: "exchange")
-    removeLiquidityEvents: [RemoveLiquidityEvent!] @derivedFrom(field: "exchange")
-    tokenPurchaseEvents: [TokenPurchaseEvent!] @derivedFrom(field: "exchange")
-    ethPurchaseEvents: [EthPurchaseEvent!] @derivedFrpm(field: "exchange")
-    mints: [MintEvent!] @derivedFrom(field: "exchange")
-    burns: [BurnEvent!] @derivedFrom(field: "exchange")
-    swaps: [SwapEvent!] @derivedFrom(field: "exchange")
+    liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "pair")
+    liquidityTokenTransfers: [LiquidityTokenTransfer!] @derivedFrom(field: "pair")
+
+    # transaction stats
+    mints: [Mint!] @derivedFrom(field: "pair")
+    burns: [Burn!] @derivedFrom(field: "pair")
+    swaps: [SwapEvent!] @derivedFrom(field: "pair")
 }
 
 type User @entity {
-    id: ID!                         # user eth adddress
-    exchangeBalances: [UserExchangeData!]!  @derivedFrom(field: "user")
+    id: ID!                         
     liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "user")
     liquidityTokenTransfersOut: [LiquidityTokenTransfer!] @derivedFrom(field: "fromUser")
     liquidityTokenTransfersIn: [LiquidityTokenTransfer!] @derivedFrom(field: "toUser")
 }
 
 type LiquidityPosition @entity {
-  id: ID!
-  user: User!
-  liquidityTokenBalance: BigInt!
-  exchange: Exchange!
-  exchangeLiquidityTokenSupply: BigInt
-  poolOwnership: BigDecimal
-  valueInToken0: BigDecimal
-  valueInToken1: BigDecimal
-  totalValueInEth: BigDecimal
+    id: ID!
+    user: User!
+    liquidityTokenBalance: BigInt!
+    pair: Pair!
+    exchangeLiquidityTokenSupply: BigInt
+    poolOwnership: BigDecimal
+    valueInToken0: BigDecimal
+    valueInToken1: BigDecimal
+    totalValueInEth: BigDecimal
 }
 
 type LiquidityTokenTransfer @entity {
-  id: ID! # concat: exchange-transactionHash-fromUser-toUser
-  amount: BigInt!
-  exchange: Exchange!
-  transferType: String # Mint, Burn, or Transfer
-  exchangeLiquidityTokenSupplyBefore: BigInt
-  exchangeLiquidityTokenSupplyAfter: BigInt
-  fromUserLiquidityTokenBalanceBefore: BigInt
-  fromUserLiquidityTokenBalanceAfter: BigInt
-  fromUserPoolOwnershipBefore: BigDecimal
-  fromUserPoolOwnershipAfter: BigDecimal
-  toUserLiquidityTokenBalanceBefore: BigInt
-  toUserLiquidityTokenBalanceAfter: BigInt
-  toUserPoolOwnershipBefore: BigDecimal
-  toUserPoolOwnershipAfter: BigDecimal
-  exchangeTotalEthLiquidityBefore: BigInt
-  exchangeTotalEthLiquidityAfter: BigInt
-  exchangeTotalTokenLiquidityBefore: BigInt
-  exchangeTotalTokenLiquidityAfter: BigInt
-  timestamp: BigInt!
-  transaction: Transaction!
-  fromUser: User!
-  toUser: User!
+    id: ID! # concat: exchange-transactionHash-fromUser-toUser
+    amount: BigInt!
+    pair: Pair!
+    # Mint, Burn, or Transfer
+    transferType: String 
+    exchangeLiquidityTokenSupplyBefore: BigInt
+    exchangeLiquidityTokenSupplyAfter: BigInt
+    fromUserLiquidityTokenBalanceBefore: BigInt
+    fromUserLiquidityTokenBalanceAfter: BigInt
+    fromUserPoolOwnershipBefore: BigDecimal
+    fromUserPoolOwnershipAfter: BigDecimal
+    toUserLiquidityTokenBalanceBefore: BigInt
+    toUserLiquidityTokenBalanceAfter: BigInt
+    toUserPoolOwnershipBefore: BigDecimal
+    toUserPoolOwnershipAfter: BigDecimal
+    exchangeTotalEthLiquidityBefore: BigInt
+    exchangeTotalEthLiquidityAfter: BigInt
+    exchangeTotalTokenLiquidityBefore: BigInt
+    exchangeTotalTokenLiquidityAfter: BigInt
+    timestamp: BigInt!
+    transaction: Transaction!
+    fromUser: User!
+    toUser: User!
 }
 
 type Migration @entity {
@@ -193,280 +136,133 @@ type Migration @entity {
     totalV2LiquidityAdded: BigDecimal
 }
 
-# trading and liquidity data around a user and their activity on a given exchange 
-type UserExchangeData @entity {
-    id: ID!                         # ID is concatenation of token and user addr. i.e. 0xahiow4-0xkashkd34....
-    userAddress: Bytes!
-    user: User!
-    exchange: Exchange!
-
-    # Liquidity Provider Data
-    baseDeposited: BigDecimal!       # where negative means eth was exchanged for tokens
-    targetDeposited: BigDecimal!    # Where negative means tokens were exchanged for eth
-    baseWithdrawn: BigDecimal!
-    targetWithdrawn: BigDecimal!
-    uniTokenBalance: BigDecimal!
-
-    # Swapping Data
-    baseBought: BigDecimal!
-    baseSold: BigDecimal!
-    targetBought: BigDecimal!
-    targetSold: BigDecimal!
-}
-
-enum EventType {
-    AddLiquidity,
-    RemoveLiquidity,
-    TokenPurchase,
-    EthPurchase,
-    MintEvent,
-    BurnEvent,
-    SwapEvent
-}
-
 type Transaction @entity {
     id: ID!  # txn hash 
     blockNumber: BigInt!
     timestamp: BigInt! 
-    mints: [MintEvent]!
-    burns: [BurnEvent]! 
+    mints: [Mint]!
+    burns: [Burn]! 
     swaps: [SwapEvent]!
 
     # migration tracking 
     isMigration: Boolean
     migration: Migration
-
-    # v1
-    addLiquidityEvents: [AddLiquidityEvent!]
-    removeLiquidityEvents: [RemoveLiquidityEvent!]
-    tokenPurchaseEvents: [TokenPurchaseEvent!]
-    ethPurchaseEvents: [EthPurchaseEvent!]
-
 }
 
-interface TransactionEvent {
-  id: ID!
-  transaction: Transaction!
-  ethAmount: BigDecimal!
-  tokenAmount: BigDecimal!
+type Mint @entity{
+    # transaction hash + "-" + index in mints Transaction array
+    id: ID!
+    transaction: Transaction! @derivedFrom(field: "mints")
+    pair: Pair
+
+    # populated from the primary Transfer event
+    to: Bytes!
+    liquidity: BigDecimal!
+      
+    # populated from the Mint event
+    sender: Bytes
+    amount0: BigDecimal
+    amount1: BigDecimal
+    # derived amount based on available prices of tokens
+    amountUSD: BigDecimal
+
+    # optional fee fields, if a Transfer event is fired in _mintFee
+    feeTo: Bytes
+    feeLiquidity: BigDecimal
 }
 
-# Note - No fee to provide liqidity
-type AddLiquidityEvent implements TransactionEvent  @entity {
-    id: ID!                 # Incrementing ID, 1, 2, etc, as txhashes can contain multiple events
-    exchange: Exchange!
-    transaction: Transaction! @derivedFrom(field: "addLiquidityEvents")
-    ethAmount: BigDecimal!
-    tokenAmount: BigDecimal!
-    uniTokensMinted: BigDecimal! 
-}
+type Burn @entity{
+    # transaction hash + "-" + index in mints Transaction array
+    id: ID!
+    transaction: Transaction! @derivedFrom(field: "burns")
+    pair: Pair
 
-# Note - No fee to provide liqidity
-type RemoveLiquidityEvent implements TransactionEvent @entity {
-    id: ID!                 # Incrementing ID, 1, 2, etc, as txhashes can contain multiple events
-    exchange: Exchange!
-    transaction: Transaction! @derivedFrom(field: "removeLiquidityEvents")
-    ethAmount: BigDecimal!
-    tokenAmount: BigDecimal!
-    uniTokensBurned: BigDecimal! 
-}
+    # populated from the primary Transfer event
+    to: Bytes!
+    liquidity: BigDecimal!
+      
+    # populated from the Mint event
+    sender: Bytes
+    amount0: BigDecimal
+    amount1: BigDecimal
+    amountUSD: BigDecimal
 
-type TokenPurchaseEvent implements TransactionEvent @entity {
-    id: ID!                 # Incrementing ID, 1, 2, etc, as txhashes can contain multiple events
-    exchange: Exchange!
-    transaction: Transaction! @derivedFrom(field: "tokenPurchaseEvents")
-    # Monetary Values. Positive or negative determined by the TradeType
-    ethAmount: BigDecimal!
-    tokenAmount: BigDecimal!
-    tokenFee: BigDecimal!
-    ethFee: BigDecimal!
-}
-
-type EthPurchaseEvent implements TransactionEvent @entity {
-    id: ID!                 # Incrementing ID, 1, 2, etc, as txhashes can contain multiple events
-    exchange: Exchange!
-    transaction: Transaction! @derivedFrom(field: "ethPurchaseEvents")
-    # Monetary Values. Positive or negative determined by the TradeType
-    ethAmount: BigDecimal!
-    tokenAmount: BigDecimal!
-    tokenFee: BigDecimal!
-    ethFee: BigDecimal!
-}
-
-interface exchangeEvent {
-  id: ID!
-}
-
-type MintEvent implements exchangeEvent @entity{
-  id: ID!
-  timestamp: Int!
-  exchange: Exchange
-  base: Asset
-  target: Asset
-  valueUSD: BigDecimal
-  valueETH: BigDecimal
-  amountBase: BigDecimal
-  amountTarget: BigDecimal
-  tx: Transaction!  @derivedFrom(field: "mints")
-  logIndex: BigInt!
-  feeTo: Bytes
-  feeLiquidity: BigDecimal
-  to: Bytes!
-  liquidity: BigDecimal!
-  reservesPre: Reserve
-  reservesPost: Reserve
-  sender: Bytes 
-}
-
-type BurnEvent @entity{
-  id: ID!
-  exchange: Exchange
-  timestamp: Int!
-  base: Asset
-  target: Asset
-  valueUSD: BigDecimal
-  valueETH: BigDecimal
-  amountBase: BigDecimal
-  amountTarget: BigDecimal
-  tx: Transaction!  @derivedFrom(field: "burns")
-  logIndex: BigInt!
-  feeTo: Bytes
-  feeLiquidity: BigDecimal
-  to: Bytes
-  liquidity: BigDecimal!
-  reservesPre: Reserve
-  reservesPost: Reserve
-  sender: Bytes 
+    # optional fee fields, if a Transfer event is fired in _mintFee
+    feeTo: Bytes
+    feeLiquidity: BigDecimal
 }
 
 type SwapEvent @entity{
-  # transaction hash + "-" + index in swaps Transaction array
-  id: ID!
-  transaction: Transaction! @derivedFrom(field: "swaps")
-
-  exchange: Exchange
-
-  # populated from the Swap event
-  sender: Bytes!
-  amount0In: BigDecimal!
-  amount1In: BigDecimal!
-  amount0Out: BigDecimal!
-  amount1Out: BigDecimal!
-  to: Bytes!
-}
-
-##### Below are entites specifically for uniswap historical data #####
-
-# Historical data for each event of each exchange. Useful for creating graphs and data analysis
-type ExchangeHistoricalData @entity {
+    # transaction hash + "-" + index in swaps Transaction array
     id: ID!
-    exchangeAddress: Bytes!
-    type: EventType!
-    timestamp: Int!
+    transaction: Transaction! @derivedFrom(field: "swaps")
+    pair: Pair
 
-    # liquidity
-    baseBalance: BigDecimal!
-    baseLiquidity: BigDecimal!     
-    targetBalance: BigDecimal!
-    targetLiquidity: BigDecimal!           
-    combinedBalanceUSD: BigDecimal!  
-    combinedBalanceETH: BigDecimal!      
-    totalUniToken: BigDecimal!   
-
-    # volume
-    tradeVolumeBase: BigDecimal!           
-    tradeVolumeTarget: BigDecimal!           
-    tradeVolumeETH: BigDecimal!  
-    tradeVolumeUSD: BigDecimal!             
-
-    # pricing
-    basePrice: BigDecimal!            
-    targetPrice: BigDecimal!    
-
-    # txns
-    totalTxsCount: BigInt! 
+    # populated from the Swap event
+    sender: Bytes!
+    amount0In: BigDecimal!
+    amount1In: BigDecimal!
+    amount0Out: BigDecimal!
+    amount1Out: BigDecimal!
+    to: Bytes!
 }
 
-# Data accumulated and condensed into day stats for each exchange
-type ExchangeDayData @entity {
-    id: ID!                                 # token address concatenated with unix date (Nov 2nd 2018 is 17837)
-    date: Int!                              # starts on 1541116800 (Nov 2nd 2018 00:00:00). all dates must start on 00:00:00
-    exchangeAddress: Bytes!
-    ethBalance: BigDecimal!                 # Eth balance at last event within the day
-    tokenBalance: BigDecimal!               # Token balance at last event within the day
-    marginalEthRate: BigDecimal!            # tokenBalance / ethBalance
-    ethVolume: BigDecimal!                  # Cumulative volume throughout the day
-    tokenPriceUSD: BigDecimal!              # USD token price at last event within the day
-    totalEvents: BigInt!                    
-}
-
-# Data checkpointed at each timestamp for 24hour data
-type UniswapHistoricalData @entity {
-    id: ID!  # unique based on incremental entity count, one for each transactions
-    timestamp: Int!
-    totalVolumeETH: BigDecimal!           # volume just on eth -i.e. we dont double count volume
-    totalLiquidityETH: BigDecimal!        # 2 * SUM(exchanges.ethLiquidity). Since tokenLiquiduity = ethLiquidity value, can just *2
-    totalVolumeUSD: BigDecimal!             # Accumulate at each trade, not just calculated off whatever totalVolume is. making it more accurate as it is a live conversion
-    totalLiquidityUSD: BigDecimal!
-    txCount: BigInt!
-}
-
-# Data accumulated and condensed into day stats for all of Uniswap
-type UniswapDayData @entity {
-    id: ID! # timestamp rounded to current day by dividing by 86400 - should only be one per day
-    date: Int!
-
-    dailyVolumeETH: BigDecimal!
-    dailyVolumeUSD: BigDecimal!
-
-    totalVolumeETH: BigDecimal!           # volume just on eth -i.e. we dont double count volume
-    totalLiquidityETH: BigDecimal!        # 2 * SUM(exchanges.ethLiquidity). Since tokenLiquiduity = ethLiquidity value, can just *2
-    totalVolumeUSD: BigDecimal!             # Accumulate at each trade, not just calculated off whatever totalVolume is. making it more accurate as it is a live conversion
-    totalLiquidityUSD: BigDecimal!
-
-     # daily top tokens in liquidity 
-    maxStored: Int
-    mostLiquidTokens: [TokenDayData!]!
-
-    txCount: BigInt!
-}
 
 # stores for USD calculations 
 type Bundle @entity {
   id: ID!
   ethPrice: BigDecimal! # price of ETH usd
   # daiPrice: BigDecimal! # price of ETH in DAI
-
-  # add these later
-  # USDC: BigDecimal! # price of ETH is usdc 
-  # TUSD: BigDecimal! # price of ETH in TUSD
 }
 
-type TokenHistoricalData @entity {
+# Data accumulated and condensed into day stats for all of Uniswap
+type UniswapDayData @entity {
+  id: ID! # timestamp rounded to current day by dividing by 86400 
+  date: Int!
+
+  dailyVolumeETH: BigDecimal!
+  dailyVolumeUSD: BigDecimal!
+
+  totalVolumeETH: BigDecimal!           # volume just on eth -i.e. we dont double count volume
+  totalLiquidityETH: BigDecimal!        # 2 * SUM(exchanges.ethLiquidity). Since tokenLiquiduity = ethLiquidity value, can just *2
+  totalVolumeUSD: BigDecimal!             # Accumulate at each trade, not just calculated off whatever totalVolume is. making it more accurate as it is a live conversion
+  totalLiquidityUSD: BigDecimal!
+
+    # daily top tokens in liquidity 
+  maxStored: Int
+  mostLiquidTokens: [TokenDayData!]!
+
+  txCount: BigInt!
+}
+
+# Data accumulated and condensed into day stats for each exchange
+type PairDayData @entity {
   id: ID!
-  token: Asset!
-  timestamp: Int!
-  
-  # volume
-  tradeVolumeToken: BigDecimal!           
-  tradeVolumeETH: BigDecimal!           
-  tradeVolumeUSD: BigDecimal! 
+  date: Int!
+  pairAddress: Bytes!
+  token0: Token!
+  token1: Token!
 
-  totalLiquidityToken: BigDecimal!        
-  totalLiquidityETH: BigDecimal!            
-  totalLiquidityUSD: BigDecimal!            
+  # reserves 
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
 
-  # pricing
-  priceETH: BigDecimal            
-  priceUSD: BigDecimal            
+  # derived liquidity 
+  reserveUSD: BigDecimal!
+
+  # volume stats 
+  dailyVolumeToken0: BigDecimal!
+  dailyVolumeToken1: BigDecimal!
+  dailyVolumeUSD: BigDecimal!
+  dailyTxns: BigInt!
 }
 
 type TokenDayData @entity {
   id: ID!                              
   date: Int!                           
-  token: Asset!     
+  token: Token!     
 
-  # volume state 
+  # volume stats
   dailyVolumeToken: BigDecimal!   
   dailyVolumeETH: BigDecimal!               
   dailyVolumeUSD: BigDecimal! 
@@ -480,11 +276,6 @@ type TokenDayData @entity {
 
   # top pairs that this token is in by liquidity
   maxStored: Int!
-  mostLiquidPairs: [ExchangeDayData!]!
+  mostLiquidPairs: [PairDayData!]!
 }
 
-type Reserve @entity{
-  id: ID!
-  reserve0: BigDecimal!
-  reserve1: BigDecimal!
-}
