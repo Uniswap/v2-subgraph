@@ -178,10 +178,10 @@ type Burn @entity{
     pair: Pair
 
     # populated from the primary Transfer event
-    to: Bytes!
+    to: Bytes
     liquidity: BigDecimal!
       
-    # populated from the Mint event
+    # populated from the Burn event
     sender: Bytes
     amount0: BigDecimal
     amount1: BigDecimal
@@ -198,7 +198,7 @@ type SwapEvent @entity{
     transaction: Transaction! @derivedFrom(field: "swaps")
     pair: Pair
 
-    # populated from the Swap event
+    # populate  d from the Swap event
     sender: Bytes!
     amount0In: BigDecimal!
     amount1In: BigDecimal!
@@ -206,7 +206,7 @@ type SwapEvent @entity{
     amount1Out: BigDecimal!
     to: Bytes!
 }
-
+# 
 
 # stores for USD calculations 
 type Bundle @entity {

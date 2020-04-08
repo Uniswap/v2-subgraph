@@ -5,23 +5,23 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: FactoryV2Contract
+    name: Factory
     network: rinkeby
     source:
-      address: '0x8A500Eff6D40B53ab7CA5D951E5eBa539445b6f0'
-      abi: FactoryV2Contract
-      startBlock: 5729170
+      address: '0xe2f197885abe8ec7c866cFf76605FD06d4576218'
+      abi: Factory
+      startBlock: 6155580
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
-      file: ./src/mappings/V2/factory.ts
+      file: ./src/mappings/factory.ts
       entities:
         - Pair
         - Token
       abis:
-        - name: FactoryV2Contract
-          file: ./abis/V2/FactoryV2Contract.json
+        - name: Factory
+          file: ./abis/factory.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: ERC20SymbolBytes
@@ -33,21 +33,21 @@ dataSources:
           handler: handleNewPair
 templates:
   - kind: ethereum/contract
-    name: ExchangeV2Contract
+    name: Pair
     network: rinkeby
     source:
-      abi: PairV2Contract
+      abi: Pair
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
-      file: ./src/mappings/V2/core.ts
+      file: ./src/mappings/core.ts
       entities:
         - Pair
         - Token
       abis:
-        - name: PairV2Contract
-          file: ./abis/V2/ExchangeV2Contract.json
+        - name: Pair
+          file: ./abis/pair.json
       eventHandlers:
         - event: Mint(indexed address,uint256,uint256)
           handler: handleMint

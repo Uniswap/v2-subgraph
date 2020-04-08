@@ -1,15 +1,15 @@
 import { log, BigInt, BigDecimal, Address } from '@graphprotocol/graph-ts'
-import { ERC20 } from '../../types/FactoryV2Contract/ERC20'
-import { ERC20SymbolBytes } from '../../types/FactoryV2Contract/ERC20SymbolBytes'
-import { ERC20NameBytes } from '../../types/FactoryV2Contract/ERC20NameBytes'
-import { User, LiquidityPosition } from '../../types/schema'
+import { ERC20 } from '../types/Factory/ERC20'
+import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
+import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
+import { User, LiquidityPosition } from '../types/schema'
 
 /************************************
  ********** Helpers ***********
  ************************************/
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 
-export const FACTORY_ADDRESS = '0xF231A51299c872040C002f3E1918D806F951Efcb'
+export const FACTORY_ADDRESS = '0xe2f197885abe8ec7c866cFf76605FD06d4576218'
 
 export function exponentToBigDecimal(decimals: i32): BigDecimal {
   let bd = BigDecimal.fromString('1')
@@ -57,7 +57,6 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
   // bind to the exchange address
   const contract = ERC20.bind(tokenAddress)
   const contractSymbolBytes = ERC20SymbolBytes.bind(tokenAddress)
-
   // try types string and bytes32 for symbol
   let symbolValue = 'unknown'
   const symbolResult = contract.try_symbol()
@@ -72,7 +71,6 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
   } else {
     symbolValue = symbolResult.value
   }
-
   return symbolValue
 }
 
@@ -95,7 +93,6 @@ export function fetchTokenName(tokenAddress: Address): string {
   } else {
     nameValue = nameResult.value
   }
-
   return nameValue
 }
 

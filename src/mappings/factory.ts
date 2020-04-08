@@ -1,11 +1,11 @@
-import { log } from '@graphprotocol/graph-ts'
-import { UniswapFactory, Pair, Token } from '../../types/schema'
-import { PairCreated } from '../../types/FactoryV2Contract/FactoryV2Contract'
-import { ExchangeV2Contract as ExchangeContract } from '../../types/templates'
+import { log, Address } from '@graphprotocol/graph-ts'
+import { UniswapFactory, Pair, Token, Bundle } from '../types/schema'
+import { PairCreated } from '../types/Factory/Factory'
+import { Pair as PairTemplate } from '../types/templates'
 import { FACTORY_ADDRESS, ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from './helpers'
 
-export function handleNewExchange(event: PairCreated): void {
-  log.debug('New Exchange: {}', [event.params.exchange.toHex()])
+export function handleNewPair(event: PairCreated): void {
+  log.debug('New Exchange: {}', [event.params.pair.toHex()])
 
   // load factory (create if first exchange)
   let factory = UniswapFactory.load(FACTORY_ADDRESS)
@@ -19,6 +19,11 @@ export function handleNewExchange(event: PairCreated): void {
     factory.totalLiquidityUSD = ZERO_BD
     factory.txCount = ZERO_BI
     factory.mostLiquidTokens = []
+
+    // create new bundle
+    const bundle = new Bundle('1')
+    bundle.ethPrice = ZERO_BD
+    bundle.save()
   }
   factory.pairCount = factory.pairCount + 1
   factory.save()
@@ -56,15 +61,15 @@ export function handleNewExchange(event: PairCreated): void {
   }
 
   const newAllPairsArray0 = token0.allPairs
-  newAllPairsArray0.push(event.params.exchange.toHexString())
+  newAllPairsArray0.push(event.params.pair.toHexString())
   token0.allPairs = newAllPairsArray0
 
   const newAllPairsArray1 = token1.allPairs
-  newAllPairsArray1.push(event.params.exchange.toHexString())
+  newAllPairsArray1.push(event.params.pair.toHexString())
   token1.allPairs = newAllPairsArray1
 
   if (token0.decimals !== null && token1.decimals !== null) {
-    const pair = new Pair(event.params.exchange.toHexString()) as Pair
+    const pair = new Pair(event.params.pair.toHexString()) as Pair
     pair.token0 = token0.id
     pair.token1 = token1.id
     pair.createdAtTimestamp = event.block.timestamp
@@ -72,6 +77,7 @@ export function handleNewExchange(event: PairCreated): void {
     pair.totalTxsCount = ZERO_BI
     pair.reserve0 = ZERO_BD
     pair.reserve1 = ZERO_BD
+    pair.reserveUSD = ZERO_BD
     pair.totalSupply = ZERO_BD
     pair.volumeToken0 = ZERO_BD
     pair.volumeToken1 = ZERO_BD
@@ -79,13 +85,21 @@ export function handleNewExchange(event: PairCreated): void {
     pair.token0Price = ZERO_BD
     pair.token1Price = ZERO_BD
 
+    // set weth exchange if exists
+    const WETHAddress = Address.fromString('0xc778417e063141139fce010982780140aa0cd5ab')
+    if (event.params.token0 == WETHAddress) {
+      token1.wethPair = event.params.pair.toHexString()
+    } else if (event.params.token1 == WETHAddress) {
+      token0.wethPair = event.params.pair.toHexString()
+    }
+
     // update factory totals
     const factoryPairs = factory.pairs
     factoryPairs.push(pair.id)
     factory.pairs = factoryPairs
 
     // create the tracked contract based on the template
-    ExchangeContract.create(event.params.exchange)
+    PairTemplate.create(event.params.pair)
 
     // save updated values
     token0.save()
