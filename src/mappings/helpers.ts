@@ -115,7 +115,7 @@ export function createLiquidityPosition(exchange: Address, user: Address): Liqui
   let liquidityTokenBalance = LiquidityPosition.load(id)
   if (liquidityTokenBalance === null) {
     liquidityTokenBalance = new LiquidityPosition(id)
-    liquidityTokenBalance.liquidityTokenBalance = BigInt.fromI32(0)
+    liquidityTokenBalance.liquidityTokenBalance = ZERO_BD
     liquidityTokenBalance.pair = exchange.toHexString()
     liquidityTokenBalance.user = user.toHexString()
     liquidityTokenBalance.save()

@@ -20,7 +20,7 @@ type UniswapFactory @entity {
   mostLiquidTokens: [TokenDayData!]!                   
 }
 
-type Token @entity {
+type Token @entity {  
   id: ID!
   symbol: String                     
   name: String                       
@@ -38,7 +38,6 @@ type Token @entity {
 
   # address of weth exchange if exists 
   wethPair: Pair
-  v1Exchange: Pair
   allPairs: [Pair!]
 
   # saved for historical refernce of most liquid pairs 
@@ -68,7 +67,7 @@ type Pair @entity {
     volumeToken0: BigDecimal!
     volumeToken1: BigDecimal!
     volumeUSD: BigDecimal!            
-    totalTxsCount: BigInt!                 
+    txCount: BigInt!                 
 
     # creation stats
     createdAtTimestamp: BigInt!
@@ -76,64 +75,24 @@ type Pair @entity {
               
     # Fields used to help derived relationship
     liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "pair")
-    liquidityTokenTransfers: [LiquidityTokenTransfer!] @derivedFrom(field: "pair")
 
     # transaction stats
     mints: [Mint!] @derivedFrom(field: "pair")
     burns: [Burn!] @derivedFrom(field: "pair")
-    swaps: [SwapEvent!] @derivedFrom(field: "pair")
+    swaps: [Swap!] @derivedFrom(field: "pair")
 }
 
 type User @entity {
     id: ID!                         
     liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "user")
-    liquidityTokenTransfersOut: [LiquidityTokenTransfer!] @derivedFrom(field: "fromUser")
-    liquidityTokenTransfersIn: [LiquidityTokenTransfer!] @derivedFrom(field: "toUser")
 }
 
 type LiquidityPosition @entity {
     id: ID!
     user: User!
-    liquidityTokenBalance: BigInt!
     pair: Pair!
-    exchangeLiquidityTokenSupply: BigInt
     poolOwnership: BigDecimal
-    valueInToken0: BigDecimal
-    valueInToken1: BigDecimal
-    totalValueInEth: BigDecimal
-}
-
-type LiquidityTokenTransfer @entity {
-    id: ID! # concat: exchange-transactionHash-fromUser-toUser
-    amount: BigInt!
-    pair: Pair!
-    # Mint, Burn, or Transfer
-    transferType: String 
-    exchangeLiquidityTokenSupplyBefore: BigInt
-    exchangeLiquidityTokenSupplyAfter: BigInt
-    fromUserLiquidityTokenBalanceBefore: BigInt
-    fromUserLiquidityTokenBalanceAfter: BigInt
-    fromUserPoolOwnershipBefore: BigDecimal
-    fromUserPoolOwnershipAfter: BigDecimal
-    toUserLiquidityTokenBalanceBefore: BigInt
-    toUserLiquidityTokenBalanceAfter: BigInt
-    toUserPoolOwnershipBefore: BigDecimal
-    toUserPoolOwnershipAfter: BigDecimal
-    exchangeTotalEthLiquidityBefore: BigInt
-    exchangeTotalEthLiquidityAfter: BigInt
-    exchangeTotalTokenLiquidityBefore: BigInt
-    exchangeTotalTokenLiquidityAfter: BigInt
-    timestamp: BigInt!
-    transaction: Transaction!
-    fromUser: User!
-    toUser: User!
-}
-
-type Migration @entity {
-    id: ID!
-    transaction: Transaction!
-    totalV1LiquidityRemoved: BigDecimal
-    totalV2LiquidityAdded: BigDecimal
+    liquidityTokenBalance: BigDecimal!
 }
 
 type Transaction @entity {
@@ -142,11 +101,7 @@ type Transaction @entity {
     timestamp: BigInt! 
     mints: [Mint]!
     burns: [Burn]! 
-    swaps: [SwapEvent]!
-
-    # migration tracking 
-    isMigration: Boolean
-    migration: Migration
+    swaps: [Swap]!
 }
 
 type Mint @entity{
@@ -192,7 +147,7 @@ type Burn @entity{
     feeLiquidity: BigDecimal
 }
 
-type SwapEvent @entity{
+type Swap @entity{
     # transaction hash + "-" + index in swaps Transaction array
     id: ID!
     transaction: Transaction! @derivedFrom(field: "swaps")
@@ -206,7 +161,6 @@ type SwapEvent @entity{
     amount1Out: BigDecimal!
     to: Bytes!
 }
-# 
 
 # stores for USD calculations 
 type Bundle @entity {

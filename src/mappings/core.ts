@@ -5,15 +5,13 @@ import {
   Token,
   UniswapFactory,
   Transaction,
-  // Migration,
   UniswapDayData,
   PairDayData,
   TokenDayData,
   Mint as MintEvent,
   Burn as BurnEvent,
-  SwapEvent,
-  Bundle,
-  LiquidityTokenTransfer
+  Swap as SwapEvent,
+  Bundle
 } from '../types/schema'
 import { Pair as PairContract, Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Pair/Pair'
 
@@ -83,25 +81,8 @@ export function handleTransfer(event: Transfer): void {
   createUser(to)
 
   let pair = Pair.load(event.address.toHexString())
-
-  const transferId = event.address.toHexString() + '-' + transactionHash + '-' + from.toHex() + '-' + to.toHex()
-  let liquidityTokenTransfer = new LiquidityTokenTransfer(transferId)
-  liquidityTokenTransfer.pair = event.address.toHexString()
-  liquidityTokenTransfer.fromUser = from.toHex()
-  liquidityTokenTransfer.toUser = to.toHex()
-  liquidityTokenTransfer.amount = event.params.value
-  liquidityTokenTransfer.transferType = 'transfer'
-  liquidityTokenTransfer.timestamp = event.block.timestamp
-  liquidityTokenTransfer.transaction = transactionHash
-  let exchangeContract = PairContract.bind(event.address)
-  liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter = exchangeContract.totalSupply()
-  liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter
-  let fromUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(from)
-  let toUserLiquidityTokenBalanceAfter = exchangeContract.balanceOf(to)
-  // TODO: Get token reserves and save to the liquidity event
-  // let token0Reserve, token1Reserve, blockTimestampLast = exchangeContract.getReserves();
-  liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter = fromUserLiquidityTokenBalanceAfter
-  liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter = toUserLiquidityTokenBalanceAfter
+  let pairContract = PairContract.bind(event.address)
+  const newTotalSupply = pairContract.totalSupply()
 
   // liquidity token amount being transfered
   const value = convertTokenToDecimal(event.params.value, 18)
@@ -116,19 +97,11 @@ export function handleTransfer(event: Transfer): void {
     transaction.burns = []
   }
 
-  // can't be migrationin this case
-  transaction.isMigration = false
-
   // load mints from transaction
   let mints = transaction.mints
 
   // mint
   if (from.toHexString() == ADDRESS_ZERO) {
-    liquidityTokenTransfer.transferType = 'mint'
-    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.minus(
-      event.params.value
-    )
-
     // update total supply
     pair.totalSupply = pair.totalSupply.plus(value)
     pair.save()
@@ -154,60 +127,10 @@ export function handleTransfer(event: Transfer): void {
       transaction.save()
       factory.save()
     }
-    // there was a remove in v1,now a mint could be a migration
-    // if (transaction.removeLiquidityEvents.length > 0) {
-    //   transaction.isMigration = true
-    //   let migration = Migration.load(txnId)
-    //   if (migration == null) {
-    //     migration = new Migration(txnId)
-    //   }
-    //   let totalV1LiquidityRemoved = BigDecimal.fromString('0')
-    //   let transactionRemoveLiquidityEvents = transaction.removeLiquidityEvents as Array<string>
-    //   log.debug('Migration: {}', [txnId])
-    //   for (let i = 0; i < transactionRemoveLiquidityEvents.length; i++) {
-    //     log.debug('Migration RL Iter: {}', [i.toString()])
-    //     let removeLiquidityEvent = RemoveLiquidityEvent.load(transactionRemoveLiquidityEvents[i])
-    //     log.debug('Migration Remove Liquidity - Transaction: {}, Liquidity Id: {}, Iter: {}, UniTokens: {}', [
-    //       txnId,
-    //       transactionRemoveLiquidityEvents[i],
-    //       i.toString(),
-    //       removeLiquidityEvent.uniTokensBurned.toString()
-    //     ])
-    //     totalV1LiquidityRemoved.plus(removeLiquidityEvent.uniTokensBurned)
-    //   }
-    //   let totalV2LiquidityAdded = BigDecimal.fromString('0')
-    //   let transactionMints = transaction.mints as Array<string>
-    //   for (let i = 0; i < transactionMints.length; i++) {
-    //     let mintEvent = MintEvent.load(transactionMints[i])
-    //     totalV2LiquidityAdded.plus(mintEvent.liquidity)
-    //   }
-    //   migration.totalV1LiquidityRemoved = totalV1LiquidityRemoved
-    //   migration.totalV2LiquidityAdded = totalV2LiquidityAdded
-    //   migration.transaction = txnId
-    //   migration.save()
-    // }
-  } else {
-    const fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
-    fromUserLiquidityPosition.liquidityTokenBalance = fromUserLiquidityTokenBalanceAfter
-    fromUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter
-    if (liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
-      fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString('0.0')
-    } else {
-      fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance
-        .toBigDecimal()
-        .div(fromUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
-    }
-    fromUserLiquidityPosition.save()
-    liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore = fromUserLiquidityTokenBalanceAfter.plus(
-      event.params.value
-    )
   }
+
   // burn
   if (event.params.to.toHexString() == ADDRESS_ZERO && event.params.from.toHexString() == pair.id) {
-    liquidityTokenTransfer.transferType = 'mint'
-    liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.plus(
-      event.params.value
-    )
     pair.totalSupply = pair.totalSupply.minus(value)
     pair.save()
 
@@ -239,48 +162,35 @@ export function handleTransfer(event: Transfer): void {
     transaction.burns = burns
 
     transaction.save()
-  } else {
-    const toUserLiquidityPosition = createLiquidityPosition(event.address, from)
-    toUserLiquidityPosition.liquidityTokenBalance = toUserLiquidityTokenBalanceAfter
-    toUserLiquidityPosition.exchangeLiquidityTokenSupply = liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter
-    if (liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
+  }
+
+  if (from.toHexString() != ADDRESS_ZERO && from.toHexString() != pair.id) {
+    const fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
+    fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(from), 18)
+    if (newTotalSupply == BigInt.fromI32(0)) {
+      fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString('0.0')
+    } else {
+      fromUserLiquidityPosition.poolOwnership = fromUserLiquidityPosition.liquidityTokenBalance.div(
+        convertTokenToDecimal(newTotalSupply, 18)
+      )
+    }
+    fromUserLiquidityPosition.save()
+  }
+
+  if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pair.id) {
+    const toUserLiquidityPosition = createLiquidityPosition(event.address, to)
+    toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(to), 18)
+    if (newTotalSupply == BigInt.fromI32(0)) {
       toUserLiquidityPosition.poolOwnership = BigDecimal.fromString('0.0')
     } else {
-      toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance
-        .toBigDecimal()
-        .div(toUserLiquidityPosition.exchangeLiquidityTokenSupply.toBigDecimal())
+      toUserLiquidityPosition.poolOwnership = toUserLiquidityPosition.liquidityTokenBalance.div(
+        convertTokenToDecimal(newTotalSupply, 18)
+      )
     }
     toUserLiquidityPosition.save()
-    liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore = toUserLiquidityTokenBalanceAfter.minus(
-      event.params.value
-    )
   }
 
-  if (liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore == BigInt.fromI32(0)) {
-    liquidityTokenTransfer.fromUserPoolOwnershipBefore = BigDecimal.fromString('0.0')
-    liquidityTokenTransfer.toUserPoolOwnershipBefore = BigDecimal.fromString('0.0')
-  } else {
-    liquidityTokenTransfer.fromUserPoolOwnershipBefore = liquidityTokenTransfer.fromUserLiquidityTokenBalanceBefore
-      .toBigDecimal()
-      .div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
-    liquidityTokenTransfer.toUserPoolOwnershipBefore = liquidityTokenTransfer.toUserLiquidityTokenBalanceBefore
-      .toBigDecimal()
-      .div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyBefore.toBigDecimal())
-  }
-
-  if (liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter == BigInt.fromI32(0)) {
-    liquidityTokenTransfer.fromUserPoolOwnershipAfter = BigDecimal.fromString('0.0')
-    liquidityTokenTransfer.toUserPoolOwnershipAfter = BigDecimal.fromString('0.0')
-  } else {
-    liquidityTokenTransfer.fromUserPoolOwnershipAfter = liquidityTokenTransfer.fromUserLiquidityTokenBalanceAfter
-      .toBigDecimal()
-      .div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
-    liquidityTokenTransfer.toUserPoolOwnershipAfter = liquidityTokenTransfer.toUserLiquidityTokenBalanceAfter
-      .toBigDecimal()
-      .div(liquidityTokenTransfer.exchangeLiquidityTokenSupplyAfter.toBigDecimal())
-  }
   transaction.save()
-  liquidityTokenTransfer.save()
 }
 
 export function handleMint(event: Mint): void {
@@ -298,7 +208,7 @@ export function handleMint(event: Mint): void {
   const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
-  pair.totalTxsCount = pair.totalTxsCount.plus(ONE_BI)
+  pair.txCount = pair.txCount.plus(ONE_BI)
   pair.save()
 
   // ETH/USD prices
@@ -325,7 +235,7 @@ export function handleMint(event: Mint): void {
   // update global liquidity
   uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.plus(amountTotalETH)
   uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
-
+  uniswap.txCount = uniswap.txCount.plus(ONE_BI)
   // update exchange liquidity
   pair.reserveUSD = pair.reserveUSD.plus(amountTotalUSD)
 
@@ -359,7 +269,7 @@ export function handleBurn(event: Burn): void {
   const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
-  pair.totalTxsCount = pair.totalTxsCount.plus(ONE_BI)
+  pair.txCount = pair.txCount.plus(ONE_BI)
 
   //ETH / USD prices
   const bundle = Bundle.load('1')
@@ -386,6 +296,7 @@ export function handleBurn(event: Burn): void {
   // update global liquidity
   factory.totalLiquidityETH = factory.totalLiquidityETH.minus(amountTotalETH)
   factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)
+  factory.txCount = factory.txCount.plus(ONE_BI)
 
   // update pair usd liquidity
   pair.reserveUSD = pair.reserveUSD.minus(amountTotalUSD)
@@ -437,7 +348,7 @@ export function handleSwap(event: Swap): void {
    */
   pair.volumeToken0 = pair.volumeToken0.plus(amount0Total)
   pair.volumeToken1 = pair.volumeToken1.plus(amount1Total)
-  pair.totalTxsCount = pair.totalTxsCount.plus(ONE_BI)
+  pair.txCount = pair.txCount.plus(ONE_BI)
   pair.save()
 
   // ETH/USD prices
@@ -473,6 +384,7 @@ export function handleSwap(event: Swap): void {
   const factory = UniswapFactory.load(FACTORY_ADDRESS)
   factory.totalVolumeUSD = factory.totalVolumeUSD.plus(amountTotalUSD)
   factory.totalVolumeETH = factory.totalVolumeETH.plus(amountTotalETH)
+  factory.txCount = factory.txCount.plus(ONE_BI)
 
   // save entities
   pair.save()

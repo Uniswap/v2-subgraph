@@ -74,7 +74,7 @@ export function handleNewPair(event: PairCreated): void {
     pair.token1 = token1.id
     pair.createdAtTimestamp = event.block.timestamp
     pair.createdAtBlockNumber = event.block.number
-    pair.totalTxsCount = ZERO_BI
+    pair.txCount = ZERO_BI
     pair.reserve0 = ZERO_BD
     pair.reserve1 = ZERO_BD
     pair.reserveUSD = ZERO_BD
