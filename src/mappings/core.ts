@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal, store, log } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, store } from '@graphprotocol/graph-ts'
 import {
   Pair,
   Token,
@@ -34,7 +34,7 @@ import {
  **/
 function findEthPerToken(token: Token, maxDepthReached: boolean): BigDecimal {
   if (token.wethPair != null) {
-    const wethPair = Pair.load(token.wethPair)
+    let wethPair = Pair.load(token.wethPair)
     if (wethPair.token0 == token.id) {
       // our token is token 0
       return wethPair.token1Price
@@ -43,20 +43,20 @@ function findEthPerToken(token: Token, maxDepthReached: boolean): BigDecimal {
       return wethPair.token0Price
     }
   } else if (!maxDepthReached) {
-    const allPairs = token.allPairs as Array<string>
+    let allPairs = token.allPairs as Array<string>
     for (let i = 0; i < allPairs.length; i++) {
-      const currentPair = Pair.load(allPairs[i])
+      let currentPair = Pair.load(allPairs[i])
       if (currentPair.token0 == token.id) {
         // our token is token 0
-        const otherToken = Token.load(currentPair.token1)
-        const otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
+        let otherToken = Token.load(currentPair.token1)
+        let otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
         if (otherTokenEthPrice != null) {
           return currentPair.token1Price.times(otherTokenEthPrice)
         }
       } else {
         // our token is token 1
-        const otherToken = Token.load(currentPair.token0)
-        const otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
+        let otherToken = Token.load(currentPair.token0)
+        let otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
         if (otherTokenEthPrice != null) {
           return currentPair.token0Price.times(otherTokenEthPrice)
         }
@@ -71,21 +71,21 @@ function isCompleteMint(mintId: string): boolean {
 }
 
 export function handleTransfer(event: Transfer): void {
-  const factory = UniswapFactory.load(FACTORY_ADDRESS)
-  const transactionHash = event.transaction.hash.toHexString()
+  let factory = UniswapFactory.load(FACTORY_ADDRESS)
+  let transactionHash = event.transaction.hash.toHexString()
 
   // user stats
-  const from = event.params.from
+  let from = event.params.from
   createUser(from)
-  const to = event.params.to
+  let to = event.params.to
   createUser(to)
 
   let pair = Pair.load(event.address.toHexString())
   let pairContract = PairContract.bind(event.address)
-  const newTotalSupply = pairContract.totalSupply()
+  let newTotalSupply = pairContract.totalSupply()
 
   // liquidity token amount being transfered
-  const value = convertTokenToDecimal(event.params.value, 18)
+  let value = convertTokenToDecimal(event.params.value, 18)
   let transaction = Transaction.load(transactionHash)
 
   if (transaction == null) {
@@ -119,7 +119,7 @@ export function handleTransfer(event: Transfer): void {
       mint.save()
 
       // update mints in transaction
-      const newMints = transaction.mints
+      let newMints = transaction.mints
       newMints.push(mint.id)
       transaction.mints = newMints
 
@@ -165,7 +165,7 @@ export function handleTransfer(event: Transfer): void {
   }
 
   if (from.toHexString() != ADDRESS_ZERO && from.toHexString() != pair.id) {
-    const fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
+    let fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
     fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(from), 18)
     if (newTotalSupply == BigInt.fromI32(0)) {
       fromUserLiquidityPosition.poolOwnership = BigDecimal.fromString('0.0')
@@ -178,7 +178,7 @@ export function handleTransfer(event: Transfer): void {
   }
 
   if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pair.id) {
-    const toUserLiquidityPosition = createLiquidityPosition(event.address, to)
+    let toUserLiquidityPosition = createLiquidityPosition(event.address, to)
     toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(to), 18)
     if (newTotalSupply == BigInt.fromI32(0)) {
       toUserLiquidityPosition.poolOwnership = BigDecimal.fromString('0.0')
@@ -198,39 +198,39 @@ export function handleMint(event: Mint): void {
   let mints = transaction.mints
   let mint = MintEvent.load(mints[mints.length - 1])
 
-  const pair = Pair.load(event.address.toHex())
-  const uniswap = UniswapFactory.load(FACTORY_ADDRESS)
+  let pair = Pair.load(event.address.toHex())
+  let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
 
-  const token0 = Token.load(pair.token0)
-  const token1 = Token.load(pair.token1)
+  let token0 = Token.load(pair.token0)
+  let token1 = Token.load(pair.token1)
 
   // update exchange info (except balances, sync will cover that)
-  const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
-  const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
+  let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
+  let token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
   pair.txCount = pair.txCount.plus(ONE_BI)
   pair.save()
 
   // ETH/USD prices
-  const bundle = Bundle.load('1')
+  let bundle = Bundle.load('1')
   bundle.ethPrice = getEthPriceInUSD(event.block.number)
   bundle.save()
 
   // update global token0 info
-  const ethPerToken0 = findEthPerToken(token0 as Token, false)
-  const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
+  let ethPerToken0 = findEthPerToken(token0 as Token, false)
+  let usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
   token0.derivedETH = ethPerToken0
   token0.totalLiquidity = token0.totalLiquidity.plus(token0Amount)
 
   // update global token1 info
-  const ethPerToken1 = findEthPerToken(token1 as Token, false)
-  const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
+  let ethPerToken1 = findEthPerToken(token1 as Token, false)
+  let usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
   token1.derivedETH = ethPerToken1
   token1.totalLiquidity = token1.totalLiquidity.plus(token1Amount)
 
   // get new amounts of USD and ETH for tracking
-  const amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
-  const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
+  let amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
+  let amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
   // update global liquidity
   uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.plus(amountTotalETH)
@@ -246,10 +246,10 @@ export function handleMint(event: Mint): void {
   uniswap.save()
 
   mint.sender = event.params.sender
-  mint.pair = pair.id as string
-  mint.amountUSD = amountTotalUSD as BigDecimal
   mint.amount0 = token0Amount as BigDecimal
   mint.amount1 = token1Amount as BigDecimal
+  mint.logIndex = event.logIndex
+  mint.amountUSD = amountTotalUSD as BigDecimal
   mint.save()
 }
 
@@ -259,39 +259,39 @@ export function handleBurn(event: Burn): void {
   let burns = transaction.burns
   let burn = BurnEvent.load(burns[burns.length - 1])
 
-  const pair = Pair.load(event.address.toHex())
+  let pair = Pair.load(event.address.toHex())
   // TODO Add in global aggregations
-  const factory = UniswapFactory.load(FACTORY_ADDRESS)
+  let factory = UniswapFactory.load(FACTORY_ADDRESS)
 
   //update token info
-  const token0 = Token.load(pair.token0)
-  const token1 = Token.load(pair.token1)
-  const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
-  const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
+  let token0 = Token.load(pair.token0)
+  let token1 = Token.load(pair.token1)
+  let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
+  let token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
   pair.txCount = pair.txCount.plus(ONE_BI)
 
   //ETH / USD prices
-  const bundle = Bundle.load('1')
-  const ethPriceInUSD = getEthPriceInUSD(event.block.number)
+  let bundle = Bundle.load('1')
+  let ethPriceInUSD = getEthPriceInUSD(event.block.number)
   bundle.ethPrice = ethPriceInUSD
   bundle.save()
 
   // update global token0 info
-  const ethPerToken0 = findEthPerToken(token0 as Token, false)
-  const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
+  let ethPerToken0 = findEthPerToken(token0 as Token, false)
+  let usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
   token0.derivedETH = ethPerToken0
   token0.totalLiquidity = token0.totalLiquidity.minus(token0Amount)
 
   // update global token1 info
-  const ethPerToken1 = findEthPerToken(token1 as Token, false)
-  const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
+  let ethPerToken1 = findEthPerToken(token1 as Token, false)
+  let usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
   token1.derivedETH = ethPerToken1
   token1.totalLiquidity = token1.totalLiquidity.minus(token1Amount)
 
   // get new amounts of USD and ETH for tracking
-  const amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
-  const amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
+  let amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
+  let amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
 
   // update global liquidity
   factory.totalLiquidityETH = factory.totalLiquidityETH.minus(amountTotalETH)
@@ -309,18 +309,18 @@ export function handleBurn(event: Burn): void {
 
   // update burn
   burn.sender = event.params.sender
-  burn.to = event.params.to
-  burn.pair = pair.id as string
-  burn.amountUSD = amountTotalUSD as BigDecimal
   burn.amount0 = token0Amount as BigDecimal
   burn.amount1 = token1Amount as BigDecimal
+  burn.to = event.params.to
+  burn.logIndex = event.logIndex
+  burn.amountUSD = amountTotalUSD as BigDecimal
   burn.save()
 }
 
 export function handleSync(event: Sync): void {
-  const pair = Pair.load(event.address.toHex())
-  const token0 = Token.load(pair.token0)
-  const token1 = Token.load(pair.token1)
+  let pair = Pair.load(event.address.toHex())
+  let token0 = Token.load(pair.token0)
+  let token1 = Token.load(pair.token1)
 
   // update pair with new values
   pair.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
@@ -331,17 +331,17 @@ export function handleSync(event: Sync): void {
 }
 
 export function handleSwap(event: Swap): void {
-  const pair = Pair.load(event.address.toHexString())
-  const token0 = Token.load(pair.token0)
-  const token1 = Token.load(pair.token1)
+  let pair = Pair.load(event.address.toHexString())
+  let token0 = Token.load(pair.token0)
+  let token1 = Token.load(pair.token1)
   let amount0In = convertTokenToDecimal(event.params.amount0In, token0.decimals)
   let amount1In = convertTokenToDecimal(event.params.amount1In, token1.decimals)
   let amount0Out = convertTokenToDecimal(event.params.amount0Out, token0.decimals)
   let amount1Out = convertTokenToDecimal(event.params.amount1Out, token1.decimals)
 
   // totals for volume updates
-  const amount0Total = amount0Out.plus(amount0In)
-  const amount1Total = amount1Out.plus(amount1In)
+  let amount0Total = amount0Out.plus(amount0In)
+  let amount1Total = amount1Out.plus(amount1In)
 
   /**
    *  @todo flash swaps?
@@ -352,22 +352,22 @@ export function handleSwap(event: Swap): void {
   pair.save()
 
   // ETH/USD prices
-  const bundle = Bundle.load('1')
-  const ethPriceInUSD = getEthPriceInUSD(event.block.number)
+  let bundle = Bundle.load('1')
+  let ethPriceInUSD = getEthPriceInUSD(event.block.number)
   bundle.ethPrice = ethPriceInUSD
   bundle.save()
 
-  const ethPerToken0 = findEthPerToken(token0 as Token, false)
-  const usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
+  let ethPerToken0 = findEthPerToken(token0 as Token, false)
+  let usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
   token0.derivedETH = ethPerToken0
 
-  const ethPerToken1 = findEthPerToken(token1 as Token, false)
-  const usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
+  let ethPerToken1 = findEthPerToken(token1 as Token, false)
+  let usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
   token1.derivedETH = ethPerToken1
 
   // get total amounts of derived USD and ETH for tracking
-  const amountTotalETH = ethPerToken1.times(amount1Total).plus(ethPerToken0.times(amount0Total))
-  const amountTotalUSD = usdPerToken1.times(amount1Total).plus(usdPerToken0.times(amount0Total))
+  let amountTotalETH = ethPerToken1.times(amount1Total).plus(ethPerToken0.times(amount0Total))
+  let amountTotalUSD = usdPerToken1.times(amount1Total).plus(usdPerToken0.times(amount0Total))
 
   // update token0 global volume and liquidity stats
   token0.totalLiquidity = token0.totalLiquidity.plus(amount0In).minus(amount0Out)
@@ -381,7 +381,7 @@ export function handleSwap(event: Swap): void {
   pair.volumeUSD = pair.volumeUSD.plus(amountTotalUSD)
 
   // update global values
-  const factory = UniswapFactory.load(FACTORY_ADDRESS)
+  let factory = UniswapFactory.load(FACTORY_ADDRESS)
   factory.totalVolumeUSD = factory.totalVolumeUSD.plus(amountTotalUSD)
   factory.totalVolumeETH = factory.totalVolumeETH.plus(amountTotalETH)
   factory.txCount = factory.txCount.plus(ONE_BI)
@@ -413,11 +413,12 @@ export function handleSwap(event: Swap): void {
   // update swap event
   swap.pair = pair.id
   swap.sender = event.params.sender
-  swap.to = event.params.to
   swap.amount0In = amount0In
   swap.amount1In = amount1In
   swap.amount0Out = amount0Out
   swap.amount1Out = amount1Out
+  swap.to = event.params.to
+  swap.logIndex = event.logIndex
   swap.save()
 
   // update the transaction
@@ -432,9 +433,9 @@ export function handleSwap(event: Swap): void {
   updateTokenDayData(token1 as Token, event)
 
   // get ids for date related entities
-  const timestamp = event.block.timestamp.toI32()
-  const dayID = timestamp / 86400
-  const dayPairID = event.address
+  let timestamp = event.block.timestamp.toI32()
+  let dayID = timestamp / 86400
+  let dayPairID = event.address
     .toHexString()
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
@@ -446,14 +447,14 @@ export function handleSwap(event: Swap): void {
   uniswapDayData.save()
 
   // swap specific updating
-  const pairDayData = PairDayData.load(dayPairID)
+  let pairDayData = PairDayData.load(dayPairID)
   pairDayData.dailyVolumeToken0 = pairDayData.dailyVolumeToken0.plus(amount0Total)
   pairDayData.dailyVolumeToken1 = pairDayData.dailyVolumeToken1.plus(amount1Total)
   pairDayData.dailyVolumeUSD = pairDayData.dailyVolumeUSD.plus(amountTotalUSD)
   pairDayData.save()
 
   // swap specific updating for token0
-  const token0DayID = token0.id
+  let token0DayID = token0.id
     .toString()
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
@@ -472,7 +473,7 @@ export function handleSwap(event: Swap): void {
   token0DayData.save()
 
   // swap specific updating
-  const token1DayID = token1.id
+  let token1DayID = token1.id
     .toString()
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
