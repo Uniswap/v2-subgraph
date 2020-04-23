@@ -113,6 +113,7 @@ export function handleTransfer(event: Transfer): void {
           .concat('-')
           .concat(BigInt.fromI32(mints.length).toString())
       )
+      mint.pair = pair.id
       mint.to = to
       mint.liquidity = value
       mint.save()
@@ -141,6 +142,7 @@ export function handleTransfer(event: Transfer): void {
         .concat('-')
         .concat(BigInt.fromI32(burns.length).toString())
     )
+    burn.pair = pair.id
     burn.liquidity = value
 
     // if this logical burn included a fee mint, account for this
@@ -243,7 +245,6 @@ export function handleMint(event: Mint): void {
   pair.save()
   uniswap.save()
 
-  mint.pair = pair.id
   mint.sender = event.params.sender
   mint.amount0 = token0Amount as BigDecimal
   mint.amount1 = token1Amount as BigDecimal
@@ -307,12 +308,10 @@ export function handleBurn(event: Burn): void {
   factory.save()
 
   // update burn
-  burn.pair = pair.id
   burn.sender = event.params.sender
-  burn.to = event.params.to
-
   burn.amount0 = token0Amount as BigDecimal
   burn.amount1 = token1Amount as BigDecimal
+  burn.to = event.params.to
   burn.logIndex = event.logIndex
   burn.amountUSD = amountTotalUSD as BigDecimal
   burn.save()
