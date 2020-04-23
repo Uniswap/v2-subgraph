@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import { Pair } from '../types/schema'
 import { BigDecimal, BigInt, Address } from '@graphprotocol/graph-ts/index'
 
@@ -8,9 +9,9 @@ const DAI_ADDRESS = '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735'
 const DAI_BLOCK_CONTRACT_CREATION = 5729921
 
 export function getEthPriceInUSD(blockNum: BigInt): BigDecimal {
-  const blockNumInt = blockNum.toI32()
+  let blockNumInt = blockNum.toI32()
   if (blockNumInt >= DAI_BLOCK_CONTRACT_CREATION) {
-    const daiWethPair = Pair.load(Address.fromString(DAI_WETH_EXCHANGE).toHexString())
+    let daiWethPair = Pair.load(Address.fromString(DAI_WETH_EXCHANGE).toHexString())
     if (daiWethPair != null) {
       if (daiWethPair.token0 == DAI_ADDRESS) {
         return daiWethPair.token0Price // dai per weth

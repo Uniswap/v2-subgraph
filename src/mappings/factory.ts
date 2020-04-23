@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import { log, Address } from '@graphprotocol/graph-ts'
 import { UniswapFactory, Pair, Token, Bundle } from '../types/schema'
 import { PairCreated } from '../types/Factory/Factory'
@@ -21,7 +22,7 @@ export function handleNewPair(event: PairCreated): void {
     factory.mostLiquidTokens = []
 
     // create new bundle
-    const bundle = new Bundle('1')
+    let bundle = new Bundle('1')
     bundle.ethPrice = ZERO_BD
     bundle.save()
   }
@@ -37,7 +38,12 @@ export function handleNewPair(event: PairCreated): void {
     token0 = new Token(event.params.token0.toHexString())
     token0.symbol = fetchTokenSymbol(event.params.token0)
     token0.name = fetchTokenName(event.params.token0)
-    token0.decimals = fetchTokenDecimals(event.params.token0)
+    let decimals = fetchTokenDecimals(event.params.token0)
+    // bail if we couldn't figure out the decimals
+    if (decimals === null) {
+      return
+    }
+    token0.decimals = decimals
     token0.derivedETH = ZERO_BD
     token0.tradeVolume = ZERO_BD
     token0.tradeVolumeUSD = ZERO_BD
@@ -51,7 +57,12 @@ export function handleNewPair(event: PairCreated): void {
     token1 = new Token(event.params.token1.toHexString())
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
-    token1.decimals = fetchTokenDecimals(event.params.token1)
+    let decimals = fetchTokenDecimals(event.params.token1)
+    // bail if we couldn't figure out the decimals
+    if (decimals === null) {
+      return
+    }
+    token1.decimals = decimals
     token1.derivedETH = ZERO_BD
     token1.tradeVolume = ZERO_BD
     token1.tradeVolumeUSD = ZERO_BD
@@ -60,51 +71,50 @@ export function handleNewPair(event: PairCreated): void {
     token1.mostLiquidPairs = []
   }
 
-  const newAllPairsArray0 = token0.allPairs
+  let newAllPairsArray0 = token0.allPairs
   newAllPairsArray0.push(event.params.pair.toHexString())
   token0.allPairs = newAllPairsArray0
 
-  const newAllPairsArray1 = token1.allPairs
+  let newAllPairsArray1 = token1.allPairs
   newAllPairsArray1.push(event.params.pair.toHexString())
   token1.allPairs = newAllPairsArray1
 
-  if (token0.decimals !== null && token1.decimals !== null) {
-    const pair = new Pair(event.params.pair.toHexString()) as Pair
-    pair.token0 = token0.id
-    pair.token1 = token1.id
-    pair.createdAtTimestamp = event.block.timestamp
-    pair.createdAtBlockNumber = event.block.number
-    pair.txCount = ZERO_BI
-    pair.reserve0 = ZERO_BD
-    pair.reserve1 = ZERO_BD
-    pair.reserveUSD = ZERO_BD
-    pair.totalSupply = ZERO_BD
-    pair.volumeToken0 = ZERO_BD
-    pair.volumeToken1 = ZERO_BD
-    pair.volumeUSD = ZERO_BD
-    pair.token0Price = ZERO_BD
-    pair.token1Price = ZERO_BD
+  let pair = new Pair(event.params.pair.toHexString()) as Pair
+  pair.token0 = token0.id
+  pair.token1 = token1.id
+  pair.createdAtTimestamp = event.block.timestamp
+  pair.createdAtBlockNumber = event.block.number
+  pair.txCount = ZERO_BI
+  pair.reserve0 = ZERO_BD
+  pair.reserve1 = ZERO_BD
+  pair.reserveUSD = ZERO_BD
+  pair.totalSupply = ZERO_BD
+  pair.volumeToken0 = ZERO_BD
+  pair.volumeToken1 = ZERO_BD
+  pair.volumeUSD = ZERO_BD
+  pair.token0Price = ZERO_BD
+  pair.token1Price = ZERO_BD
 
-    // set weth exchange if exists
-    const WETHAddress = Address.fromString('0xc778417e063141139fce010982780140aa0cd5ab')
-    if (event.params.token0 == WETHAddress) {
-      token1.wethPair = event.params.pair.toHexString()
-    } else if (event.params.token1 == WETHAddress) {
-      token0.wethPair = event.params.pair.toHexString()
-    }
-
-    // update factory totals
-    const factoryPairs = factory.pairs
-    factoryPairs.push(pair.id)
-    factory.pairs = factoryPairs
-
-    // create the tracked contract based on the template
-    PairTemplate.create(event.params.pair)
-
-    // save updated values
-    token0.save()
-    token1.save()
-    pair.save()
-    factory.save()
+  // set weth exchange if exists
+  // TODO change to mainnet WETH
+  let WETHAddress = Address.fromString('0xc778417e063141139fce010982780140aa0cd5ab')
+  if (event.params.token0 == WETHAddress) {
+    token1.wethPair = pair.id
+  } else if (event.params.token1 == WETHAddress) {
+    token0.wethPair = pair.id
   }
+
+  // update factory totals
+  let factoryPairs = factory.pairs
+  factoryPairs.push(pair.id)
+  factory.pairs = factoryPairs
+
+  // create the tracked contract based on the template
+  PairTemplate.create(event.params.pair)
+
+  // save updated values
+  token0.save()
+  token1.save()
+  pair.save()
+  factory.save()
 }

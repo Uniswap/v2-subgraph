@@ -1,8 +1,8 @@
-# Uniswap-subgraph
+# Uniswap V2 Subgraph
 
-[Uniswap](https://uniswap.io/) is a decentralized protocol for automated token exchange on Ethereum.
+[Uniswap](https://uniswap.org/) is a decentralized protocol for automated token exchange on Ethereum.
 
-This Subgraph dynamically tracks any exchange created by the uniswap factory. Any exchange, any user of the protocol, and any transaction of the protocol can be queried.
+This subgraph dynamically tracks any exchange created by the uniswap factory. Any exchange, any user of the protocol, and any transaction of the protocol can be queried.
 
 ## Running Locally
 

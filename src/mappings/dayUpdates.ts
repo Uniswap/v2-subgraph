@@ -8,12 +8,12 @@ const maxTokenDayDatas = 10
 const maxPairDayDatas = 10
 
 function updateStoredPairs(tokenDayData: TokenDayData, exchangeDayID: string): void {
-  const pairDayData = PairDayData.load(exchangeDayID.toString())
-  const newList = tokenDayData.mostLiquidPairs
+  let pairDayData = PairDayData.load(exchangeDayID.toString())
+  let newList = tokenDayData.mostLiquidPairs
   let alreadyInList = false
   // check if exchange is already in list, make sure to compare on exchange
   for (let i = 0; i < newList.length; i++) {
-    const currentPairData = PairDayData.load(newList[i])
+    let currentPairData = PairDayData.load(newList[i])
     if (currentPairData.pairAddress.toHexString() == pairDayData.pairAddress.toHexString()) {
       alreadyInList = true
       newList[i] = pairDayData.id // reset to new day data
@@ -27,11 +27,11 @@ function updateStoredPairs(tokenDayData: TokenDayData, exchangeDayID: string): v
   } else if (!alreadyInList) {
     // loop through stored list and find min token liquidity
     for (let i = 0; i < newList.length; i++) {
-      const currentPairs = tokenDayData.mostLiquidPairs as Array<string>
-      const id = currentPairs[i]
-      const currentPairDayData = PairDayData.load(id.toString())
-      const globalToken = tokenDayData.token
-      const localToken0 = currentPairDayData.token0
+      let currentPairs = tokenDayData.mostLiquidPairs as Array<string>
+      let id = currentPairs[i]
+      let currentPairDayData = PairDayData.load(id.toString())
+      let globalToken = tokenDayData.token
+      let localToken0 = currentPairDayData.token0
       // if our token of interest is token0, compare against that
       if (globalToken == localToken0) {
         if (currentPairDayData.reserve0 < minTokenLiquidity) {
@@ -53,7 +53,7 @@ function updateStoredPairs(tokenDayData: TokenDayData, exchangeDayID: string): v
     }
   }
   tokenDayData.mostLiquidPairs = newList
-  const token = Token.load(tokenDayData.token)
+  let token = Token.load(tokenDayData.token)
   token.mostLiquidPairs = newList
   token.save()
   tokenDayData.save()
@@ -64,13 +64,13 @@ function updateStoredPairs(tokenDayData: TokenDayData, exchangeDayID: string): v
  * If new token is higher than min, replace min list at min index.
  */
 function updateStoredTokens(tokenDayData: TokenDayData, dayID: i32): void {
-  const uniswap = UniswapFactory.load(FACTORY_ADDRESS)
-  const uniswapDayData = UniswapDayData.load(dayID.toString())
-  const newList = uniswapDayData.mostLiquidTokens
+  let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
+  let uniswapDayData = UniswapDayData.load(dayID.toString())
+  let newList = uniswapDayData.mostLiquidTokens
   let alreadyInList = false
   // check if token is already in the list
   for (let i = 0; i < newList.length; i++) {
-    const currentDayData = TokenDayData.load(newList[i].toString())
+    let currentDayData = TokenDayData.load(newList[i].toString())
     if (currentDayData.token.toString() == tokenDayData.token.toString()) {
       alreadyInList = true
       newList[i] = tokenDayData.id
@@ -83,7 +83,7 @@ function updateStoredTokens(tokenDayData: TokenDayData, dayID: i32): void {
     let localMinLiquidity = new BigDecimal(BigInt.fromI32(I32.MAX_VALUE))
     // loop through stored list and find min liquidity
     for (let i = 0; i < newList.length; i++) {
-      const currentDayData = TokenDayData.load(newList[i].toString())
+      let currentDayData = TokenDayData.load(newList[i].toString())
       if (currentDayData.totalLiquidityETH < localMinLiquidity) {
         localMinLiquidity = currentDayData.totalLiquidityETH
         minIndex = i
@@ -101,13 +101,13 @@ function updateStoredTokens(tokenDayData: TokenDayData, dayID: i32): void {
 }
 
 export function updateUniswapDayData(event: EthereumEvent): void {
-  const uniswap = UniswapFactory.load(FACTORY_ADDRESS)
-  const timestamp = event.block.timestamp.toI32()
-  const dayID = timestamp / 86400
-  const dayStartTimestamp = dayID * 86400
+  let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
+  let timestamp = event.block.timestamp.toI32()
+  let dayID = timestamp / 86400
+  let dayStartTimestamp = dayID * 86400
   let uniswapDayData = UniswapDayData.load(dayID.toString())
   if (uniswapDayData == null) {
-    const uniswapDayData = new UniswapDayData(dayID.toString())
+    let uniswapDayData = new UniswapDayData(dayID.toString())
     uniswapDayData.date = dayStartTimestamp
     uniswapDayData.dailyVolumeUSD = ZERO_BD
     uniswapDayData.dailyVolumeETH = ZERO_BD
@@ -128,18 +128,18 @@ export function updateUniswapDayData(event: EthereumEvent): void {
 }
 
 export function updatePairDayData(event: EthereumEvent): void {
-  const timestamp = event.block.timestamp.toI32()
-  const dayID = timestamp / 86400
-  const dayStartTimestamp = dayID * 86400
-  const dayPairID = event.address
+  let timestamp = event.block.timestamp.toI32()
+  let dayID = timestamp / 86400
+  let dayStartTimestamp = dayID * 86400
+  let dayPairID = event.address
     .toHexString()
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
-  const pair = Pair.load(event.address.toHexString())
+  let pair = Pair.load(event.address.toHexString())
   let pairDayData = PairDayData.load(dayPairID)
   if (pairDayData == null) {
-    const pairDayData = new PairDayData(dayPairID)
-    const pair = Pair.load(event.address.toHexString())
+    let pairDayData = new PairDayData(dayPairID)
+    let pair = Pair.load(event.address.toHexString())
     pairDayData.date = dayStartTimestamp
     pairDayData.token0 = pair.token0
     pairDayData.token1 = pair.token1
@@ -162,22 +162,22 @@ export function updatePairDayData(event: EthereumEvent): void {
 }
 
 export function updateTokenDayData(token: Token, event: EthereumEvent): void {
-  const bundle = Bundle.load('1')
-  const timestamp = event.block.timestamp.toI32()
-  const dayID = timestamp / 86400
-  const dayStartTimestamp = dayID * 86400
-  const tokenDayID = token.id
+  let bundle = Bundle.load('1')
+  let timestamp = event.block.timestamp.toI32()
+  let dayID = timestamp / 86400
+  let dayStartTimestamp = dayID * 86400
+  let tokenDayID = token.id
     .toString()
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
-  const dayPairID = event.address
+  let dayPairID = event.address
     .toHexString()
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
 
   let tokenDayData = TokenDayData.load(tokenDayID)
   if (tokenDayData == null) {
-    const tokenDayData = new TokenDayData(tokenDayID)
+    let tokenDayData = new TokenDayData(tokenDayID)
     tokenDayData.date = dayStartTimestamp
     tokenDayData.token = token.id
     tokenDayData.dailyVolumeToken = ZERO_BD
