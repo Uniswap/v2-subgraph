@@ -17,54 +17,15 @@ import { Pair as PairContract, Mint, Burn, Swap, Transfer, Sync } from '../types
 
 import { updatePairDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
 
-import { getEthPriceInUSD } from './priceOracle'
+import { getEthPriceInUSD, findEthPerToken } from './pricing'
 import {
   convertTokenToDecimal,
   ADDRESS_ZERO,
   FACTORY_ADDRESS,
   ONE_BI,
-  ZERO_BD,
   createUser,
   createLiquidityPosition
 } from './helpers'
-
-/**
- * Search through graph to find derived Eth per token.
- * @todo update to be derived ETH (add stablecoin estimates)
- **/
-function findEthPerToken(token: Token, maxDepthReached: boolean): BigDecimal {
-  if (token.wethPair != null) {
-    let wethPair = Pair.load(token.wethPair)
-    if (wethPair.token0 == token.id) {
-      // our token is token 0
-      return wethPair.token1Price
-    } else {
-      // our token is token 1
-      return wethPair.token0Price
-    }
-  } else if (!maxDepthReached) {
-    let allPairs = token.allPairs as Array<string>
-    for (let i = 0; i < allPairs.length; i++) {
-      let currentPair = Pair.load(allPairs[i])
-      if (currentPair.token0 == token.id) {
-        // our token is token 0
-        let otherToken = Token.load(currentPair.token1)
-        let otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
-        if (otherTokenEthPrice != null) {
-          return currentPair.token1Price.times(otherTokenEthPrice)
-        }
-      } else {
-        // our token is token 1
-        let otherToken = Token.load(currentPair.token0)
-        let otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
-        if (otherTokenEthPrice != null) {
-          return currentPair.token0Price.times(otherTokenEthPrice)
-        }
-      }
-    }
-  }
-  return ZERO_BD /** @todo may want to return null */
-}
 
 function isCompleteMint(mintId: string): boolean {
   return MintEvent.load(mintId).sender !== null // sufficient checks
@@ -215,7 +176,7 @@ export function handleMint(event: Mint): void {
 
   // ETH/USD prices
   let bundle = Bundle.load('1')
-  bundle.ethPrice = getEthPriceInUSD(event.block.number)
+  bundle.ethPrice = getEthPriceInUSD()
   bundle.save()
 
   // update global token0 info
@@ -276,7 +237,7 @@ export function handleBurn(event: Burn): void {
 
   //ETH / USD prices
   let bundle = Bundle.load('1')
-  let ethPriceInUSD = getEthPriceInUSD(event.block.number)
+  let ethPriceInUSD = getEthPriceInUSD()
   bundle.ethPrice = ethPriceInUSD
   bundle.save()
 
@@ -365,7 +326,7 @@ export function handleSwap(event: Swap): void {
 
   // ETH/USD prices
   let bundle = Bundle.load('1')
-  let ethPriceInUSD = getEthPriceInUSD(event.block.number)
+  let ethPriceInUSD = getEthPriceInUSD()
   bundle.ethPrice = ethPriceInUSD
   bundle.save()
 

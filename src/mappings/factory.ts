@@ -97,7 +97,7 @@ export function handleNewPair(event: PairCreated): void {
 
   // set weth exchange if exists
   // TODO change to mainnet WETH
-  let WETHAddress = Address.fromString('0xc778417e063141139fce010982780140aa0cd5ab')
+  let WETHAddress = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
   if (event.params.token0 == WETHAddress) {
     token1.wethPair = pair.id
   } else if (event.params.token1 == WETHAddress) {
