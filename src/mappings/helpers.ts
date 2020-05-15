@@ -58,7 +58,7 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
   if (symbolResult.reverted) {
     let symbolResultBytes = contractSymbolBytes.try_symbol()
     if (!symbolResultBytes.reverted) {
-      // for broken exchanges that have no symbol function exposed
+      // for broken pairs that have no symbol function exposed
       if (!isNullEthValue(symbolResultBytes.value.toHexString())) {
         symbolValue = symbolResultBytes.value.toString()
       }

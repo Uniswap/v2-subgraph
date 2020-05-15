@@ -291,6 +291,9 @@ export function handleSync(event: Sync): void {
   pair.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
   pair.token0Price = pair.reserve0.div(pair.reserve1)
   pair.token1Price = pair.reserve1.div(pair.reserve0)
+
+  // for all pairs in each token - update their rserves
+
   pair.save()
 }
 
