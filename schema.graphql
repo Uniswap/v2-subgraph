@@ -33,6 +33,9 @@ type Token @entity {
   # token specific volume
   tradeVolume: BigDecimal!
   tradeVolumeUSD: BigDecimal!
+  
+  # transactions across all pairs
+  txCount: BigInt!
 
   # liquidity across all pairs
   totalLiquidity: BigDecimal!
@@ -60,7 +63,8 @@ type Pair @entity {
   reserve1: BigDecimal!
   totalSupply: BigDecimal!
 
-  # derived liquidity
+  # derived liquidity 
+  reserveETH: BigDecimal 
   reserveUSD: BigDecimal!
 
   # Price in terms of the asset pair
@@ -237,13 +241,15 @@ type TokenDayData @entity {
   dailyVolumeToken: BigDecimal!
   dailyVolumeETH: BigDecimal!
   dailyVolumeUSD: BigDecimal!
+  dailyTxns: BigInt!
 
   # liquidity stats
   totalLiquidityToken: BigDecimal!
   totalLiquidityETH: BigDecimal!
   totalLiquidityUSD: BigDecimal!
 
-  dailyTxns: BigInt!
+  # price stats
+  priceUSD: BigDecimal!
 
   # top pairs that this token is in by liquidity
   maxStored: Int!

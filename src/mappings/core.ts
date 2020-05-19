@@ -152,8 +152,53 @@ export function handleTransfer(event: Transfer): void {
     }
     toUserLiquidityPosition.save()
   }
-
   transaction.save()
+}
+
+export function handleSync(event: Sync): void {
+  let pair = Pair.load(event.address.toHex())
+  let token0 = Token.load(pair.token0)
+  let token1 = Token.load(pair.token1)
+  let factory = UniswapFactory.load(FACTORY_ADDRESS)
+
+  // reset factory liquidity
+  factory.totalLiquidityETH = factory.totalLiquidityETH.minus(pair.reserveETH as BigDecimal)
+
+  // update pair with new values
+  pair.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
+  pair.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
+  pair.token0Price = pair.reserve0.div(pair.reserve1)
+  pair.token1Price = pair.reserve1.div(pair.reserve0)
+  pair.save() // save to use in helper functions
+
+  // update ETH price
+  let bundle = Bundle.load('1')
+  bundle.ethPrice = getEthPriceInUSD()
+  bundle.save()
+
+  token0.derivedETH = findEthPerToken(token0 as Token, false)
+  token1.derivedETH = findEthPerToken(token1 as Token, false)
+
+  // update the derivedETH value for pair
+  pair.reserveETH = pair.reserve0
+    .times(token0.derivedETH as BigDecimal)
+    .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
+
+  // update derived USD reserves for pair
+  pair.reserveUSD = pair.reserve0
+    .times(token0.derivedETH as BigDecimal)
+    .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
+    .times(bundle.ethPrice)
+
+  // update total liquidity with new reserves and prices
+  factory.totalLiquidityETH = factory.totalLiquidityETH.plus(pair.reserveETH as BigDecimal)
+  factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)
+
+  // save entities
+  token0.save()
+  token1.save()
+  pair.save()
+  factory.save()
 }
 
 export function handleMint(event: Mint): void {
@@ -171,37 +216,24 @@ export function handleMint(event: Mint): void {
   let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   let token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
-  pair.txCount = pair.txCount.plus(ONE_BI)
-  pair.save()
-
-  // ETH/USD prices
-  let bundle = Bundle.load('1')
-  bundle.ethPrice = getEthPriceInUSD()
-  bundle.save()
-
-  // update global token0 info
-  let ethPerToken0 = findEthPerToken(token0 as Token, false)
-  let usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
-  token0.derivedETH = ethPerToken0
+  // update global token info
   token0.totalLiquidity = token0.totalLiquidity.plus(token0Amount)
-
-  // update global token1 info
-  let ethPerToken1 = findEthPerToken(token1 as Token, false)
-  let usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
-  token1.derivedETH = ethPerToken1
   token1.totalLiquidity = token1.totalLiquidity.plus(token1Amount)
 
+  // update txn counts
+  token0.txCount = token0.txCount.plus(ONE_BI)
+  token1.txCount = token1.txCount.plus(ONE_BI)
+
   // get new amounts of USD and ETH for tracking
-  let amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
-  let amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
+  let bundle = Bundle.load('1')
+  let amountTotalUSD = token1.derivedETH
+    .times(token1Amount)
+    .plus(token0.derivedETH.times(token0Amount))
+    .times(bundle.ethPrice)
 
-  // update global liquidity
-  uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.plus(amountTotalETH)
-  uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
+  // update txn counts
+  pair.txCount = pair.txCount.plus(ONE_BI)
   uniswap.txCount = uniswap.txCount.plus(ONE_BI)
-
-  // update exchange liquidity
-  pair.reserveUSD = pair.reserve0.times(usdPerToken0).plus(pair.reserve1.times(usdPerToken1))
 
   // save entities
   token0.save()
@@ -219,13 +251,11 @@ export function handleMint(event: Mint): void {
 
 export function handleBurn(event: Burn): void {
   let transaction = Transaction.load(event.transaction.hash.toHexString())
-
   let burns = transaction.burns
   let burn = BurnEvent.load(burns[burns.length - 1])
 
   let pair = Pair.load(event.address.toHex())
-  // TODO Add in global aggregations
-  let factory = UniswapFactory.load(FACTORY_ADDRESS)
+  let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
 
   //update token info
   let token0 = Token.load(pair.token0)
@@ -233,43 +263,30 @@ export function handleBurn(event: Burn): void {
   let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   let token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
-  pair.txCount = pair.txCount.plus(ONE_BI)
-
-  //ETH / USD prices
-  let bundle = Bundle.load('1')
-  let ethPriceInUSD = getEthPriceInUSD()
-  bundle.ethPrice = ethPriceInUSD
-  bundle.save()
-
-  // update global token0 info
-  let ethPerToken0 = findEthPerToken(token0 as Token, false)
-  let usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
-  token0.derivedETH = ethPerToken0
+  // update global token info
   token0.totalLiquidity = token0.totalLiquidity.minus(token0Amount)
-
-  // update global token1 info
-  let ethPerToken1 = findEthPerToken(token1 as Token, false)
-  let usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
-  token1.derivedETH = ethPerToken1
   token1.totalLiquidity = token1.totalLiquidity.minus(token1Amount)
 
+  // update txn counts
+  token0.txCount = token0.txCount.plus(ONE_BI)
+  token1.txCount = token1.txCount.plus(ONE_BI)
+
   // get new amounts of USD and ETH for tracking
-  let amountTotalETH = ethPerToken1.times(token1Amount).plus(ethPerToken0.times(token0Amount))
-  let amountTotalUSD = usdPerToken1.times(token1Amount).plus(usdPerToken0.times(token0Amount))
+  let bundle = Bundle.load('1')
+  let amountTotalUSD = token1.derivedETH
+    .times(token1Amount)
+    .plus(token0.derivedETH.times(token0Amount))
+    .times(bundle.ethPrice)
 
-  // update global liquidity
-  factory.totalLiquidityETH = factory.totalLiquidityETH.minus(amountTotalETH)
-  factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)
-  factory.txCount = factory.txCount.plus(ONE_BI)
-
-  // update pair usd liquidity
-  pair.reserveUSD = pair.reserveUSD.minus(amountTotalUSD)
+  // update txn counts
+  uniswap.txCount = uniswap.txCount.plus(ONE_BI)
+  pair.txCount = pair.txCount.plus(ONE_BI)
 
   // update global counter and save
   token0.save()
   token1.save()
   pair.save()
-  factory.save()
+  uniswap.save()
 
   // update burn
   burn.sender = event.params.sender
@@ -279,22 +296,6 @@ export function handleBurn(event: Burn): void {
   burn.logIndex = event.logIndex
   burn.amountUSD = amountTotalUSD as BigDecimal
   burn.save()
-}
-
-export function handleSync(event: Sync): void {
-  let pair = Pair.load(event.address.toHex())
-  let token0 = Token.load(pair.token0)
-  let token1 = Token.load(pair.token1)
-
-  // update pair with new values
-  pair.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
-  pair.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
-  pair.token0Price = pair.reserve0.div(pair.reserve1)
-  pair.token1Price = pair.reserve1.div(pair.reserve0)
-
-  // for all pairs in each token - update their rserves
-
-  pair.save()
 }
 
 export function handleSwap(event: Swap): void {
@@ -318,64 +319,50 @@ export function handleSwap(event: Swap): void {
   pair.txCount = pair.txCount.plus(ONE_BI)
   pair.save()
 
-  // reset the factory total liquidity before adjusting
-  let factory = UniswapFactory.load(FACTORY_ADDRESS)
-  factory.totalLiquidityETH = factory.totalLiquidityETH.minus(
-    token0.totalLiquidity.times(token0.derivedETH as BigDecimal)
-  )
-  factory.totalLiquidityETH = factory.totalLiquidityETH.minus(
-    token1.totalLiquidity.times(token1.derivedETH as BigDecimal)
-  )
-
   // ETH/USD prices
   let bundle = Bundle.load('1')
-  let ethPriceInUSD = getEthPriceInUSD()
-  bundle.ethPrice = ethPriceInUSD
-  bundle.save()
-
-  let ethPerToken0 = findEthPerToken(token0 as Token, false)
-  let usdPerToken0 = bundle.ethPrice.times(ethPerToken0)
-  token0.derivedETH = ethPerToken0
-
-  let ethPerToken1 = findEthPerToken(token1 as Token, false)
-  let usdPerToken1 = bundle.ethPrice.times(ethPerToken1)
-  token1.derivedETH = ethPerToken1
 
   // get total amounts of derived USD and ETH for tracking
-  let amountTotalETH = ethPerToken1.times(amount1Total).plus(ethPerToken0.times(amount0Total))
-  let amountTotalUSD = usdPerToken1.times(amount1Total).plus(usdPerToken0.times(amount0Total))
+  let amountTotalETH = token1.derivedETH.times(amount1Total).plus(token0.derivedETH.times(amount0Total))
+  let amountTotalUSD = amountTotalETH.times(bundle.ethPrice)
 
-  // update token0 global volume and liquidity stats
+  // update token0 global volume and token liquidity stats
   token0.totalLiquidity = token0.totalLiquidity.plus(amount0In).minus(amount0Out)
   token0.tradeVolume = token0.tradeVolume.plus(amount0In.plus(amount0Out))
-  token0.tradeVolumeUSD = token0.tradeVolumeUSD.plus(usdPerToken0.times(amount0Total))
+  token0.tradeVolumeUSD = token0.tradeVolumeUSD.plus(token0.derivedETH.times(bundle.ethPrice).times(amount0Total))
 
-  // update token0 global volume and liquidity stats
+  // update token1 global volume and token liquidity stats
   token1.totalLiquidity = token1.totalLiquidity.plus(amount1In).minus(amount1Out)
   token1.tradeVolume = token1.tradeVolume.plus(amount1In.plus(amount1Out))
-  token1.tradeVolumeUSD = token1.tradeVolumeUSD.plus(usdPerToken1.times(amount1Total))
+  token1.tradeVolumeUSD = token1.tradeVolumeUSD.plus(token1.derivedETH.times(bundle.ethPrice).times(amount1Total))
+
+  // update txn counts
+  token0.txCount = token0.txCount.plus(ONE_BI)
+  token1.txCount = token1.txCount.plus(ONE_BI)
 
   // update pair volume data in derived USD
   pair.volumeUSD = pair.volumeUSD.plus(amountTotalUSD)
 
-  // reset factory liquidity amounts
-  factory.totalLiquidityETH = factory.totalLiquidityETH.plus(
-    token0.totalLiquidity
-      .times(token0.derivedETH as BigDecimal)
-      .plus(token1.totalLiquidity.times(token1.derivedETH as BigDecimal))
-  )
-  factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)
+  // check liquidity threshold
+  let derivedLiquidityETH = pair.reserve0
+    .times(token0.derivedETH as BigDecimal)
+    .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
 
   // update global values
-  factory.totalVolumeUSD = factory.totalVolumeUSD.plus(amountTotalUSD)
-  factory.totalVolumeETH = factory.totalVolumeETH.plus(amountTotalETH)
-  factory.txCount = factory.txCount.plus(ONE_BI)
+  let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
+
+  // only update if over threshold
+  if (derivedLiquidityETH.gt(BigDecimal.fromString('0.1'))) {
+    uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(amountTotalUSD)
+    uniswap.totalVolumeETH = uniswap.totalVolumeETH.plus(amountTotalETH)
+  }
+  uniswap.txCount = uniswap.txCount.plus(ONE_BI)
 
   // save entities
   pair.save()
   token0.save()
   token1.save()
-  factory.save()
+  uniswap.save()
 
   let transaction = Transaction.load(event.transaction.hash.toHexString())
   if (transaction === null) {
@@ -433,7 +420,7 @@ export function handleSwap(event: Swap): void {
   uniswapDayData.dailyVolumeETH = uniswapDayData.dailyVolumeETH.plus(amountTotalETH)
   uniswapDayData.save()
 
-  // swap specific updating
+  // swap specific updating for pair
   let pairDayData = PairDayData.load(dayPairID)
   pairDayData.dailyVolumeToken0 = pairDayData.dailyVolumeToken0.plus(amount0Total)
   pairDayData.dailyVolumeToken1 = pairDayData.dailyVolumeToken1.plus(amount1Total)
@@ -446,14 +433,11 @@ export function handleSwap(event: Swap): void {
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
   let token0DayData = TokenDayData.load(token0DayID)
-
   token0DayData.dailyVolumeToken = token0DayData.dailyVolumeToken.plus(amount0Total)
-  token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(amount0Total.times(ethPerToken0))
+  token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(amount0Total.times(token1.derivedETH as BigDecimal))
   token0DayData.dailyVolumeUSD = token0DayData.dailyVolumeUSD.plus(
-    amount0Total.times(ethPerToken0).times(bundle.ethPrice)
+    amount0Total.times(token0.derivedETH as BigDecimal).times(bundle.ethPrice)
   )
-
-  // save token day data
   token0DayData.save()
 
   // swap specific updating
@@ -463,13 +447,10 @@ export function handleSwap(event: Swap): void {
     .concat(BigInt.fromI32(dayID).toString())
   let token1DayData = TokenDayData.load(token1DayID)
   token1DayData = TokenDayData.load(token1DayID)
-
   token1DayData.dailyVolumeToken = token1DayData.dailyVolumeToken.plus(amount1Total)
-  token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(amount1Total.times(ethPerToken1))
+  token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(amount1Total.times(token1.derivedETH as BigDecimal))
   token1DayData.dailyVolumeUSD = token1DayData.dailyVolumeUSD.plus(
-    amount1Total.times(ethPerToken1).times(bundle.ethPrice)
+    amount1Total.times(token1.derivedETH as BigDecimal).times(bundle.ethPrice)
   )
-
-  // save token day data
   token1DayData.save()
 }
