@@ -343,19 +343,11 @@ export function handleSwap(event: Swap): void {
   // update pair volume data in derived USD
   pair.volumeUSD = pair.volumeUSD.plus(amountTotalUSD)
 
-  // check liquidity threshold
-  let derivedLiquidityETH = pair.reserve0
-    .times(token0.derivedETH as BigDecimal)
-    .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
-
   // update global values
   let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
 
-  // only update if over threshold
-  if (derivedLiquidityETH.gt(BigDecimal.fromString('0.1'))) {
-    uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(amountTotalUSD)
-    uniswap.totalVolumeETH = uniswap.totalVolumeETH.plus(amountTotalETH)
-  }
+  uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(amountTotalUSD)
+  uniswap.totalVolumeETH = uniswap.totalVolumeETH.plus(amountTotalETH)
   uniswap.txCount = uniswap.txCount.plus(ONE_BI)
 
   // save entities
