@@ -344,7 +344,7 @@ export function handleSwap(event: Swap): void {
   token1.txCount = token1.txCount.plus(ONE_BI)
 
   // update pair volume data in derived USD
-  pair.volumeUSD = pair.volumeUSD.plus(amountTotalUSD)
+  pair.volumeUSD = pair.volumeUSD.plus(amountTotalUSD.div(BigDecimal.fromString('2')))
 
   // update global values - update with strict volume amount
   let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
