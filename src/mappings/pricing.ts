@@ -81,7 +81,7 @@ function getPriceFromAddress(tokenAddress: string): BigDecimal {
   if (tokenAddress == WETH_ADDRESS) {
     return bundle.ethPrice
   }
-  if (tokenAddress == USDC_ADDRESS) {
+  if (tokenAddress == DAI_ADDRESS) {
     return BigDecimal.fromString('1')
   }
   if (tokenAddress == USDC_ADDRESS) {
