@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
-import { Pair, Token } from '../types/schema'
-import { BigDecimal, Address, log } from '@graphprotocol/graph-ts/index'
+import { Pair, Token, Bundle } from '../types/schema'
+import { BigDecimal, Address } from '@graphprotocol/graph-ts/index'
 import { ZERO_BD, ONE_BD, factoryContract, ADDRESS_ZERO } from './helpers'
 
 const DAI_WETH_PAIR = '0xa478c2975ab1ea89e8196811f51a7b7ade33eb11'
@@ -15,7 +15,8 @@ const USDT_WETH_PAIR = '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852'
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 
 // only count derived ETH prices in WETH pairs with at least this much WETH reserve
-const ETH_RESERVE_THRESHOLD = BigDecimal.fromString('0.1')
+let ETH_RESERVE_THRESHOLD = BigDecimal.fromString('0.1')
+
 function deriveEthPrice(pairAddress: string, tokenAddress: string): BigDecimal {
   let tokensPerEth = ZERO_BD
   // loop through each stablecoin and find eth price
@@ -156,4 +157,3 @@ export function getTrackedVolumeUSD(
 
   return ZERO_BD // case where neither token is ETH or stablecoin
 }
-
