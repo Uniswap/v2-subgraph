@@ -14,9 +14,7 @@ import {
   Bundle
 } from '../types/schema'
 import { Pair as PairContract, Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Pair/Pair'
-
 import { updatePairDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
-
 import { getEthPriceInUSD, findEthPerToken, getTrackedVolumeUSD } from './pricing'
 import {
   convertTokenToDecimal,
@@ -327,6 +325,7 @@ export function handleSwap(event: Swap): void {
   token0.tradeVolume = token0.tradeVolume.plus(amount0In.plus(amount0Out))
   token0.tradeVolumeUSD = token0.tradeVolumeUSD.plus(trackedAmountUSD === ZERO_BD ? derivedAmountUSD : trackedAmountUSD)
 
+
   // update token1 global volume and token liquidity stats
   token1.totalLiquidity = token1.totalLiquidity.plus(amount1In).minus(amount1Out)
   token1.tradeVolume = token1.tradeVolume.plus(amount1In.plus(amount1Out))
@@ -346,7 +345,7 @@ export function handleSwap(event: Swap): void {
   pair.txCount = pair.txCount.plus(ONE_BI)
   pair.save()
 
-  // update global values - update with strict volume amount
+  // update global values
   let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
   uniswap.totalVolumeUSD = uniswap.totalVolumeUSD.plus(trackedAmountUSD)
   uniswap.totalVolumeETH = uniswap.totalVolumeETH.plus(derivedAmountETH)
