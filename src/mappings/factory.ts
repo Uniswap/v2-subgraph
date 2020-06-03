@@ -50,6 +50,7 @@ export function handleNewPair(event: PairCreated): void {
     token0.totalLiquidity = ZERO_BD
     token0.allPairs = []
     token0.mostLiquidPairs = []
+    token0.txCount = ZERO_BI
   }
 
   // fetch info if null
@@ -69,6 +70,7 @@ export function handleNewPair(event: PairCreated): void {
     token1.totalLiquidity = ZERO_BD
     token1.allPairs = []
     token1.mostLiquidPairs = []
+    token1.txCount = ZERO_BI
   }
 
   let newAllPairsArray0 = token0.allPairs
@@ -97,7 +99,7 @@ export function handleNewPair(event: PairCreated): void {
 
   // set weth exchange if exists
   // TODO change to mainnet WETH
-  let WETHAddress = Address.fromString('0xc778417e063141139fce010982780140aa0cd5ab')
+  let WETHAddress = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
   if (event.params.token0 == WETHAddress) {
     token1.wethPair = pair.id
   } else if (event.params.token1 == WETHAddress) {

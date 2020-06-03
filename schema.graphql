@@ -33,6 +33,9 @@ type Token @entity {
   # token specific volume
   tradeVolume: BigDecimal!
   tradeVolumeUSD: BigDecimal!
+  
+  # transactions across all pairs
+  txCount: BigInt!
 
   # liquidity across all pairs
   totalLiquidity: BigDecimal!
@@ -60,7 +63,8 @@ type Pair @entity {
   reserve1: BigDecimal!
   totalSupply: BigDecimal!
 
-  # derived liquidity
+  # derived liquidity 
+  reserveETH: BigDecimal 
   reserveUSD: BigDecimal!
 
   # Price in terms of the asset pair
@@ -112,6 +116,7 @@ type Mint @entity {
   # transaction hash + "-" + index in mints Transaction array
   id: ID!
   transaction: Transaction! @derivedFrom(field: "mints")
+  timestamp: BigInt! # need this to pull recent txns for specific token or pair 
 
   pair: Pair!
 
@@ -136,6 +141,7 @@ type Burn @entity {
   # transaction hash + "-" + index in mints Transaction array
   id: ID!
   transaction: Transaction! @derivedFrom(field: "burns")
+  timestamp: BigInt! # need this to pull recent txns for specific token or pair 
 
   pair: Pair!
 
@@ -160,6 +166,7 @@ type Swap @entity {
   # transaction hash + "-" + index in swaps Transaction array
   id: ID!
   transaction: Transaction! @derivedFrom(field: "swaps")
+  timestamp: BigInt! # need this to pull recent txns for specific token or pair 
 
   pair: Pair!
 
@@ -171,6 +178,9 @@ type Swap @entity {
   amount1Out: BigDecimal!
   to: Bytes!
   logIndex: BigInt
+
+  # derived info
+  amountUSD: BigDecimal!
 }
 
 # stores for USD calculations
@@ -231,13 +241,15 @@ type TokenDayData @entity {
   dailyVolumeToken: BigDecimal!
   dailyVolumeETH: BigDecimal!
   dailyVolumeUSD: BigDecimal!
+  dailyTxns: BigInt!
 
   # liquidity stats
   totalLiquidityToken: BigDecimal!
   totalLiquidityETH: BigDecimal!
   totalLiquidityUSD: BigDecimal!
 
-  dailyTxns: BigInt!
+  # price stats
+  priceUSD: BigDecimal!
 
   # top pairs that this token is in by liquidity
   maxStored: Int!
