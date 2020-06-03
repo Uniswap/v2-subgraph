@@ -1,3 +1,4 @@
+import { Bundle } from './../types/schema'
 /* eslint-disable prefer-const */
 import { Pair, Token } from '../types/schema'
 import { BigDecimal, Address } from '@graphprotocol/graph-ts/index'
@@ -8,6 +9,8 @@ const DAI_ADDRESS = '0x6b175474e89094c44da98b954eedeac495271d0f'
 
 const USDC_WETH_PAIR = '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc'
 const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+
+const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 
 function deriveEthPrice(pairAddress: string, tokenAddress: string): BigDecimal {
   let tokensPerEth = ZERO_BD
@@ -70,5 +73,43 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
       }
     }
   }
+  return ZERO_BD /** @todo may want to return null */
+}
+
+function getPriceFromAddress(tokenAddress: string): BigDecimal {
+  let bundle = Bundle.load('1')
+  if (tokenAddress == WETH_ADDRESS) {
+    return bundle.ethPrice
+  }
+  if (tokenAddress == DAI_ADDRESS) {
+    return BigDecimal.fromString('1')
+  }
+  if (tokenAddress == USDC_ADDRESS) {
+    return BigDecimal.fromString('1')
+  }
+  return ZERO_BD
+}
+
+export function amountsToUSD(
+  tokenAmount0: BigDecimal,
+  token0: Token,
+  tokenAmount1: BigDecimal,
+  token1: Token
+): BigDecimal {
+  let price0 = getPriceFromAddress(token0.id)
+  let price1 = getPriceFromAddress(token1.id)
+
+  if (price0.notEqual(ZERO_BD) && price1.notEqual(ZERO_BD)) {
+    return tokenAmount0.times(price0)
+  }
+
+  if (price0.notEqual(ZERO_BD) && price1.equals(ZERO_BD)) {
+    return tokenAmount0.times(price0)
+  }
+
+  if (price1.notEqual(ZERO_BD) && price0.equals(ZERO_BD)) {
+    return tokenAmount1.times(price1)
+  }
+
   return ZERO_BD /** @todo may want to return null */
 }
