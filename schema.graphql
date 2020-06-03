@@ -44,7 +44,6 @@ type Token @entity {
   derivedETH: BigDecimal
 
   # address of weth exchange if exists
-  wethPair: Pair
   allPairs: [Pair!]
 
   # saved for historical refernce of most liquid pairs

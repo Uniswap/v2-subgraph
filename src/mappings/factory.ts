@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { log, Address } from '@graphprotocol/graph-ts'
+import { log } from '@graphprotocol/graph-ts'
 import { UniswapFactory, Pair, Token, Bundle } from '../types/schema'
 import { PairCreated } from '../types/Factory/Factory'
 import { Pair as PairTemplate } from '../types/templates'
@@ -43,6 +43,7 @@ export function handleNewPair(event: PairCreated): void {
     if (decimals === null) {
       return
     }
+
     token0.decimals = decimals
     token0.derivedETH = ZERO_BD
     token0.tradeVolume = ZERO_BD
@@ -96,15 +97,6 @@ export function handleNewPair(event: PairCreated): void {
   pair.volumeUSD = ZERO_BD
   pair.token0Price = ZERO_BD
   pair.token1Price = ZERO_BD
-
-  // set weth exchange if exists
-  // TODO change to mainnet WETH
-  let WETHAddress = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
-  if (event.params.token0 == WETHAddress) {
-    token1.wethPair = pair.id
-  } else if (event.params.token1 == WETHAddress) {
-    token0.wethPair = pair.id
-  }
 
   // update factory totals
   let factoryPairs = factory.pairs
