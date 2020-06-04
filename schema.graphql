@@ -28,7 +28,7 @@ type Token @entity {
   # mirrored from the smart contract
   symbol: String!
   name: String!
-  decimals: Int!
+  decimals: BigInt!
 
   # token specific volume
   tradeVolume: BigDecimal!
@@ -63,8 +63,9 @@ type Pair @entity {
   totalSupply: BigDecimal!
 
   # derived liquidity 
-  reserveETH: BigDecimal 
+  reserveETH: BigDecimal!
   reserveUSD: BigDecimal!
+  trackedReserveETH: BigDecimal! # used for separating per pair reserves and global
 
   # Price in terms of the asset pair
   token0Price: BigDecimal!

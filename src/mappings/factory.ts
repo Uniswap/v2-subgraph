@@ -6,8 +6,6 @@ import { Pair as PairTemplate } from '../types/templates'
 import { FACTORY_ADDRESS, ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from './helpers'
 
 export function handleNewPair(event: PairCreated): void {
-  log.debug('New Exchange: {}', [event.params.pair.toHex()])
-
   // load factory (create if first exchange)
   let factory = UniswapFactory.load(FACTORY_ADDRESS)
   if (factory == null) {
@@ -41,6 +39,7 @@ export function handleNewPair(event: PairCreated): void {
     let decimals = fetchTokenDecimals(event.params.token0)
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
+      log.debug('mybug the decimal on token 0 was null', [])
       return
     }
 
@@ -60,8 +59,10 @@ export function handleNewPair(event: PairCreated): void {
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
     let decimals = fetchTokenDecimals(event.params.token1)
+
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
+      log.debug('mybug the decimal on token 1 was null', [])
       return
     }
     token1.decimals = decimals
@@ -90,6 +91,8 @@ export function handleNewPair(event: PairCreated): void {
   pair.txCount = ZERO_BI
   pair.reserve0 = ZERO_BD
   pair.reserve1 = ZERO_BD
+  pair.trackedReserveETH = ZERO_BD
+  pair.reserveETH = ZERO_BD
   pair.reserveUSD = ZERO_BD
   pair.totalSupply = ZERO_BD
   pair.volumeToken0 = ZERO_BD
@@ -112,3 +115,4 @@ export function handleNewPair(event: PairCreated): void {
   pair.save()
   factory.save()
 }
+// }

@@ -2,221 +2,56 @@
 
 [Uniswap](https://uniswap.org/) is a decentralized protocol for automated token exchange on Ethereum.
 
-This subgraph dynamically tracks any exchange created by the uniswap factory. Any exchange, any user of the protocol, and any transaction of the protocol can be queried.
+This subgraph dynamically tracks any pair created by the uniswap factory. It tracks of the current state of Uniswap contracts, and contains derived stats for things like historical data and USD prices.
+
+- aggregated data across pairs and tokens,
+- data on individual pairs and tokens,
+- data on transactions
+- data on liquidity providers
+- historical data on Uniswap, pairs or tokens, aggregated by day
 
 ## Running Locally
 
 Make sure to update package.json settings to point to your own graph account.
 
-## Important Info
-
-- USD values are based on the Compound Finance DAI oracle, which gets its prices from the Maker oracle.
-- You can find the profit of a liquidity provider with the following information:
-  - Find the ratio of total tokens owned by the user out of all tokens:
-    - `(liquidityTokensMinted - liquidityTokensBurned) / totalLiquidityTokens = ratio`
-  - With that ratio, figure out how much ETH and token could be withdrawn. You must take the tokens and convert to ETH for total ETH they could withdraw:
-    - `ratio * ethBalance = ethWithdrawable`
-    - `ratio * tokenBalance * tokenPrice = tokenWithdrawableInEth`
-    - `ethWithdrawable + tokenWithdrawable = totalWithdrawable`
-  - Now take `ethDeposited - ethWithdrawn = totalEth`
-  - And `(tokenDeposited - tokenWithdrawn) * tokenPrice = totalTokensInEth`
-  - Current Liquidity profit is:
-    - `profit = totalWithdrawable - totalEth - totalTokensInEth`
-
-Currently only the top 50 coins have decimals incorporated into values. This is because not all uniswap exchanges created have proper ERC-20 interfaces, and calling decimals fails. So with dynamic contracts, we had to opt for hardcoding in the top 50 exchanges by volume. The others have tokens represented as the full large number. (i.e. 123456789123456789 instead of 1.23456789123456789). We are tracking this issue here: https://github.com/graphprotocol/graph-node/issues/892
-
 ## Queries
 
 Below are a few ways to show how to query the uniswap-subgraph for data. The queries show most of the information that is queryable, but there are many other filtering options that can be used, just check out the [querying api](https://thegraph.com/docs/graphql-api). These queries can be used locally or in The Graph Explorer playground.
 
-### Querying Aggregated Uniswap Data
+## Key Entity Overviews
 
-This query fetches aggredated data from all uniswap exchanges, to give a view into how much activity is happening within the whole protocol
+#### UniswapFactory
 
-```graphql
-{
-  uniswap(id: "1") {
-    exchangeCount
-    totalVolumeInEth
-    totalLiquidityInEth
-    totalVolumeUSD
-    totalLiquidityUSD
-  }
-}
-```
+Contains data across all of Uniswap V2. This entity tracks important things like total liquidity (in ETH and USD, see below), all time volume, transaction count, number of pairs and more.
 
-### Querying a Uniswap Pair
+#### Token
 
-This query fetches high level information on each uniswap exchange contract.
+Contains data on a specific token. This token specific data is aggregated across all pairs, and is updated whenever there is a transaction involving that pair.
 
-```graphql
-{
-  exchanges(where: { tokenSymbol: "MKR" }) {
-    id
-    tokenAddress
-    tokenSymbol
-    tokenName
-    tokenDecimals
-    fee
-    version
-    startTime
+#### Pairs
 
-    ethLiquidity
-    tokenLiquidity
-    ethBalance
-    tokenBalance
-    combinedBalanceInEth
-    combinedBalanceInUSD
-    ROI
-    totalUniToken
-
-    addLiquidityCount
-    removeLiquidityCount
-    sellTokenCount
-    buyTokenCount
-
-    lastPrice
-    price
-    tradeVolumeToken
-    tradeVolumeEth
-    totalValue
-    weightedAvgPrice
-
-    lastPriceUSD
-    priceUSD
-    weightedAvgPriceUSD
-  }
-}
-```
-
-### Querying User Data
+Contains data on a specific pair.
 
 #### Transactions
 
-This query fetches a user trading Dai between two timestamps, and returns a maximum of ten of their transactions.
+Every transaction on Uniswap is stored. Each transaction contains an array of mints, burns, and swaps that occured within it.
+
+#### Mints, Burns, and Swaps
+
+These contain specifc information about a transaction. Things like which pair triggered the transaction, amounts, sender, recipient, and more. Each is linked to a parent Transaction entity.
+
+## Example Queries
+
+### Querying Aggregated Uniswap Data
+
+This query fetches aggredated data from all uniswap pairs and tokens, to give a view into how much activity is happening within the whole protocol.
 
 ```graphql
 {
-  transactions(
-    where: {
-      timeStamp_gt: 1544832000
-      timeStamp_lt: 1545696000
-      tokenSymbol: "DAI"
-      userAddress: "0x85c5c26dc2af5546341fc1988b9d178148b4838b"
-    }
-    first: 10
-  ) {
-    id
-    exchangeAddress
-    userAddress
-    block
-    ethAmount
-    tokenAmount
-    fee
-    event
-    timeStamp
-  }
-}
-```
-
-#### User Balances on Pairs
-
-This query fetches a single user, and all their exchange balances.
-
-```graphql
-{
-  user(id: "0x0000000000c90bc353314b6911180ed7e06019a9") {
-    exchangeBalances {
-      userAddress
-      exchangeAddress
-
-      ethDeposited
-      tokensDeposited
-      ethWithdrawn
-      tokensWithdrawn
-      uniTokensMinted
-      uniTokensBurned
-
-      ethBought
-      ethSold
-      tokensBought
-      tokensSold
-      ethFeesPaid
-      tokenFeesPaid
-      ethFeesInUSD
-      tokenFeesInUSD
-    }
-  }
-}
-```
-
-### Querying Historical Data
-
-#### PairHistory
-
-This query fetches historical data for the MKR exchange, ordered by time:
-
-```graphql
-{
-  exchangeHistories(where: { tokenSymbol: "MKR" }, orderBy: timestamp, orderDirection: desc) {
-    id
-    exchangeAddress
-    tokenSymbol
-    tokenAddress
-    type
-    timestamp
-    ethLiquidity
-    tokenLiquidity
-    ethBalance
-    tokenBalance
-    combinedBalanceInEth
-    combinedBalanceInUSD
-    ROI
-    totalUniToken
-    priceUSD
-    price
-    tradeVolumeToken
-    tradeVolumeEth
-    feeInEth
-  }
-}
-```
-
-These queries fetch historical data as the events that were emitted, split into trade events and liquidity events:
-
-```graphql
-{
-  liquidityEvents {
-    id
-    type
-    provider
-    ethAmount
-    tokenAmount
-    exchangeAddress
-    timestamp
-    txhash
-    block
-    tokenAddress
-    symbol
-    decimals
-    name
-  }
-  tradeEvents {
-    id
-    type
-    buyer
-    eth
-    token
-    exchangeAddress
-    timestamp
-    txhash
-    block
-    tokenFee
-    ethFee
-    tokenAddress
-    symbol
-    decimals
-    name
+  uniswapFactory(id: "1") {
+    pairCount
+    totalVolumeUSD
+    totalLiquidityUSD
   }
 }
 ```
