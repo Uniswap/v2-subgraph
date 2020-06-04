@@ -1,13 +1,11 @@
 /* eslint-disable prefer-const */
-import { log, Address } from '@graphprotocol/graph-ts'
+import { log } from '@graphprotocol/graph-ts'
 import { UniswapFactory, Pair, Token, Bundle } from '../types/schema'
 import { PairCreated } from '../types/Factory/Factory'
 import { Pair as PairTemplate } from '../types/templates'
 import { FACTORY_ADDRESS, ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from './helpers'
 
 export function handleNewPair(event: PairCreated): void {
-  log.debug('New Exchange: {}', [event.params.pair.toHex()])
-
   // load factory (create if first exchange)
   let factory = UniswapFactory.load(FACTORY_ADDRESS)
   if (factory == null) {
@@ -41,8 +39,10 @@ export function handleNewPair(event: PairCreated): void {
     let decimals = fetchTokenDecimals(event.params.token0)
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
+      log.debug('mybug the decimal on token 0 was null', [])
       return
     }
+
     token0.decimals = decimals
     token0.derivedETH = ZERO_BD
     token0.tradeVolume = ZERO_BD
@@ -59,8 +59,10 @@ export function handleNewPair(event: PairCreated): void {
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
     let decimals = fetchTokenDecimals(event.params.token1)
+
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
+      log.debug('mybug the decimal on token 1 was null', [])
       return
     }
     token1.decimals = decimals
@@ -89,6 +91,8 @@ export function handleNewPair(event: PairCreated): void {
   pair.txCount = ZERO_BI
   pair.reserve0 = ZERO_BD
   pair.reserve1 = ZERO_BD
+  pair.trackedReserveETH = ZERO_BD
+  pair.reserveETH = ZERO_BD
   pair.reserveUSD = ZERO_BD
   pair.totalSupply = ZERO_BD
   pair.volumeToken0 = ZERO_BD
@@ -96,15 +100,6 @@ export function handleNewPair(event: PairCreated): void {
   pair.volumeUSD = ZERO_BD
   pair.token0Price = ZERO_BD
   pair.token1Price = ZERO_BD
-
-  // set weth exchange if exists
-  // TODO change to mainnet WETH
-  let WETHAddress = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
-  if (event.params.token0 == WETHAddress) {
-    token1.wethPair = pair.id
-  } else if (event.params.token1 == WETHAddress) {
-    token0.wethPair = pair.id
-  }
 
   // update factory totals
   let factoryPairs = factory.pairs
@@ -120,3 +115,4 @@ export function handleNewPair(event: PairCreated): void {
   pair.save()
   factory.save()
 }
+// }
