@@ -28,15 +28,15 @@ Contains data across all of Uniswap V2. This entity tracks important things like
 
 Contains data on a specific token. This token specific data is aggregated across all pairs, and is updated whenever there is a transaction involving that pair.
 
-#### Pairs
+#### Pair
 
 Contains data on a specific pair.
 
-#### Transactions
+#### Transaction
 
 Every transaction on Uniswap is stored. Each transaction contains an array of mints, burns, and swaps that occured within it.
 
-#### Mints, Burns, and Swaps
+#### Mint, Burn, Swap
 
 These contain specifc information about a transaction. Things like which pair triggered the transaction, amounts, sender, recipient, and more. Each is linked to a parent Transaction entity.
 
