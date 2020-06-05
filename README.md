@@ -25,19 +25,15 @@ Below are a few ways to show how to query the uniswap-subgraph for data. The que
 Contains data across all of Uniswap V2. This entity tracks important things like total liquidity (in ETH and USD, see below), all time volume, transaction count, number of pairs and more.
 
 #### Token
-
-Contains data on a specific token. This token specific data is aggregated across all pairs, and is updated whenever there is a transaction involving that pair.
+Contains data on a specific token. This token specific data is aggregated across all pairs, and is updated whenever there is a transaction involving that token.
 
 #### Pair
-
 Contains data on a specific pair.
 
 #### Transaction
-
 Every transaction on Uniswap is stored. Each transaction contains an array of mints, burns, and swaps that occured within it.
 
 #### Mint, Burn, Swap
-
 These contain specifc information about a transaction. Things like which pair triggered the transaction, amounts, sender, recipient, and more. Each is linked to a parent Transaction entity.
 
 ## Example Queries
