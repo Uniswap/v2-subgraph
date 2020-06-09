@@ -250,6 +250,12 @@ export function handleMint(event: Mint): void {
   mint.logIndex = event.logIndex
   mint.amountUSD = amountTotalUSD as BigDecimal
   mint.save()
+
+  // update day entities
+  updatePairDayData(event)
+  updateUniswapDayData(event)
+  updateTokenDayData(token0 as Token, event)
+  updateTokenDayData(token1 as Token, event)
 }
 
 export function handleBurn(event: Burn): void {
@@ -299,6 +305,12 @@ export function handleBurn(event: Burn): void {
   burn.logIndex = event.logIndex
   burn.amountUSD = amountTotalUSD as BigDecimal
   burn.save()
+
+  // update day entities
+  updatePairDayData(event)
+  updateUniswapDayData(event)
+  updateTokenDayData(token0 as Token, event)
+  updateTokenDayData(token1 as Token, event)
 }
 
 export function handleSwap(event: Swap): void {
