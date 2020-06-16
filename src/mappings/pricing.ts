@@ -3,45 +3,44 @@ import { Pair, Token, Bundle } from '../types/schema'
 import { BigDecimal, Address } from '@graphprotocol/graph-ts/index'
 import { ZERO_BD, factoryContract, ADDRESS_ZERO } from './helpers'
 
-const DAI_WETH_PAIR = '0xa478c2975ab1ea89e8196811f51a7b7ade33eb11'
-const DAI_ADDRESS = '0x6b175474e89094c44da98b954eedeac495271d0f'
-
-const USDC_WETH_PAIR = '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc'
-const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
-
-const USDT_WETH_PAIR = '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852'
-const USDT_ADDRESS = '0xdac17f958d2ee523a2206206994597c13d831ec7'
-
+const USDC_WETH_PAIR = '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc' // created 10008355
+const DAI_WETH_PAIR = '0xa478c2975ab1ea89e8196811f51a7b7ade33eb11' // created block 10042267
+const USDT_WETH_PAIR = '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852' // created block 10093341
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 
 // only count derived ETH prices in WETH pairs with at least this much WETH reserve
-let ETH_RESERVE_THRESHOLD = BigDecimal.fromString('0.1')
+let ETH_RESERVE_THRESHOLD = BigDecimal.fromString('0.5')
 
-function getTokensPerEth(pairAddress: string, tokenAddress: string): BigDecimal {
-  let tokensPerEth = ZERO_BD
-  // loop through each stablecoin and find eth price
-  let pair = Pair.load(Address.fromString(pairAddress).toHexString())
-  if (pair != null) {
-    if (pair.token0 == tokenAddress) {
-      tokensPerEth = pair.token0Price // token per weth
-    } else {
-      tokensPerEth = pair.token1Price // token per weth
-    }
-  }
-  return tokensPerEth
-}
-
+// return a weighted average price
 export function getEthPriceInUSD(): BigDecimal {
   // fetch eth prices for each stablecoin
-  let daiPerEth = getTokensPerEth(DAI_WETH_PAIR, DAI_ADDRESS)
-  let usdcPerEth = getTokensPerEth(USDC_WETH_PAIR, USDC_ADDRESS)
-  let usdtPerEth = getTokensPerEth(USDT_WETH_PAIR, USDT_ADDRESS)
 
-  // return weighted average of prices
-  return daiPerEth
-    .plus(usdcPerEth)
-    .plus(usdtPerEth)
-    .div(BigDecimal.fromString('3'))
+  let daiPair = Pair.load(DAI_WETH_PAIR) // dai is token0
+  let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token0
+  let usdtPair = Pair.load(USDT_WETH_PAIR) // usdt is token1
+
+  // all 3 have been created
+  if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
+    let totalLiquidityETH = daiPair.reserve1.plus(usdcPair.reserve1).plus(usdtPair.reserve0)
+    let daiWeight = daiPair.reserve1.div(totalLiquidityETH)
+    let usdcWeight = usdcPair.reserve1.div(totalLiquidityETH)
+    let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
+    return daiPair.token0Price
+      .times(daiWeight)
+      .plus(usdcPair.token0Price.times(usdcWeight))
+      .plus(usdtPair.token1Price.times(usdtWeight))
+    // dai and USDC have been created
+  } else if (daiPair !== null && usdcPair !== null) {
+    let totalLiquidityETH = daiPair.reserve1.plus(usdcPair.reserve1)
+    let daiWeight = daiPair.reserve1.div(totalLiquidityETH)
+    let usdcWeight = usdcPair.reserve1.div(totalLiquidityETH)
+    return daiPair.token0Price.times(daiWeight).plus(usdcPair.token0Price.times(usdcWeight))
+    // USDC is the only pair so far
+  } else if (usdcPair !== null) {
+    return usdcPair.token0Price
+  } else {
+    return ZERO_BD
+  }
 }
 
 /**
@@ -70,8 +69,22 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
     }
   } else if (!maxDepthReached) {
     let allPairs = token.allPairs as Array<string>
-    for (let i = 0; i < allPairs.length; i++) {
-      let currentPair = Pair.load(allPairs[i])
+
+    // sort pairs by reserves to get best estimate
+    let sortedPairs = allPairs.sort((addressA, addressB) => {
+      let pairA = Pair.load(addressA)
+      let pairB = Pair.load(addressB)
+      if (pairA.trackedReserveETH.gt(pairB.trackedReserveETH)) {
+        return -1
+      } else if (pairA.trackedReserveETH.lt(pairB.trackedReserveETH)) {
+        return 1
+      } else {
+        return 0
+      }
+    })
+
+    for (let i = 0; i < sortedPairs.length; i++) {
+      let currentPair = Pair.load(sortedPairs[i])
       if (currentPair.token0 == token.id) {
         // our token is token 0
         let otherToken = Token.load(currentPair.token1)
@@ -103,7 +116,8 @@ let WHITELIST: string[] = [
   '0x39aa39c021dfbae8fac545936693ac917d5e7563', // cUSDC
   '0x86fadb80d8d2cff3c3680819e4da99c10232ba0f', // EBASE
   '0x57ab1ec28d129707052df4df418d58a2d46d5f51', // sUSD
-  '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2' // MKR
+  '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2', // MKR
+  '0xc00e94cb662c3520282e6f5717214004a7f26888' // COMP
 ]
 
 /**

@@ -406,7 +406,8 @@ export function handleSwap(event: Swap): void {
   swap.amount1Out = amount1Out
   swap.to = event.params.to
   swap.logIndex = event.logIndex
-  swap.amountUSD = derivedAmountUSD
+  // use the tracked amount if we have it
+  swap.amountUSD = trackedAmountUSD === ZERO_BD ? derivedAmountUSD : trackedAmountUSD
   swap.save()
 
   // update the transaction

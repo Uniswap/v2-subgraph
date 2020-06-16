@@ -30,6 +30,9 @@ type Token @entity {
   name: String!
   decimals: BigInt!
 
+  # used for other stats like marketcap
+  totalSupply: BigInt!
+
   # token specific volume
   tradeVolume: BigDecimal!
   tradeVolumeUSD: BigDecimal!

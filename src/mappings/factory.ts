@@ -3,7 +3,15 @@ import { log } from '@graphprotocol/graph-ts'
 import { UniswapFactory, Pair, Token, Bundle } from '../types/schema'
 import { PairCreated } from '../types/Factory/Factory'
 import { Pair as PairTemplate } from '../types/templates'
-import { FACTORY_ADDRESS, ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenDecimals } from './helpers'
+import {
+  FACTORY_ADDRESS,
+  ZERO_BD,
+  ZERO_BI,
+  fetchTokenSymbol,
+  fetchTokenName,
+  fetchTokenDecimals,
+  fetchTokenTotalSupply
+} from './helpers'
 
 export function handleNewPair(event: PairCreated): void {
   // load factory (create if first exchange)
@@ -36,6 +44,7 @@ export function handleNewPair(event: PairCreated): void {
     token0 = new Token(event.params.token0.toHexString())
     token0.symbol = fetchTokenSymbol(event.params.token0)
     token0.name = fetchTokenName(event.params.token0)
+    token0.totalSupply = fetchTokenTotalSupply(event.params.token0)
     let decimals = fetchTokenDecimals(event.params.token0)
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
@@ -58,6 +67,7 @@ export function handleNewPair(event: PairCreated): void {
     token1 = new Token(event.params.token1.toHexString())
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
+    token1.totalSupply = fetchTokenTotalSupply(event.params.token1)
     let decimals = fetchTokenDecimals(event.params.token1)
 
     // bail if we couldn't figure out the decimals
