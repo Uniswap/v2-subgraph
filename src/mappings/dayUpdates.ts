@@ -81,7 +81,7 @@ export function updatePairHourData(event: EthereumEvent): void {
   let pairHourData = PairHourData.load(hourPairID)
   if (pairHourData == null) {
     let pairHourData = new PairHourData(hourPairID)
-    pairHourData.date = hourStartIndex
+    pairHourData.hourStartUnix = hourStartIndex
     pairHourData.pair = event.address.toHexString()
     pairHourData.reserve0 = ZERO_BD
     pairHourData.reserve1 = ZERO_BD
