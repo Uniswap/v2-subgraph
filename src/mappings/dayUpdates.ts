@@ -72,7 +72,7 @@ export function updatePairDayData(event: EthereumEvent): void {
 export function updatePairHourData(event: EthereumEvent): void {
   let timestamp = event.block.timestamp.toI32()
   let hourIndex = timestamp / 3600 // get unique hour within unix history
-  let hourStartIndex = hourIndex * 3600 // want the rounded effect
+  let hourStartUnix = hourIndex * 3600 // want the rounded effect
   let hourPairID = event.address
     .toHexString()
     .concat('-')
@@ -81,7 +81,7 @@ export function updatePairHourData(event: EthereumEvent): void {
   let pairHourData = PairHourData.load(hourPairID)
   if (pairHourData == null) {
     let pairHourData = new PairHourData(hourPairID)
-    pairHourData.date = hourStartIndex
+    pairHourData.hourStartUnix = hourStartUnix
     pairHourData.pair = event.address.toHexString()
     pairHourData.reserve0 = ZERO_BD
     pairHourData.reserve1 = ZERO_BD
