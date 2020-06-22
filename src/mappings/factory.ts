@@ -13,17 +13,7 @@ import {
   fetchTokenTotalSupply
 } from './helpers'
 
-// ian coin 0x19c506211A26A67Ad7E6D45CD274bAD1863f8667
-// ian weth pair 0x07762371f09ba11c9df64ced901cad7ff5104100
-
-let INCLUDED_PAIRS: string[] = ['0x07762371f09ba11c9df64ced901cad7ff5104100']
-
 export function handleNewPair(event: PairCreated): void {
-  log.debug('event address {}', [event.params.pair.toHexString()])
-  if (!INCLUDED_PAIRS.includes(event.params.pair.toHexString())) {
-    return // ignore everything not on included list for testing
-  }
-
   // load factory (create if first exchange)
   let factory = UniswapFactory.load(FACTORY_ADDRESS)
   if (factory == null) {

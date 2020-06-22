@@ -220,7 +220,7 @@ type UniswapDayData @entity {
 
 type PairHourData @entity {
   id: ID!
-  hourStartUnix: Int!
+  hourStartUnix: Int! # unix timestamp for start of hour
   pair: Pair!
 
   # reserves
