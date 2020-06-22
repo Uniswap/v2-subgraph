@@ -1,6 +1,6 @@
-type UniswapFactory @entity {
+type UniswapFactory @entity { 
   # factory address
-  id: ID!
+  id: ID! 
 
   # pair info
   pairCount: Int!
@@ -96,6 +96,7 @@ type Pair @entity {
 type User @entity {
   id: ID!
   liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "user")
+  usdSwapped: BigDecimal!
 }
 
 type LiquidityPosition @entity {
@@ -160,6 +161,9 @@ type Burn @entity {
   # derived amount based on available prices of tokens
   amountUSD: BigDecimal
 
+  # mark uncomplete in ETH case 
+  needsComplete: Boolean
+
   # optional fee fields, if a Transfer event is fired in _mintFee
   feeTo: Bytes
   feeLiquidity: BigDecimal
@@ -211,6 +215,26 @@ type UniswapDayData @entity {
   mostLiquidTokens: [TokenDayData!]!
 
   txCount: BigInt!
+}
+
+
+type PairHourData @entity {
+  id: ID!
+  hourStartUnix: Int!
+  pair: Pair!
+
+  # reserves
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
+
+  # derived liquidity
+  reserveUSD: BigDecimal!
+
+  # volume stats
+  hourlyVolumeToken0: BigDecimal!
+  hourlyVolumeToken1: BigDecimal!
+  hourlyVolumeUSD: BigDecimal!
+  hourlyTxns: BigInt!
 }
 
 # Data accumulated and condensed into day stats for each exchange

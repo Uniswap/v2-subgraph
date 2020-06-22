@@ -14,7 +14,7 @@ import {
   Bundle
 } from '../types/schema'
 import { Pair as PairContract, Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Pair/Pair'
-import { updatePairDayData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
+import { updatePairDayData, updateTokenDayData, updateUniswapDayData, updatePairHourData } from './dayUpdates'
 import { getEthPriceInUSD, findEthPerToken, getTrackedVolumeUSD, getTrackedLiquidityUSD } from './pricing'
 import {
   convertTokenToDecimal,
@@ -32,6 +32,11 @@ function isCompleteMint(mintId: string): boolean {
 }
 
 export function handleTransfer(event: Transfer): void {
+  // ignore initial transfers for first adds
+  if (event.params.to.toHexString() == ADDRESS_ZERO && event.params.value.equals(BigInt.fromI32(1000))) {
+    return
+  }
+
   let factory = UniswapFactory.load(FACTORY_ADDRESS)
   let transactionHash = event.transaction.hash.toHexString()
 
@@ -91,12 +96,8 @@ export function handleTransfer(event: Transfer): void {
     }
   }
 
-  // burn
-  if (event.params.to.toHexString() == ADDRESS_ZERO && event.params.from.toHexString() == pair.id) {
-    pair.totalSupply = pair.totalSupply.minus(value)
-    pair.save()
-
-    // this is a new instance of a logical burn
+  // case where direct send first on ETH withdrawls
+  if (event.params.to.toHexString() == pair.id) {
     let burns = transaction.burns
     let burn = new BurnEvent(
       event.transaction.hash
@@ -107,6 +108,49 @@ export function handleTransfer(event: Transfer): void {
     burn.pair = pair.id
     burn.liquidity = value
     burn.timestamp = transaction.timestamp
+    burn.to = event.params.to
+    burn.sender = event.params.from
+    burn.needsComplete = true
+    burn.save()
+    burns.push(burn.id)
+    transaction.burns = burns
+    transaction.save()
+  }
+
+  // burn
+  if (event.params.to.toHexString() == ADDRESS_ZERO && event.params.from.toHexString() == pair.id) {
+    pair.totalSupply = pair.totalSupply.minus(value)
+    pair.save()
+
+    // this is a new instance of a logical burn
+    let burns = transaction.burns
+    let burn: BurnEvent
+    if (burns.length > 0) {
+      let currentBurn = BurnEvent.load(burns[burns.length - 1])
+      if (currentBurn.needsComplete) {
+        burn = currentBurn as BurnEvent
+      } else {
+        burn = new BurnEvent(
+          event.transaction.hash
+            .toHexString()
+            .concat('-')
+            .concat(BigInt.fromI32(burns.length).toString())
+        )
+        burn.pair = pair.id
+        burn.liquidity = value
+        burn.timestamp = transaction.timestamp
+      }
+    } else {
+      burn = new BurnEvent(
+        event.transaction.hash
+          .toHexString()
+          .concat('-')
+          .concat(BigInt.fromI32(burns.length).toString())
+      )
+      burn.pair = pair.id
+      burn.liquidity = value
+      burn.timestamp = transaction.timestamp
+    }
 
     // if this logical burn included a fee mint, account for this
     if (mints.length !== 0 && !isCompleteMint(mints[mints.length - 1])) {
@@ -120,10 +164,18 @@ export function handleTransfer(event: Transfer): void {
       transaction.mints = mints
       transaction.save()
     }
-    burn.save()
-    burns.push(burn.id)
-    transaction.burns = burns
 
+    burn.save()
+
+    // if accessing last one, replace it
+    if (burn.needsComplete) {
+      burns[burns.length - 1] = burn.id
+    }
+    // else add new one
+    else {
+      burns.push(burn.id)
+    }
+    transaction.burns = burns
     transaction.save()
   }
 
@@ -181,12 +233,14 @@ export function handleSync(event: Sync): void {
   token1.save()
 
   // get tracked liquidity - will be 0 if neither is in whitelist
-  let trackedLiquidityETH: BigDecimal = getTrackedLiquidityUSD(
-    pair.reserve0,
-    token0 as Token,
-    pair.reserve1,
-    token1 as Token
-  ).div(bundle.ethPrice)
+  let trackedLiquidityETH: BigDecimal
+  if (bundle.ethPrice.notEqual(ZERO_BD)) {
+    trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token).div(
+      bundle.ethPrice
+    )
+  } else {
+    trackedLiquidityETH = ZERO_BD
+  }
 
   // use derived amounts within pair
   pair.trackedReserveETH = trackedLiquidityETH
@@ -253,6 +307,7 @@ export function handleMint(event: Mint): void {
 
   // update day entities
   updatePairDayData(event)
+  updatePairHourData(event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
@@ -298,16 +353,17 @@ export function handleBurn(event: Burn): void {
   uniswap.save()
 
   // update burn
-  burn.sender = event.params.sender
+  // burn.sender = event.params.sender
   burn.amount0 = token0Amount as BigDecimal
   burn.amount1 = token1Amount as BigDecimal
-  burn.to = event.params.to
+  // burn.to = event.params.to
   burn.logIndex = event.logIndex
   burn.amountUSD = amountTotalUSD as BigDecimal
   burn.save()
 
   // update day entities
   updatePairDayData(event)
+  updatePairHourData(event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
@@ -338,6 +394,7 @@ export function handleSwap(event: Swap): void {
 
   // only accounts for volume through white listed tokens
   let trackedAmountUSD = getTrackedVolumeUSD(amount0Total, token0 as Token, amount1Total, token1 as Token)
+
   let trackedAmountETH: BigDecimal
   if (bundle.ethPrice.equals(ZERO_BD)) {
     trackedAmountETH = ZERO_BD
@@ -417,6 +474,7 @@ export function handleSwap(event: Swap): void {
 
   // update day entities
   updatePairDayData(event)
+  updatePairHourData(event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
