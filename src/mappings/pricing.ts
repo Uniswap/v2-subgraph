@@ -11,7 +11,6 @@ const USDT_WETH_PAIR = '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852' // created b
 // dummy for testing
 export function getEthPriceInUSD(): BigDecimal {
   // fetch eth prices for each stablecoin
-
   let daiPair = Pair.load(DAI_WETH_PAIR) // dai is token0
   let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token0
   let usdtPair = Pair.load(USDT_WETH_PAIR) // usdt is token1
@@ -46,19 +45,14 @@ export function getEthPriceInUSD(): BigDecimal {
  **/
 export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDecimal {
   let tokenWethPair = factoryContract.getPair(Address.fromString(token.id), Address.fromString(WETH_ADDRESS))
-
   if (tokenWethPair.toHexString() != ADDRESS_ZERO) {
     let wethPair = Pair.load(tokenWethPair.toHexString())
     if (wethPair.token0 == token.id) {
-      // our token is token 0
-      return wethPair.token1Price
-    } else {
-      // our token is token 1
-      return wethPair.token0Price
+      return wethPair.token1Price // return WETH per token
     }
+    return wethPair.token0Price
   } else if (!maxDepthReached) {
     let allPairs = token.allPairs as Array<string>
-
     // sort pairs by reserves to get best estimate
     let sortedPairs = allPairs.sort((addressA, addressB) => {
       let pairA = Pair.load(addressA)
@@ -71,7 +65,6 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
         return 0
       }
     })
-
     for (let i = 0; i < sortedPairs.length; i++) {
       let currentPair = Pair.load(sortedPairs[i])
       if (currentPair.token0 == token.id) {
@@ -109,6 +102,7 @@ let WHITELIST: string[] = [
   '0xc00e94cb662c3520282e6f5717214004a7f26888' // COMP
 ]
 
+// minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
 
 /**
@@ -129,7 +123,7 @@ export function getTrackedVolumeUSD(
   let pairAddress = factoryContract.getPair(Address.fromString(token0.id), Address.fromString(token1.id))
   let pair = Pair.load(pairAddress.toHexString())
 
-  // if only 1 LP, require high minimum reserve amount amount or return 0
+  // if less than 5 lps, require high minimum reserve amount amount or return 0
   if (pair.liquidityPositions.length < 5) {
     let reserve0USD = pair.reserve0.times(price0)
     let reserve1USD = pair.reserve1.times(price1)
@@ -150,8 +144,8 @@ export function getTrackedVolumeUSD(
     }
   }
 
+  // both are whitelist tokens, take average of both amounts
   if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
-    // both are whitelist tokens, take average of both amounts
     return tokenAmount0
       .times(price0)
       .plus(tokenAmount1.times(price1))

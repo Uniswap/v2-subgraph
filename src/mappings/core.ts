@@ -1,3 +1,4 @@
+import { PairHourData } from './../types/schema'
 /* eslint-disable prefer-const */
 import { BigInt, BigDecimal, store } from '@graphprotocol/graph-ts'
 import {
@@ -479,13 +480,20 @@ export function handleSwap(event: Swap): void {
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
 
-  // get ids for date related entities
   let timestamp = event.block.timestamp.toI32()
+  // daily info
   let dayID = timestamp / 86400
   let dayPairID = event.address
     .toHexString()
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
+
+  // hourly info
+  let hourID = timestamp / 3600
+  let hourPairID = event.address
+    .toHexString()
+    .concat('-')
+    .concat(BigInt.fromI32(hourID).toString())
 
   // swap specific updating
   let uniswapDayData = UniswapDayData.load(dayID.toString())
@@ -499,6 +507,13 @@ export function handleSwap(event: Swap): void {
   pairDayData.dailyVolumeToken1 = pairDayData.dailyVolumeToken1.plus(amount1Total)
   pairDayData.dailyVolumeUSD = pairDayData.dailyVolumeUSD.plus(trackedAmountUSD)
   pairDayData.save()
+
+  // update hourly pair data
+  let pairHourData = PairHourData.load(hourPairID)
+  pairHourData.hourlyVolumeToken0 = pairHourData.hourlyVolumeToken0.plus(amount0Total)
+  pairHourData.hourlyVolumeToken1 = pairHourData.hourlyVolumeToken1.plus(amount1Total)
+  pairHourData.hourlyVolumeUSD = pairHourData.hourlyVolumeUSD.plus(trackedAmountUSD)
+  pairHourData.save()
 
   // swap specific updating for token0
   let token0DayID = token0.id
