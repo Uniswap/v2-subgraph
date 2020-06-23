@@ -192,7 +192,6 @@ export function handleTransfer(event: Transfer): void {
       )
     }
     fromUserLiquidityPosition.save()
-    createLiquiditySnapshot(fromUserLiquidityPosition, event)
   }
 
   if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pair.id) {
@@ -205,7 +204,7 @@ export function handleTransfer(event: Transfer): void {
         convertTokenToDecimal(newTotalSupply, BI_18)
       )
     }
-    createLiquiditySnapshot(toUserLiquidityPosition, event)
+
     toUserLiquidityPosition.save()
   }
   transaction.save()
@@ -285,6 +284,10 @@ export function handleMint(event: Mint): void {
   token0.txCount = token0.txCount.plus(ONE_BI)
   token1.txCount = token1.txCount.plus(ONE_BI)
 
+  // update the LP position
+  let liquidityPosition = createLiquidityPosition(event.address, event.params.sender)
+  createLiquiditySnapshot(liquidityPosition, event)
+
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
   let amountTotalUSD = token1.derivedETH
@@ -338,6 +341,10 @@ export function handleBurn(event: Burn): void {
   // update txn counts
   token0.txCount = token0.txCount.plus(ONE_BI)
   token1.txCount = token1.txCount.plus(ONE_BI)
+
+  // update the LP position
+  let liquidityPosition = createLiquidityPosition(event.address, event.params.to)
+  createLiquiditySnapshot(liquidityPosition, event)
 
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
