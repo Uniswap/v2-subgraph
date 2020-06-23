@@ -25,7 +25,8 @@ import {
   createUser,
   createLiquidityPosition,
   ZERO_BD,
-  BI_18
+  BI_18,
+  createLiquiditySnapshot
 } from './helpers'
 
 function isCompleteMint(mintId: string): boolean {
@@ -191,6 +192,7 @@ export function handleTransfer(event: Transfer): void {
       )
     }
     fromUserLiquidityPosition.save()
+    createLiquiditySnapshot(fromUserLiquidityPosition, event)
   }
 
   if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pair.id) {
@@ -203,6 +205,7 @@ export function handleTransfer(event: Transfer): void {
         convertTokenToDecimal(newTotalSupply, BI_18)
       )
     }
+    createLiquiditySnapshot(toUserLiquidityPosition, event)
     toUserLiquidityPosition.save()
   }
   transaction.save()
