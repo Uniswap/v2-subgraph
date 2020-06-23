@@ -1,6 +1,6 @@
 import { PairHourData } from './../types/schema'
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal, store } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, store, Address } from '@graphprotocol/graph-ts'
 import {
   Pair,
   Token,
@@ -284,10 +284,6 @@ export function handleMint(event: Mint): void {
   token0.txCount = token0.txCount.plus(ONE_BI)
   token1.txCount = token1.txCount.plus(ONE_BI)
 
-  // update the LP position
-  let liquidityPosition = createLiquidityPosition(event.address, event.params.sender)
-  createLiquiditySnapshot(liquidityPosition, event)
-
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
   let amountTotalUSD = token1.derivedETH
@@ -311,6 +307,10 @@ export function handleMint(event: Mint): void {
   mint.logIndex = event.logIndex
   mint.amountUSD = amountTotalUSD as BigDecimal
   mint.save()
+
+  // update the LP position
+  let liquidityPosition = createLiquidityPosition(event.address, mint.to as Address)
+  createLiquiditySnapshot(liquidityPosition, event)
 
   // update day entities
   updatePairDayData(event)
@@ -342,10 +342,6 @@ export function handleBurn(event: Burn): void {
   token0.txCount = token0.txCount.plus(ONE_BI)
   token1.txCount = token1.txCount.plus(ONE_BI)
 
-  // update the LP position
-  let liquidityPosition = createLiquidityPosition(event.address, event.params.to)
-  createLiquiditySnapshot(liquidityPosition, event)
-
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
   let amountTotalUSD = token1.derivedETH
@@ -371,6 +367,10 @@ export function handleBurn(event: Burn): void {
   burn.logIndex = event.logIndex
   burn.amountUSD = amountTotalUSD as BigDecimal
   burn.save()
+
+  // update the LP position
+  let liquidityPosition = createLiquidityPosition(event.address, burn.sender as Address)
+  createLiquiditySnapshot(liquidityPosition, event)
 
   // update day entities
   updatePairDayData(event)
