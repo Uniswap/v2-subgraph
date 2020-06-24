@@ -48,6 +48,7 @@ export function updatePairDayData(event: EthereumEvent): void {
   if (pairDayData == null) {
     let pairDayData = new PairDayData(dayPairID)
     let pair = Pair.load(event.address.toHexString())
+    pairDayData.totalSupply = pair.totalSupply
     pairDayData.date = dayStartTimestamp
     pairDayData.token0 = pair.token0
     pairDayData.token1 = pair.token1
@@ -62,6 +63,7 @@ export function updatePairDayData(event: EthereumEvent): void {
     pairDayData.save()
   }
   pairDayData = PairDayData.load(dayPairID)
+  pairDayData.totalSupply = pair.totalSupply
   pairDayData.reserve0 = pair.reserve0
   pairDayData.reserve1 = pair.reserve1
   pairDayData.reserveUSD = pair.reserveUSD
