@@ -19,7 +19,6 @@ export function handleNewPair(event: PairCreated): void {
   if (factory == null) {
     factory = new UniswapFactory(FACTORY_ADDRESS)
     factory.pairCount = 0
-    factory.pairs = []
     factory.totalVolumeETH = ZERO_BD
     factory.totalLiquidityETH = ZERO_BD
     factory.totalVolumeUSD = ZERO_BD
@@ -57,7 +56,7 @@ export function handleNewPair(event: PairCreated): void {
     token0.tradeVolume = ZERO_BD
     token0.tradeVolumeUSD = ZERO_BD
     token0.totalLiquidity = ZERO_BD
-    token0.allPairs = []
+    // token0.allPairs = []
     token0.mostLiquidPairs = []
     token0.txCount = ZERO_BI
   }
@@ -80,18 +79,18 @@ export function handleNewPair(event: PairCreated): void {
     token1.tradeVolume = ZERO_BD
     token1.tradeVolumeUSD = ZERO_BD
     token1.totalLiquidity = ZERO_BD
-    token1.allPairs = []
+    // token1.allPairs = []
     token1.mostLiquidPairs = []
     token1.txCount = ZERO_BI
   }
 
-  let newAllPairsArray0 = token0.allPairs
-  newAllPairsArray0.push(event.params.pair.toHexString())
-  token0.allPairs = newAllPairsArray0
+  // let newAllPairsArray0 = token0.allPairs
+  // newAllPairsArray0.push(event.params.pair.toHexString())
+  // token0.allPairs = newAllPairsArray0
 
-  let newAllPairsArray1 = token1.allPairs
-  newAllPairsArray1.push(event.params.pair.toHexString())
-  token1.allPairs = newAllPairsArray1
+  // let newAllPairsArray1 = token1.allPairs
+  // newAllPairsArray1.push(event.params.pair.toHexString())
+  // token1.allPairs = newAllPairsArray1
 
   let pair = new Pair(event.params.pair.toHexString()) as Pair
   pair.token0 = token0.id
@@ -110,11 +109,6 @@ export function handleNewPair(event: PairCreated): void {
   pair.volumeUSD = ZERO_BD
   pair.token0Price = ZERO_BD
   pair.token1Price = ZERO_BD
-
-  // update factory totals
-  let factoryPairs = factory.pairs
-  factoryPairs.push(pair.id)
-  factory.pairs = factoryPairs
 
   // create the tracked contract based on the template
   PairTemplate.create(event.params.pair)

@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { Pair, Token, Bundle } from '../types/schema'
 import { BigDecimal, Address } from '@graphprotocol/graph-ts/index'
-import { ZERO_BD, factoryContract, ADDRESS_ZERO } from './helpers'
+import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from './helpers'
 
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 const USDC_WETH_PAIR = '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc' // created 10008355
@@ -39,54 +39,6 @@ export function getEthPriceInUSD(): BigDecimal {
   }
 }
 
-/**
- * Search through graph to find derived Eth per token.
- * @todo update to be derived ETH (add stablecoin estimates)
- **/
-export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDecimal {
-  let tokenWethPair = factoryContract.getPair(Address.fromString(token.id), Address.fromString(WETH_ADDRESS))
-  if (tokenWethPair.toHexString() != ADDRESS_ZERO) {
-    let wethPair = Pair.load(tokenWethPair.toHexString())
-    if (wethPair.token0 == token.id) {
-      return wethPair.token1Price // return WETH per token
-    }
-    return wethPair.token0Price
-  } else if (!maxDepthReached) {
-    let allPairs = token.allPairs as Array<string>
-    // sort pairs by reserves to get best estimate
-    let sortedPairs = allPairs.sort((addressA, addressB) => {
-      let pairA = Pair.load(addressA)
-      let pairB = Pair.load(addressB)
-      if (pairA.trackedReserveETH.gt(pairB.trackedReserveETH)) {
-        return -1
-      } else if (pairA.trackedReserveETH.lt(pairB.trackedReserveETH)) {
-        return 1
-      } else {
-        return 0
-      }
-    })
-    for (let i = 0; i < sortedPairs.length; i++) {
-      let currentPair = Pair.load(sortedPairs[i])
-      if (currentPair.token0 == token.id) {
-        // our token is token 0
-        let otherToken = Token.load(currentPair.token1)
-        let otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
-        if (otherTokenEthPrice != null) {
-          return currentPair.token1Price.times(otherTokenEthPrice)
-        }
-      } else {
-        // our token is token 1
-        let otherToken = Token.load(currentPair.token0)
-        let otherTokenEthPrice = findEthPerToken(otherToken as Token, true)
-        if (otherTokenEthPrice != null) {
-          return currentPair.token0Price.times(otherTokenEthPrice)
-        }
-      }
-    }
-  }
-  return ZERO_BD /** @todo may want to return null */
-}
-
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
@@ -101,6 +53,32 @@ let WHITELIST: string[] = [
   '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2', // MKR
   '0xc00e94cb662c3520282e6f5717214004a7f26888' // COMP
 ]
+
+/**
+ * Search through graph to find derived Eth per token.
+ * @todo update to be derived ETH (add stablecoin estimates)
+ **/
+export function findEthPerToken(token: Token): BigDecimal {
+  if (token.id == WETH_ADDRESS) {
+    return ONE_BD
+  }
+  // loop through whitelist and check if paired with any
+  for (let i = 0; i < WHITELIST.length; ++i) {
+    let pairAddress = factoryContract.getPair(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
+    if (pairAddress.toHexString() != ADDRESS_ZERO) {
+      let pair = Pair.load(pairAddress.toHexString())
+      if (pair.token0 == token.id) {
+        let token1 = Token.load(pair.token1)
+        return pair.token1Price.times(token1.derivedETH as BigDecimal) // return token1 per our token * Eth per token 1
+      }
+      if (pair.token1 == token.id) {
+        let token0 = Token.load(pair.token0)
+        return pair.token0Price.times(token0.derivedETH as BigDecimal) // return token0 per our token * ETH per token 0
+      }
+    }
+  }
+  return ZERO_BD // nothing was found return 0
+}
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
@@ -124,7 +102,7 @@ export function getTrackedVolumeUSD(
   let pair = Pair.load(pairAddress.toHexString())
 
   // if less than 5 lps, require high minimum reserve amount amount or return 0
-  if (pair.liquidityPositions.length < 5) {
+  if (false) {
     let reserve0USD = pair.reserve0.times(price0)
     let reserve1USD = pair.reserve1.times(price1)
     if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {

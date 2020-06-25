@@ -4,7 +4,6 @@ type UniswapFactory @entity {
 
   # pair info
   pairCount: Int!
-  pairs: [Pair]!
 
   # total volume
   totalVolumeUSD: BigDecimal!
@@ -47,7 +46,7 @@ type Token @entity {
   derivedETH: BigDecimal
 
   # address of weth exchange if exists
-  allPairs: [Pair!]
+  # allPairs: [Pair!]
 
   # saved for historical refernce of most liquid pairs
   mostLiquidPairs: [PairDayData]!
@@ -56,7 +55,6 @@ type Token @entity {
 type Pair @entity {
   # pair address
   id: ID!
-  factory: UniswapFactory! @derivedFrom(field: "pairs")
 
   # mirrored from the smart contract
   token0: Token!
@@ -85,12 +83,12 @@ type Pair @entity {
   createdAtBlockNumber: BigInt!
 
   # Fields used to help derived relationship
-  liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "pair")
+  # liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "pair")
 
   # transaction stats
-  mints: [Mint!] @derivedFrom(field: "pair")
-  burns: [Burn!] @derivedFrom(field: "pair")
-  swaps: [Swap!] @derivedFrom(field: "pair")
+  # mints: [Mint!] @derivedFrom(field: "pair")
+  # burns: [Burn!] @derivedFrom(field: "pair")
+  # swaps: [Swap!] @derivedFrom(field: "pair")
 }
 
 type User @entity {
