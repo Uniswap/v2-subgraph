@@ -138,6 +138,7 @@ export function handleTransfer(event: Transfer): void {
             .concat('-')
             .concat(BigInt.fromI32(burns.length).toString())
         )
+        burn.needsComplete = false
         burn.pair = pair.id
         burn.liquidity = value
         burn.timestamp = transaction.timestamp
@@ -149,6 +150,7 @@ export function handleTransfer(event: Transfer): void {
           .concat('-')
           .concat(BigInt.fromI32(burns.length).toString())
       )
+      burn.needsComplete = false
       burn.pair = pair.id
       burn.liquidity = value
       burn.timestamp = transaction.timestamp
@@ -166,9 +168,7 @@ export function handleTransfer(event: Transfer): void {
       transaction.mints = mints
       transaction.save()
     }
-
     burn.save()
-
     // if accessing last one, replace it
     if (burn.needsComplete) {
       burns[burns.length - 1] = burn.id
@@ -404,7 +404,7 @@ export function handleSwap(event: Swap): void {
   let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
   // only accounts for volume through white listed tokens
-  let trackedAmountUSD = getTrackedVolumeUSD(amount0Total, token0 as Token, amount1Total, token1 as Token)
+  let trackedAmountUSD = getTrackedVolumeUSD(amount0Total, token0 as Token, amount1Total, token1 as Token, pair as Pair)
 
   let trackedAmountETH: BigDecimal
   if (bundle.ethPrice.equals(ZERO_BD)) {

@@ -71,7 +71,6 @@ export function handleNewPair(event: PairCreated): void {
 
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
-      log.debug('mybug the decimal on token 1 was null', [])
       return
     }
     token1.decimals = decimals
@@ -95,6 +94,7 @@ export function handleNewPair(event: PairCreated): void {
   let pair = new Pair(event.params.pair.toHexString()) as Pair
   pair.token0 = token0.id
   pair.token1 = token1.id
+  pair.liquidityProviderCount = ZERO_BI
   pair.createdAtTimestamp = event.block.timestamp
   pair.createdAtBlockNumber = event.block.number
   pair.txCount = ZERO_BI

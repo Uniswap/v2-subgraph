@@ -45,9 +45,6 @@ type Token @entity {
   # derived prices
   derivedETH: BigDecimal
 
-  # address of weth exchange if exists
-  # allPairs: [Pair!]
-
   # saved for historical refernce of most liquid pairs
   mostLiquidPairs: [PairDayData]!
 }
@@ -84,6 +81,8 @@ type Pair @entity {
 
   # Fields used to help derived relationship
   # liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "pair")
+  liquidityProviderCount: BigInt! # used to detect new exchanges 
+
 
   # transaction stats
   # mints: [Mint!] @derivedFrom(field: "pair")
@@ -178,7 +177,7 @@ type Burn @entity {
   amountUSD: BigDecimal
 
   # mark uncomplete in ETH case 
-  needsComplete: Boolean
+  needsComplete: Boolean!
 
   # optional fee fields, if a Transfer event is fired in _mintFee
   feeTo: Bytes

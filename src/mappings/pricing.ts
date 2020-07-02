@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { Pair, Token, Bundle } from '../types/schema'
-import { BigDecimal, Address } from '@graphprotocol/graph-ts/index'
+import { BigDecimal, Address, BigInt } from '@graphprotocol/graph-ts/index'
 import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from './helpers'
 
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
@@ -54,6 +54,12 @@ let WHITELIST: string[] = [
   '0xc00e94cb662c3520282e6f5717214004a7f26888' // COMP
 ]
 
+// minimum liquidity required to count towards tracked volume for pairs with small # of Lps
+let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('400000')
+
+// minimum liquidity for price to get tracked
+let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('2')
+
 /**
  * Search through graph to find derived Eth per token.
  * @todo update to be derived ETH (add stablecoin estimates)
@@ -67,11 +73,11 @@ export function findEthPerToken(token: Token): BigDecimal {
     let pairAddress = factoryContract.getPair(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
     if (pairAddress.toHexString() != ADDRESS_ZERO) {
       let pair = Pair.load(pairAddress.toHexString())
-      if (pair.token0 == token.id) {
+      if (pair.token0 == token.id && pair.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
         let token1 = Token.load(pair.token1)
         return pair.token1Price.times(token1.derivedETH as BigDecimal) // return token1 per our token * Eth per token 1
       }
-      if (pair.token1 == token.id) {
+      if (pair.token1 == token.id && pair.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
         let token0 = Token.load(pair.token0)
         return pair.token0Price.times(token0.derivedETH as BigDecimal) // return token0 per our token * ETH per token 0
       }
@@ -79,9 +85,6 @@ export function findEthPerToken(token: Token): BigDecimal {
   }
   return ZERO_BD // nothing was found return 0
 }
-
-// minimum liquidity required to count towards tracked volume for pairs with small # of Lps
-let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
 
 /**
  * Accepts tokens and amounts, return tracked amount based on token whitelist
@@ -93,16 +96,15 @@ export function getTrackedVolumeUSD(
   tokenAmount0: BigDecimal,
   token0: Token,
   tokenAmount1: BigDecimal,
-  token1: Token
+  token1: Token,
+  pair: Pair
 ): BigDecimal {
   let bundle = Bundle.load('1')
   let price0 = token0.derivedETH.times(bundle.ethPrice)
   let price1 = token1.derivedETH.times(bundle.ethPrice)
-  let pairAddress = factoryContract.getPair(Address.fromString(token0.id), Address.fromString(token1.id))
-  let pair = Pair.load(pairAddress.toHexString())
 
-  // if less than 5 lps, require high minimum reserve amount amount or return 0
-  if (false) {
+  // if less than 5 LPs, require high minimum reserve amount amount or return 0
+  if (pair.liquidityProviderCount.lt(BigInt.fromI32(5))) {
     let reserve0USD = pair.reserve0.times(price0)
     let reserve1USD = pair.reserve1.times(price1)
     if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
