@@ -48,7 +48,7 @@ This query fetches aggredated data from all uniswap pairs and tokens, to give a 
 
 ```graphql
 {
-  uniswapFactory(id: "1") {
+  uniswapFactories(first: 1) {
     pairCount
     totalVolumeUSD
     totalLiquidityUSD
