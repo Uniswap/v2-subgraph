@@ -1,6 +1,6 @@
-type UniswapFactory @entity { 
+type UniswapFactory @entity {
   # factory address
-  id: ID! 
+  id: ID!
 
   # pair info
   pairCount: Int!
@@ -8,6 +8,9 @@ type UniswapFactory @entity {
   # total volume
   totalVolumeUSD: BigDecimal!
   totalVolumeETH: BigDecimal!
+
+  # untracked values - less confident USD scores
+  untrackedVolumeUSD: BigDecimal!
 
   # total liquidity
   totalLiquidityUSD: BigDecimal!
@@ -35,7 +38,8 @@ type Token @entity {
   # token specific volume
   tradeVolume: BigDecimal!
   tradeVolumeUSD: BigDecimal!
-  
+  untrackedVolumeUSD: BigDecimal!
+
   # transactions across all pairs
   txCount: BigInt!
 
@@ -60,11 +64,10 @@ type Pair @entity {
   reserve1: BigDecimal!
   totalSupply: BigDecimal!
 
-  # derived liquidity 
+  # derived liquidity
   reserveETH: BigDecimal!
   reserveUSD: BigDecimal!
   trackedReserveETH: BigDecimal! # used for separating per pair reserves and global
-
   # Price in terms of the asset pair
   token0Price: BigDecimal!
   token1Price: BigDecimal!
@@ -73,6 +76,7 @@ type Pair @entity {
   volumeToken0: BigDecimal!
   volumeToken1: BigDecimal!
   volumeUSD: BigDecimal!
+  untrackedVolumeUSD: BigDecimal!
   txCount: BigInt!
 
   # creation stats
@@ -80,14 +84,7 @@ type Pair @entity {
   createdAtBlockNumber: BigInt!
 
   # Fields used to help derived relationship
-  # liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "pair")
-  liquidityProviderCount: BigInt! # used to detect new exchanges 
-
-
-  # transaction stats
-  # mints: [Mint!] @derivedFrom(field: "pair")
-  # burns: [Burn!] @derivedFrom(field: "pair")
-  # swaps: [Swap!] @derivedFrom(field: "pair")
+  liquidityProviderCount: BigInt! # used to detect new exchanges
 }
 
 type User @entity {
@@ -100,23 +97,22 @@ type LiquidityPosition @entity {
   id: ID!
   user: User!
   pair: Pair!
-  poolOwnership: BigDecimal
   liquidityTokenBalance: BigDecimal!
   historicalSnapshots: [LiquidityPositionSnapshot]!
 }
 
-# saved over time for return calculations, gets created and never updated 
+# saved over time for return calculations, gets created and never updated
 type LiquidityPositionSnapshot @entity {
   id: ID!
   liquidityPosition: LiquidityPosition! @derivedFrom(field: "historicalSnapshots")
   timestamp: Int! # saved for fast historical lookups
   block: Int! # saved for fast historical lookups
-  user: User! # reference to user  
-  pair: Pair! # reference to pair 
-  token0PriceUSD: BigDecimal! # snapshot of token0 price 
-  token1PriceUSD: BigDecimal! # snapshot of token1 price 
-  reserve0: BigDecimal! # snapshot of pair token0 reserves 
-  reserve1: BigDecimal! # snapshot of pair token1 reserves 
+  user: User! # reference to user
+  pair: Pair! # reference to pair
+  token0PriceUSD: BigDecimal! # snapshot of token0 price
+  token1PriceUSD: BigDecimal! # snapshot of token1 price
+  reserve0: BigDecimal! # snapshot of pair token0 reserves
+  reserve1: BigDecimal! # snapshot of pair token1 reserves
   reserveUSD: BigDecimal! # snapshot of pair reserves in USD
   liquidityTokenTotalSupply: BigDecimal! # snapshot of pool token supply
   liquidityTokenBalance: BigDecimal! # snapshot of users pool token balance
@@ -135,8 +131,7 @@ type Mint @entity {
   # transaction hash + "-" + index in mints Transaction array
   id: ID!
   transaction: Transaction! @derivedFrom(field: "mints")
-  timestamp: BigInt! # need this to pull recent txns for specific token or pair 
-
+  timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 
   # populated from the primary Transfer event
@@ -160,8 +155,7 @@ type Burn @entity {
   # transaction hash + "-" + index in mints Transaction array
   id: ID!
   transaction: Transaction! @derivedFrom(field: "burns")
-  timestamp: BigInt! # need this to pull recent txns for specific token or pair 
-
+  timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 
   # populated from the primary Transfer event
@@ -176,7 +170,7 @@ type Burn @entity {
   # derived amount based on available prices of tokens
   amountUSD: BigDecimal
 
-  # mark uncomplete in ETH case 
+  # mark uncomplete in ETH case
   needsComplete: Boolean!
 
   # optional fee fields, if a Transfer event is fired in _mintFee
@@ -188,8 +182,7 @@ type Swap @entity {
   # transaction hash + "-" + index in swaps Transaction array
   id: ID!
   transaction: Transaction! @derivedFrom(field: "swaps")
-  timestamp: BigInt! # need this to pull recent txns for specific token or pair 
-
+  timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 
   # populated from the Swap event
@@ -231,7 +224,6 @@ type UniswapDayData @entity {
 
   txCount: BigInt!
 }
-
 
 type PairHourData @entity {
   id: ID!

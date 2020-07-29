@@ -22,6 +22,7 @@ export function handleNewPair(event: PairCreated): void {
     factory.totalVolumeETH = ZERO_BD
     factory.totalLiquidityETH = ZERO_BD
     factory.totalVolumeUSD = ZERO_BD
+    factory.untrackedVolumeUSD = ZERO_BD
     factory.totalLiquidityUSD = ZERO_BD
     factory.txCount = ZERO_BI
     factory.mostLiquidTokens = []
@@ -55,6 +56,7 @@ export function handleNewPair(event: PairCreated): void {
     token0.derivedETH = ZERO_BD
     token0.tradeVolume = ZERO_BD
     token0.tradeVolumeUSD = ZERO_BD
+    token0.untrackedVolumeUSD = ZERO_BD
     token0.totalLiquidity = ZERO_BD
     // token0.allPairs = []
     token0.mostLiquidPairs = []
@@ -77,19 +79,12 @@ export function handleNewPair(event: PairCreated): void {
     token1.derivedETH = ZERO_BD
     token1.tradeVolume = ZERO_BD
     token1.tradeVolumeUSD = ZERO_BD
+    token1.untrackedVolumeUSD = ZERO_BD
     token1.totalLiquidity = ZERO_BD
     // token1.allPairs = []
     token1.mostLiquidPairs = []
     token1.txCount = ZERO_BI
   }
-
-  // let newAllPairsArray0 = token0.allPairs
-  // newAllPairsArray0.push(event.params.pair.toHexString())
-  // token0.allPairs = newAllPairsArray0
-
-  // let newAllPairsArray1 = token1.allPairs
-  // newAllPairsArray1.push(event.params.pair.toHexString())
-  // token1.allPairs = newAllPairsArray1
 
   let pair = new Pair(event.params.pair.toHexString()) as Pair
   pair.token0 = token0.id
@@ -107,6 +102,7 @@ export function handleNewPair(event: PairCreated): void {
   pair.volumeToken0 = ZERO_BD
   pair.volumeToken1 = ZERO_BD
   pair.volumeUSD = ZERO_BD
+  pair.untrackedVolumeUSD = ZERO_BD
   pair.token0Price = ZERO_BD
   pair.token1Price = ZERO_BD
 
