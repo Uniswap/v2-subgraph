@@ -206,6 +206,10 @@ export function handleSync(event: Sync): void {
   // reset factory liquidity by subtracting onluy tarcked liquidity
   uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.minus(pair.trackedReserveETH as BigDecimal)
 
+  // reset token total liquidity amounts
+  token0.totalLiquidity = token0.totalLiquidity.minus(pair.reserve0)
+  token1.totalLiquidity = token1.totalLiquidity.minus(pair.reserve1)
+
   pair.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
   pair.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
   pair.token0Price = pair.reserve0.div(pair.reserve1)
@@ -243,9 +247,15 @@ export function handleSync(event: Sync): void {
   uniswap.totalLiquidityETH = uniswap.totalLiquidityETH.plus(trackedLiquidityETH)
   uniswap.totalLiquidityUSD = uniswap.totalLiquidityETH.times(bundle.ethPrice)
 
+  // now correctly set liquidity amounts for each token
+  token0.totalLiquidity = token0.totalLiquidity.plus(pair.reserve0)
+  token1.totalLiquidity = token1.totalLiquidity.plus(pair.reserve1)
+
   // save entities
   pair.save()
   uniswap.save()
+  token0.save()
+  token1.save()
 }
 
 export function handleMint(event: Mint): void {
@@ -262,10 +272,6 @@ export function handleMint(event: Mint): void {
   // update exchange info (except balances, sync will cover that)
   let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   let token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
-
-  // update global token info
-  token0.totalLiquidity = token0.totalLiquidity.plus(token0Amount)
-  token1.totalLiquidity = token1.totalLiquidity.plus(token1Amount)
 
   // update txn counts
   token0.txCount = token0.txCount.plus(ONE_BI)
@@ -320,10 +326,6 @@ export function handleBurn(event: Burn): void {
   let token1 = Token.load(pair.token1)
   let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   let token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
-
-  // update global token info
-  token0.totalLiquidity = token0.totalLiquidity.minus(token0Amount)
-  token1.totalLiquidity = token1.totalLiquidity.minus(token1Amount)
 
   // update txn counts
   token0.txCount = token0.txCount.plus(ONE_BI)
@@ -401,13 +403,11 @@ export function handleSwap(event: Swap): void {
   }
 
   // update token0 global volume and token liquidity stats
-  token0.totalLiquidity = token0.totalLiquidity.plus(amount0In).minus(amount0Out)
   token0.tradeVolume = token0.tradeVolume.plus(amount0In.plus(amount0Out))
   token0.tradeVolumeUSD = token0.tradeVolumeUSD.plus(trackedAmountUSD)
   token0.untrackedVolumeUSD = token0.untrackedVolumeUSD.plus(derivedAmountUSD)
 
   // update token1 global volume and token liquidity stats
-  token1.totalLiquidity = token1.totalLiquidity.plus(amount1In).minus(amount1Out)
   token1.tradeVolume = token1.tradeVolume.plus(amount1In.plus(amount1Out))
   token1.tradeVolumeUSD = token1.tradeVolumeUSD.plus(trackedAmountUSD)
   token1.untrackedVolumeUSD = token1.untrackedVolumeUSD.plus(derivedAmountUSD)
