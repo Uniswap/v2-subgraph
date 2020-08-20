@@ -202,7 +202,6 @@ type Swap @entity {
 type Bundle @entity {
   id: ID!
   ethPrice: BigDecimal! # price of ETH usd
-  # daiPrice: BigDecimal! # price of ETH in DAI
 }
 
 # Data accumulated and condensed into day stats for all of Uniswap
@@ -212,9 +211,10 @@ type UniswapDayData @entity {
 
   dailyVolumeETH: BigDecimal!
   dailyVolumeUSD: BigDecimal!
+  dailyVolumeUntracked: BigDecimal!
 
-  totalVolumeETH: BigDecimal! # volume just on eth -i.e. we dont double count volume
-  totalLiquidityETH: BigDecimal! # 2 * SUM(exchanges.ethLiquidity). Since tokenLiquiduity = ethLiquidity value, can just *2
+  totalVolumeETH: BigDecimal!
+  totalLiquidityETH: BigDecimal!
   totalVolumeUSD: BigDecimal! # Accumulate at each trade, not just calculated off whatever totalVolume is. making it more accurate as it is a live conversion
   totalLiquidityUSD: BigDecimal!
 

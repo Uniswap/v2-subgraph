@@ -21,6 +21,7 @@ export function updateUniswapDayData(event: EthereumEvent): void {
     uniswapDayData.dailyVolumeETH = ZERO_BD
     uniswapDayData.totalVolumeUSD = ZERO_BD
     uniswapDayData.totalVolumeETH = ZERO_BD
+    uniswapDayData.dailyVolumeUntracked = ZERO_BD
     uniswapDayData.totalLiquidityUSD = ZERO_BD
     uniswapDayData.totalLiquidityETH = ZERO_BD
     uniswapDayData.maxStored = maxTokenDayDatas
