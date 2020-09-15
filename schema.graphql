@@ -214,9 +214,6 @@ type UniswapDayData @entity {
   totalVolumeUSD: BigDecimal! # Accumulate at each trade, not just calculated off whatever totalVolume is. making it more accurate as it is a live conversion
   totalLiquidityUSD: BigDecimal!
 
-  # daily top tokens in liquidity
-  maxStored: Int
-
   txCount: BigInt!
 }
 
@@ -282,7 +279,4 @@ type TokenDayData @entity {
 
   # price stats
   priceUSD: BigDecimal!
-
-  # top pairs that this token is in by liquidity
-  maxStored: Int!
 }

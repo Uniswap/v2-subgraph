@@ -4,10 +4,6 @@ import { BigInt, BigDecimal, EthereumEvent } from '@graphprotocol/graph-ts'
 import { Pair, Bundle, Token, UniswapFactory, UniswapDayData, PairDayData, TokenDayData } from '../types/schema'
 import { ONE_BI, ZERO_BD, ZERO_BI, FACTORY_ADDRESS } from './helpers'
 
-// max number of entities to store
-const maxTokenDayDatas = 10
-const maxPairDayDatas = 10
-
 export function updateUniswapDayData(event: EthereumEvent): void {
   let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
   let timestamp = event.block.timestamp.toI32()
@@ -24,7 +20,6 @@ export function updateUniswapDayData(event: EthereumEvent): void {
     uniswapDayData.dailyVolumeUntracked = ZERO_BD
     uniswapDayData.totalLiquidityUSD = ZERO_BD
     uniswapDayData.totalLiquidityETH = ZERO_BD
-    uniswapDayData.maxStored = maxTokenDayDatas
     uniswapDayData.txCount = ZERO_BI
     uniswapDayData.save()
   }
@@ -125,7 +120,6 @@ export function updateTokenDayData(token: Token, event: EthereumEvent): void {
     tokenDayData.totalLiquidityToken = ZERO_BD
     tokenDayData.totalLiquidityETH = ZERO_BD
     tokenDayData.totalLiquidityUSD = ZERO_BD
-    tokenDayData.maxStored = maxPairDayDatas
     tokenDayData.save()
   }
   tokenDayData = TokenDayData.load(tokenDayID)
