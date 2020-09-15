@@ -18,9 +18,6 @@ type UniswapFactory @entity {
 
   # transactions
   txCount: BigInt!
-
-  # as reference for new day datas
-  mostLiquidTokens: [TokenDayData!]!
 }
 
 type Token @entity {
@@ -220,7 +217,6 @@ type UniswapDayData @entity {
 
   # daily top tokens in liquidity
   maxStored: Int
-  mostLiquidTokens: [TokenDayData!]!
 
   txCount: BigInt!
 }
