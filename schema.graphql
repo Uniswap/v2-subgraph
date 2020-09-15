@@ -116,6 +116,8 @@ type Transaction @entity {
   id: ID! # txn hash
   blockNumber: BigInt!
   timestamp: BigInt!
+  # This is not the reverse of Mint.transaction; it is only used to
+  # track incomplete mints (similar for burns and swaps)
   mints: [Mint]!
   burns: [Burn]!
   swaps: [Swap]!
@@ -124,7 +126,7 @@ type Transaction @entity {
 type Mint @entity {
   # transaction hash + "-" + index in mints Transaction array
   id: ID!
-  transaction: Transaction! @derivedFrom(field: "mints")
+  transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 
@@ -148,7 +150,7 @@ type Mint @entity {
 type Burn @entity {
   # transaction hash + "-" + index in mints Transaction array
   id: ID!
-  transaction: Transaction! @derivedFrom(field: "burns")
+  transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 
@@ -175,7 +177,7 @@ type Burn @entity {
 type Swap @entity {
   # transaction hash + "-" + index in swaps Transaction array
   id: ID!
-  transaction: Transaction! @derivedFrom(field: "swaps")
+  transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 
