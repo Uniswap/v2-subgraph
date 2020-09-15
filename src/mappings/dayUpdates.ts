@@ -126,7 +126,6 @@ export function updateTokenDayData(token: Token, event: EthereumEvent): void {
     tokenDayData.totalLiquidityETH = ZERO_BD
     tokenDayData.totalLiquidityUSD = ZERO_BD
     tokenDayData.maxStored = maxPairDayDatas
-    tokenDayData.mostLiquidPairs = token.mostLiquidPairs
     tokenDayData.save()
   }
   tokenDayData = TokenDayData.load(tokenDayID)

@@ -45,9 +45,6 @@ type Token @entity {
 
   # derived prices
   derivedETH: BigDecimal
-
-  # saved for historical refernce of most liquid pairs
-  mostLiquidPairs: [PairDayData]!
 }
 
 type Pair @entity {
@@ -286,5 +283,4 @@ type TokenDayData @entity {
 
   # top pairs that this token is in by liquidity
   maxStored: Int!
-  mostLiquidPairs: [PairDayData!]!
 }
