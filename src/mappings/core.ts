@@ -59,6 +59,9 @@ export function handleTransfer(event: Transfer): void {
     transaction = new Transaction(transactionHash)
     transaction.blockNumber = event.block.number
     transaction.timestamp = event.block.timestamp
+    transaction.mints = []
+    transaction.burns = []
+    transaction.swaps = []
   }
 
   // load mints from transaction
