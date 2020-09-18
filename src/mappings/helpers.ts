@@ -141,7 +141,6 @@ export function createLiquidityPosition(exchange: Address, user: Address): Liqui
     liquidityTokenBalance.liquidityTokenBalance = ZERO_BD
     liquidityTokenBalance.pair = exchange.toHexString()
     liquidityTokenBalance.user = user.toHexString()
-    liquidityTokenBalance.historicalSnapshots = []
     liquidityTokenBalance.save()
   }
   if (liquidityTokenBalance == null) log.error('LiquidityTokenBalance is null', [id])
@@ -177,11 +176,6 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   snapshot.reserveUSD = pair.reserveUSD
   snapshot.liquidityTokenTotalSupply = pair.totalSupply
   snapshot.liquidityTokenBalance = position.liquidityTokenBalance
+  snapshot.liquidityPosition = position.id
   snapshot.save()
-
-  // add snapshot to lqiudiity position array
-  let snapshots = position.historicalSnapshots
-  snapshots.push(snapshot.id)
-  position.historicalSnapshots = snapshots
-  position.save()
 }
