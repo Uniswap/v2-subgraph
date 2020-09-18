@@ -5,6 +5,7 @@ import {
   ipfs,
   json,
   JSONValueKind,
+  log,
 } from '@graphprotocol/graph-ts'
 import { Token } from '../types/schema'
 
@@ -18,22 +19,26 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
 
   // Stop if no result from IPFS
   if(tokenListBytes == null) {
+    log.error('Failed to retrieve Token List from IPFS', [])
     return null
   }
 
   // Extract the token list object
-  let tokenListJson = json.fromBytes(<Bytes>tokenListBytes)
+  let tokenListJson = json.fromBytes(tokenListBytes as Bytes)
   if(tokenListJson.kind != JSONValueKind.OBJECT) {
+    log.error('JSON retrieved is not an object', [])
     return null
   }
   let tokenList = tokenListJson.toObject()
 
   // Extract the tokens from the token list
   if(!tokenList.isSet('tokens')) {
+    log.error('Missing tokens property in JSON list', [])
     return null
   }
   let tokensJson = tokenListJson.toObject().get('tokens')
   if(tokensJson.kind != JSONValueKind.ARRAY) {
+    log.error('Tokens property is not an array', [])
     return null
   }
   let tokens = tokensJson.toArray()
@@ -41,6 +46,7 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
   for (let i: i32 = 0, len: i32 = tokens.length; i < len; i++) {
     // Check type
     if(tokens[i].kind != JSONValueKind.OBJECT) {
+      log.warning('Skipping array entry, not an object', [])
       continue
     }
     let tokenData = tokens[i].toObject()
@@ -67,12 +73,15 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
     let token = new Token(tokenAddress.toString())
     if(tokenData.isSet('symbol') && tokenData.get('symbol').kind == JSONValueKind.STRING) {
       token.symbol = tokenData.get('symbol').toString()
+      log.info('Token symbol found in Token List', [tokenAddress.toString(), token.symbol])
     }
     if(tokenData.isSet('name') && tokenData.get('name').kind == JSONValueKind.STRING) {
       token.name = tokenData.get('name').toString()
+      log.info('Token name found in Token List', [tokenAddress.toString(), token.name])
     }
     if(tokenData.isSet('decimals') && tokenData.get('decimals').kind == JSONValueKind.NUMBER) {
       token.decimals = tokenData.get('decimals').toBigInt()
+      log.info('Token decimals found in Token List', [tokenAddress.toString(), token.decimals.toString()])
     }
 
     return token
@@ -86,7 +95,7 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
 // Helper to get a token symbol from the token list
 export function fetchTokenSymbolFromTokenList(tokenAddress: Address): string {
   let token = fetchTokenFromTokenList(tokenAddress)
-  if(token) {
+  if(token != null) {
     return token.symbol
   } else {
     return 'unknown'
@@ -96,7 +105,7 @@ export function fetchTokenSymbolFromTokenList(tokenAddress: Address): string {
 // Helper to get a token name from the token list
 export function fetchTokenNameFromTokenList(tokenAddress: Address): string {
   let token = fetchTokenFromTokenList(tokenAddress)
-  if(token) {
+  if(token != null) {
     return token.name
   } else {
     return 'unknown'
@@ -106,7 +115,7 @@ export function fetchTokenNameFromTokenList(tokenAddress: Address): string {
 // Helper to get a token decimals from the token list
 export function fetchTokenDecimalsFromTokenList(tokenAddress: Address): BigInt {
   let token = fetchTokenFromTokenList(tokenAddress)
-  if(token) {
+  if(token != null) {
     return token.decimals
   } else {
     return null

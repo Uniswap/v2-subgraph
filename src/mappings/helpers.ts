@@ -61,11 +61,6 @@ export function isNullEthValue(value: string): boolean {
 
 
 export function fetchTokenSymbol(tokenAddress: Address): string {
-  // hard coded override
-  if (tokenAddress.toHexString() == '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a') {
-    return 'DGD'
-  }
-
   let contract = ERC20.bind(tokenAddress)
   let contractSymbolBytes = ERC20SymbolBytes.bind(tokenAddress)
 
@@ -81,6 +76,7 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
       }
     } else {
       // Fallback to token list
+      log.debug('Token symbol not defined in ERC20 Contract', [tokenAddress.toString()])
       symbolValue = fetchTokenSymbolFromTokenList(tokenAddress)
     }
   } else {
@@ -91,11 +87,6 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
 }
 
 export function fetchTokenName(tokenAddress: Address): string {
-  // hard coded override
-  if (tokenAddress.toHexString() == '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a') {
-    return 'DGD'
-  }
-
   let contract = ERC20.bind(tokenAddress)
   let contractNameBytes = ERC20NameBytes.bind(tokenAddress)
 
@@ -111,6 +102,7 @@ export function fetchTokenName(tokenAddress: Address): string {
       }
     } else {
       // Fallback to token list
+      log.debug('Token name not defined in ERC20 Contract',  [tokenAddress.toString()])
       nameValue = fetchTokenNameFromTokenList(tokenAddress)
     }
   } else {
@@ -138,6 +130,7 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   if (!decimalResult.reverted) {
     decimalValue = decimalResult.value
   } else {
+    log.debug('Token decimals not defined in ERC20 Contract', [tokenAddress.toString()])
     return fetchTokenDecimalsFromTokenList(tokenAddress)
   }
   return BigInt.fromI32(decimalValue as i32)
