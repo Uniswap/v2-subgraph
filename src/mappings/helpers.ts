@@ -76,7 +76,7 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
       }
     } else {
       // Fallback to token list
-      log.debug('Token symbol not defined in ERC20 Contract', [tokenAddress.toString()])
+      log.debug('Token symbol not defined in ERC20 Contract', [tokenAddress.toHexString()])
       symbolValue = fetchTokenSymbolFromTokenList(tokenAddress)
     }
   } else {
@@ -102,7 +102,7 @@ export function fetchTokenName(tokenAddress: Address): string {
       }
     } else {
       // Fallback to token list
-      log.debug('Token name not defined in ERC20 Contract',  [tokenAddress.toString()])
+      log.debug('Token name not defined in ERC20 Contract',  [tokenAddress.toHexString()])
       nameValue = fetchTokenNameFromTokenList(tokenAddress)
     }
   } else {
@@ -130,7 +130,7 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   if (!decimalResult.reverted) {
     decimalValue = decimalResult.value
   } else {
-    log.debug('Token decimals not defined in ERC20 Contract', [tokenAddress.toString()])
+    log.debug('Token decimals not defined in ERC20 Contract', [tokenAddress.toHexString()])
     return fetchTokenDecimalsFromTokenList(tokenAddress)
   }
   return BigInt.fromI32(decimalValue as i32)

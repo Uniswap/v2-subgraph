@@ -64,24 +64,24 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
     if(
       !tokenData.isSet('address') ||
       tokenData.get('address').kind != JSONValueKind.STRING ||
-      tokenData.get('address').toString() != tokenAddress.toString()
+      tokenData.get('address').toString() != tokenAddress.toHexString()
     ) {
       continue
     }
 
     // Build Token with best-effort
-    let token = new Token(tokenAddress.toString())
+    let token = new Token(tokenAddress.toHexString())
     if(tokenData.isSet('symbol') && tokenData.get('symbol').kind == JSONValueKind.STRING) {
       token.symbol = tokenData.get('symbol').toString()
-      log.info('Token symbol found in Token List', [tokenAddress.toString(), token.symbol])
+      log.info('Token symbol found in Token List', [tokenAddress.toHexString(), token.symbol])
     }
     if(tokenData.isSet('name') && tokenData.get('name').kind == JSONValueKind.STRING) {
       token.name = tokenData.get('name').toString()
-      log.info('Token name found in Token List', [tokenAddress.toString(), token.name])
+      log.info('Token name found in Token List', [tokenAddress.toHexString(), token.name])
     }
     if(tokenData.isSet('decimals') && tokenData.get('decimals').kind == JSONValueKind.NUMBER) {
       token.decimals = tokenData.get('decimals').toBigInt()
-      log.info('Token decimals found in Token List', [tokenAddress.toString(), token.decimals.toString()])
+      log.info('Token decimals found in Token List', [tokenAddress.toHexString(), token.decimals.toString()])
     }
 
     return token
