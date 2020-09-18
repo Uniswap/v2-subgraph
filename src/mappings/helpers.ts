@@ -5,6 +5,11 @@ import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
 import { User, Bundle, Token, LiquidityPosition, LiquidityPositionSnapshot, Pair } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
+import { 
+  fetchTokenSymbolFromTokenList,
+  fetchTokenNameFromTokenList,
+  fetchTokenDecimalsFromTokenList,
+} from './tokenList'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
@@ -53,6 +58,8 @@ export function isNullEthValue(value: string): boolean {
   return value == '0x0000000000000000000000000000000000000000000000000000000000000001'
 }
 
+
+
 export function fetchTokenSymbol(tokenAddress: Address): string {
   // hard coded override
   if (tokenAddress.toHexString() == '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a') {
@@ -72,6 +79,9 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
       if (!isNullEthValue(symbolResultBytes.value.toHexString())) {
         symbolValue = symbolResultBytes.value.toString()
       }
+    } else {
+      // Fallback to token list
+      symbolValue = fetchTokenSymbolFromTokenList(tokenAddress)
     }
   } else {
     symbolValue = symbolResult.value
@@ -99,6 +109,9 @@ export function fetchTokenName(tokenAddress: Address): string {
       if (!isNullEthValue(nameResultBytes.value.toHexString())) {
         nameValue = nameResultBytes.value.toString()
       }
+    } else {
+      // Fallback to token list
+      nameValue = fetchTokenNameFromTokenList(tokenAddress)
     }
   } else {
     nameValue = nameResult.value
@@ -124,6 +137,8 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   let decimalResult = contract.try_decimals()
   if (!decimalResult.reverted) {
     decimalValue = decimalResult.value
+  } else {
+    return fetchTokenDecimalsFromTokenList(tokenAddress)
   }
   return BigInt.fromI32(decimalValue as i32)
 }
@@ -185,3 +200,4 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   position.historicalSnapshots = snapshots
   position.save()
 }
+
