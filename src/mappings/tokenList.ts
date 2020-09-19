@@ -57,7 +57,7 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
       tokenData.get('chainId').kind != JSONValueKind.NUMBER || 
       tokenData.get('chainId').toI64() != 1
     ) {
-      //log.debug('Skipping token not on mainnet: {}', [tokenData.get('chainId').toString()])
+      log.debug('Skipping token not on mainnet: {}', [tokenData.get('chainId').toString()])
       continue
     }
 
@@ -65,7 +65,7 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
     if(
       !tokenData.isSet('address') ||
       tokenData.get('address').kind != JSONValueKind.STRING ||
-      tokenData.get('address').toString() != tokenAddress.toHexString()
+      Address.fromString(tokenData.get('address').toString()) != tokenAddress
     ) {
       //log.debug('Skipping address: {}', [tokenData.get('address').toString()])
       continue
