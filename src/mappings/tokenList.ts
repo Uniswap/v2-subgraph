@@ -19,26 +19,26 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
 
   // Stop if no result from IPFS
   if(tokenListBytes == null) {
-    log.error('Failed to retrieve Token List from IPFS', [])
+    log.error('Failed to retrieve Token List from IPFS: {}', [TOKEN_LIST_IPFS])
     return null
   }
 
   // Extract the token list object
   let tokenListJson = json.fromBytes(tokenListBytes as Bytes)
   if(tokenListJson.kind != JSONValueKind.OBJECT) {
-    log.error('JSON retrieved is not an object', [])
+    log.error('JSON retrieved is not an object: {}', [TOKEN_LIST_IPFS])
     return null
   }
   let tokenList = tokenListJson.toObject()
 
   // Extract the tokens from the token list
   if(!tokenList.isSet('tokens')) {
-    log.error('Missing tokens property in JSON list', [])
+    log.error('Missing tokens property in JSON list: {}', [TOKEN_LIST_IPFS])
     return null
   }
   let tokensJson = tokenListJson.toObject().get('tokens')
   if(tokensJson.kind != JSONValueKind.ARRAY) {
-    log.error('Tokens property is not an array', [])
+    log.error('Tokens property is not an array: {}', [TOKEN_LIST_IPFS])
     return null
   }
   let tokens = tokensJson.toArray()
@@ -57,6 +57,7 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
       tokenData.get('chainId').kind != JSONValueKind.NUMBER || 
       tokenData.get('chainId').toI64() != 1
     ) {
+      //log.debug('Skipping token not on mainnet: {}', [tokenData.get('chainId').toString()])
       continue
     }
 
@@ -66,11 +67,15 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
       tokenData.get('address').kind != JSONValueKind.STRING ||
       tokenData.get('address').toString() != tokenAddress.toHexString()
     ) {
+      //log.debug('Skipping address: {}', [tokenData.get('address').toString()])
       continue
     }
 
-    // Build Token with best-effort
+    // Token is found
+    log.info('Token Found in TokenList: {}', [tokenData.get('address').toString()])
     let token = new Token(tokenAddress.toHexString())
+
+    // Build Token with best-effort
     if(tokenData.isSet('symbol') && tokenData.get('symbol').kind == JSONValueKind.STRING) {
       token.symbol = tokenData.get('symbol').toString()
       log.info('Token symbol found in Token List', [tokenAddress.toHexString(), token.symbol])
@@ -84,10 +89,12 @@ export function fetchTokenFromTokenList(tokenAddress: Address) : Token | null {
       log.info('Token decimals found in Token List', [tokenAddress.toHexString(), token.decimals.toString()])
     }
 
+    
     return token
     
   }
 
+  log.warning('Token not found in TokenList: {}', [tokenAddress.toHexString()])
   return null
   
 }
