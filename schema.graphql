@@ -98,13 +98,12 @@ type LiquidityPosition @entity {
   user: User!
   pair: Pair!
   liquidityTokenBalance: BigDecimal!
-  historicalSnapshots: [LiquidityPositionSnapshot]!
 }
 
 # saved over time for return calculations, gets created and never updated
 type LiquidityPositionSnapshot @entity {
   id: ID!
-  liquidityPosition: LiquidityPosition! @derivedFrom(field: "historicalSnapshots")
+  liquidityPosition: LiquidityPosition!
   timestamp: Int! # saved for fast historical lookups
   block: Int! # saved for fast historical lookups
   user: User! # reference to user
@@ -130,7 +129,7 @@ type Transaction @entity {
 type Mint @entity {
   # transaction hash + "-" + index in mints Transaction array
   id: ID!
-  transaction: Transaction! @derivedFrom(field: "mints")
+  transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 
@@ -154,7 +153,7 @@ type Mint @entity {
 type Burn @entity {
   # transaction hash + "-" + index in mints Transaction array
   id: ID!
-  transaction: Transaction! @derivedFrom(field: "burns")
+  transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 
@@ -181,7 +180,7 @@ type Burn @entity {
 type Swap @entity {
   # transaction hash + "-" + index in swaps Transaction array
   id: ID!
-  transaction: Transaction! @derivedFrom(field: "swaps")
+  transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
   pair: Pair!
 

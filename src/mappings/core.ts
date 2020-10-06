@@ -48,13 +48,15 @@ export function handleTransfer(event: Transfer): void {
   let to = event.params.to
   createUser(to)
 
+  // get pair and load contract
   let pair = Pair.load(event.address.toHexString())
   let pairContract = PairContract.bind(event.address)
 
   // liquidity token amount being transfered
   let value = convertTokenToDecimal(event.params.value, BI_18)
-  let transaction = Transaction.load(transactionHash)
 
+  // get or create transaction
+  let transaction = Transaction.load(transactionHash)
   if (transaction == null) {
     transaction = new Transaction(transactionHash)
     transaction.blockNumber = event.block.number
@@ -64,15 +66,14 @@ export function handleTransfer(event: Transfer): void {
     transaction.burns = []
   }
 
-  // load mints from transaction
+  // mints
   let mints = transaction.mints
-
-  // mint
   if (from.toHexString() == ADDRESS_ZERO) {
     // update total supply
     pair.totalSupply = pair.totalSupply.plus(value)
     pair.save()
 
+    // create new mint if no mints so far or if last one is done already
     if (mints.length === 0 || isCompleteMint(mints[mints.length - 1])) {
       let mint = new MintEvent(
         event.transaction.hash
@@ -80,6 +81,7 @@ export function handleTransfer(event: Transfer): void {
           .concat('-')
           .concat(BigInt.fromI32(mints.length).toString())
       )
+      mint.transaction = transaction.id
       mint.pair = pair.id
       mint.to = to
       mint.liquidity = value
@@ -106,6 +108,7 @@ export function handleTransfer(event: Transfer): void {
         .concat('-')
         .concat(BigInt.fromI32(burns.length).toString())
     )
+    burn.transaction = transaction.id
     burn.pair = pair.id
     burn.liquidity = value
     burn.timestamp = transaction.timestamp
@@ -137,6 +140,7 @@ export function handleTransfer(event: Transfer): void {
             .concat('-')
             .concat(BigInt.fromI32(burns.length).toString())
         )
+        burn.transaction = transaction.id
         burn.needsComplete = false
         burn.pair = pair.id
         burn.liquidity = value
@@ -149,6 +153,7 @@ export function handleTransfer(event: Transfer): void {
           .concat('-')
           .concat(BigInt.fromI32(burns.length).toString())
       )
+      burn.transaction = transaction.id
       burn.needsComplete = false
       burn.pair = pair.id
       burn.liquidity = value
@@ -213,14 +218,10 @@ export function handleSync(event: Sync): void {
   pair.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
   pair.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
 
-  if (pair.reserve1.notEqual(ZERO_BD))
-    pair.token0Price = pair.reserve0.div(pair.reserve1)
-  else
-    pair.token0Price = ZERO_BD
-  if (pair.reserve0.notEqual(ZERO_BD))
-    pair.token1Price = pair.reserve1.div(pair.reserve0)
-  else
-    pair.token1Price = ZERO_BD
+  if (pair.reserve1.notEqual(ZERO_BD)) pair.token0Price = pair.reserve0.div(pair.reserve1)
+  else pair.token0Price = ZERO_BD
+  if (pair.reserve0.notEqual(ZERO_BD)) pair.token1Price = pair.reserve1.div(pair.reserve0)
+  else pair.token1Price = ZERO_BD
 
   pair.save()
 
@@ -464,6 +465,7 @@ export function handleSwap(event: Swap): void {
   )
 
   // update swap event
+  swap.transaction = transaction.id
   swap.pair = pair.id
   swap.timestamp = transaction.timestamp
   swap.sender = event.params.sender
