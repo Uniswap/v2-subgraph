@@ -92,7 +92,6 @@ type LiquidityPosition @entity {
   user: User!
   pair: Pair!
   liquidityTokenBalance: BigDecimal!
-  historicalSnapshots: [LiquidityPositionSnapshot]! @derivedFrom(field: "liquidityPosition")
 }
 
 # saved over time for return calculations, gets created and never updated

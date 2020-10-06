@@ -165,6 +165,7 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
 
   // create new snapshot
   let snapshot = new LiquidityPositionSnapshot(position.id.concat(timestamp.toString()))
+  snapshot.liquidityPosition = position.id
   snapshot.timestamp = timestamp
   snapshot.block = event.block.number.toI32()
   snapshot.user = position.user
@@ -178,4 +179,5 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   snapshot.liquidityTokenBalance = position.liquidityTokenBalance
   snapshot.liquidityPosition = position.id
   snapshot.save()
+  position.save()
 }
