@@ -57,7 +57,7 @@ export function handleTransfer(event: Transfer): void {
 
   // get or create transaction
   let transaction = Transaction.load(transactionHash)
-  if (transaction == null) {
+  if (transaction === null) {
     transaction = new Transaction(transactionHash)
     transaction.blockNumber = event.block.number
     transaction.timestamp = event.block.timestamp

@@ -10,7 +10,7 @@ export function updateUniswapDayData(event: EthereumEvent): void {
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
   let uniswapDayData = UniswapDayData.load(dayID.toString())
-  if (uniswapDayData == null) {
+  if (uniswapDayData === null) {
     let uniswapDayData = new UniswapDayData(dayID.toString())
     uniswapDayData.date = dayStartTimestamp
     uniswapDayData.dailyVolumeUSD = ZERO_BD
@@ -40,7 +40,7 @@ export function updatePairDayData(event: EthereumEvent): void {
     .concat(BigInt.fromI32(dayID).toString())
   let pair = Pair.load(event.address.toHexString())
   let pairDayData = PairDayData.load(dayPairID)
-  if (pairDayData == null) {
+  if (pairDayData === null) {
     let pairDayData = new PairDayData(dayPairID)
     let pair = Pair.load(event.address.toHexString())
     pairDayData.totalSupply = pair.totalSupply
@@ -76,7 +76,7 @@ export function updatePairHourData(event: EthereumEvent): void {
     .concat(BigInt.fromI32(hourIndex).toString())
   let pair = Pair.load(event.address.toHexString())
   let pairHourData = PairHourData.load(hourPairID)
-  if (pairHourData == null) {
+  if (pairHourData === null) {
     let pairHourData = new PairHourData(hourPairID)
     pairHourData.hourStartUnix = hourStartUnix
     pairHourData.pair = event.address.toHexString()
@@ -108,7 +108,7 @@ export function updateTokenDayData(token: Token, event: EthereumEvent): void {
     .concat(BigInt.fromI32(dayID).toString())
 
   let tokenDayData = TokenDayData.load(tokenDayID)
-  if (tokenDayData == null) {
+  if (tokenDayData === null) {
     let tokenDayData = new TokenDayData(tokenDayID)
     tokenDayData.date = dayStartTimestamp
     tokenDayData.token = token.id
