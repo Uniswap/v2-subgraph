@@ -90,9 +90,7 @@ export function handleTransfer(event: Transfer): void {
       mint.save()
 
       // update mints in transaction
-      let newMints = transaction.mints
-      newMints.push(mint.id)
-      transaction.mints = newMints
+      transaction.mints = mints.concat([mint.id])
 
       // save entities
       transaction.save()
@@ -118,6 +116,9 @@ export function handleTransfer(event: Transfer): void {
     burn.needsComplete = true
     burn.transaction = transaction.id
     burn.save()
+
+    // TODO: Consider using .concat() for handling array updates to protect
+    // against unintended side effects for other code paths.
     burns.push(burn.id)
     transaction.burns = burns
     transaction.save()
@@ -172,6 +173,9 @@ export function handleTransfer(event: Transfer): void {
       // remove the logical mint
       store.remove('Mint', mints[mints.length - 1])
       // update the transaction
+
+      // TODO: Consider using .slice().pop() to protect against unintended
+      // side effects for other code paths.
       mints.pop()
       transaction.mints = mints
       transaction.save()
@@ -179,10 +183,14 @@ export function handleTransfer(event: Transfer): void {
     burn.save()
     // if accessing last one, replace it
     if (burn.needsComplete) {
+      // TODO: Consider using .slice(0, -1).concat() to protect against
+      // unintended side effects for other code paths.
       burns[burns.length - 1] = burn.id
     }
     // else add new one
     else {
+      // TODO: Consider using .concat() for handling array updates to protect
+      // against unintended side effects for other code paths.
       burns.push(burn.id)
     }
     transaction.burns = burns
@@ -484,6 +492,9 @@ export function handleSwap(event: Swap): void {
   swap.save()
 
   // update the transaction
+
+  // TODO: Consider using .concat() for handling array updates to protect
+  // against unintended side effects for other code paths.
   swaps.push(swap.id)
   transaction.swaps = swaps
   transaction.save()
