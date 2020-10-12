@@ -57,7 +57,7 @@ export function handleTransfer(event: Transfer): void {
 
   // get or create transaction
   let transaction = Transaction.load(transactionHash)
-  if (transaction == null) {
+  if (transaction === null) {
     transaction = new Transaction(transactionHash)
     transaction.blockNumber = event.block.number
     transaction.timestamp = event.block.timestamp
@@ -90,9 +90,7 @@ export function handleTransfer(event: Transfer): void {
       mint.save()
 
       // update mints in transaction
-      let newMints = transaction.mints
-      newMints.push(mint.id)
-      transaction.mints = newMints
+      transaction.mints = mints.concat([mint.id])
 
       // save entities
       transaction.save()
@@ -118,6 +116,9 @@ export function handleTransfer(event: Transfer): void {
     burn.needsComplete = true
     burn.transaction = transaction.id
     burn.save()
+
+    // TODO: Consider using .concat() for handling array updates to protect
+    // against unintended side effects for other code paths.
     burns.push(burn.id)
     transaction.burns = burns
     transaction.save()
@@ -172,6 +173,9 @@ export function handleTransfer(event: Transfer): void {
       // remove the logical mint
       store.remove('Mint', mints[mints.length - 1])
       // update the transaction
+
+      // TODO: Consider using .slice().pop() to protect against unintended
+      // side effects for other code paths.
       mints.pop()
       transaction.mints = mints
       transaction.save()
@@ -179,10 +183,14 @@ export function handleTransfer(event: Transfer): void {
     burn.save()
     // if accessing last one, replace it
     if (burn.needsComplete) {
+      // TODO: Consider using .slice(0, -1).concat() to protect against
+      // unintended side effects for other code paths.
       burns[burns.length - 1] = burn.id
     }
     // else add new one
     else {
+      // TODO: Consider using .concat() for handling array updates to protect
+      // against unintended side effects for other code paths.
       burns.push(burn.id)
     }
     transaction.burns = burns
@@ -458,7 +466,6 @@ export function handleSwap(event: Swap): void {
     transaction.mints = []
     transaction.swaps = []
     transaction.burns = []
-    transaction.save()
   }
   let swaps = transaction.swaps
   let swap = new SwapEvent(
@@ -485,59 +492,39 @@ export function handleSwap(event: Swap): void {
   swap.save()
 
   // update the transaction
+
+  // TODO: Consider using .concat() for handling array updates to protect
+  // against unintended side effects for other code paths.
   swaps.push(swap.id)
   transaction.swaps = swaps
   transaction.save()
 
   // update day entities
-  updatePairDayData(event)
-  updatePairHourData(event)
-  updateUniswapDayData(event)
-  updateTokenDayData(token0 as Token, event)
-  updateTokenDayData(token1 as Token, event)
-
-  let timestamp = event.block.timestamp.toI32()
-  // daily info
-  let dayID = timestamp / 86400
-  let dayPairID = event.address
-    .toHexString()
-    .concat('-')
-    .concat(BigInt.fromI32(dayID).toString())
-
-  // hourly info
-  let hourID = timestamp / 3600
-  let hourPairID = event.address
-    .toHexString()
-    .concat('-')
-    .concat(BigInt.fromI32(hourID).toString())
+  let pairDayData = updatePairDayData(event)
+  let pairHourData = updatePairHourData(event)
+  let uniswapDayData = updateUniswapDayData(event)
+  let token0DayData = updateTokenDayData(token0 as Token, event)
+  let token1DayData = updateTokenDayData(token1 as Token, event)
 
   // swap specific updating
-  let uniswapDayData = UniswapDayData.load(dayID.toString())
   uniswapDayData.dailyVolumeUSD = uniswapDayData.dailyVolumeUSD.plus(trackedAmountUSD)
   uniswapDayData.dailyVolumeETH = uniswapDayData.dailyVolumeETH.plus(trackedAmountETH)
   uniswapDayData.dailyVolumeUntracked = uniswapDayData.dailyVolumeUntracked.plus(derivedAmountUSD)
   uniswapDayData.save()
 
   // swap specific updating for pair
-  let pairDayData = PairDayData.load(dayPairID)
   pairDayData.dailyVolumeToken0 = pairDayData.dailyVolumeToken0.plus(amount0Total)
   pairDayData.dailyVolumeToken1 = pairDayData.dailyVolumeToken1.plus(amount1Total)
   pairDayData.dailyVolumeUSD = pairDayData.dailyVolumeUSD.plus(trackedAmountUSD)
   pairDayData.save()
 
   // update hourly pair data
-  let pairHourData = PairHourData.load(hourPairID)
   pairHourData.hourlyVolumeToken0 = pairHourData.hourlyVolumeToken0.plus(amount0Total)
   pairHourData.hourlyVolumeToken1 = pairHourData.hourlyVolumeToken1.plus(amount1Total)
   pairHourData.hourlyVolumeUSD = pairHourData.hourlyVolumeUSD.plus(trackedAmountUSD)
   pairHourData.save()
 
   // swap specific updating for token0
-  let token0DayID = token0.id
-    .toString()
-    .concat('-')
-    .concat(BigInt.fromI32(dayID).toString())
-  let token0DayData = TokenDayData.load(token0DayID)
   token0DayData.dailyVolumeToken = token0DayData.dailyVolumeToken.plus(amount0Total)
   token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(amount0Total.times(token1.derivedETH as BigDecimal))
   token0DayData.dailyVolumeUSD = token0DayData.dailyVolumeUSD.plus(
@@ -546,12 +533,6 @@ export function handleSwap(event: Swap): void {
   token0DayData.save()
 
   // swap specific updating
-  let token1DayID = token1.id
-    .toString()
-    .concat('-')
-    .concat(BigInt.fromI32(dayID).toString())
-  let token1DayData = TokenDayData.load(token1DayID)
-  token1DayData = TokenDayData.load(token1DayID)
   token1DayData.dailyVolumeToken = token1DayData.dailyVolumeToken.plus(amount1Total)
   token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(amount1Total.times(token1.derivedETH as BigDecimal))
   token1DayData.dailyVolumeUSD = token1DayData.dailyVolumeUSD.plus(

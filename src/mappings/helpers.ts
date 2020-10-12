@@ -143,7 +143,7 @@ export function createLiquidityPosition(exchange: Address, user: Address): Liqui
     liquidityTokenBalance.user = user.toHexString()
     liquidityTokenBalance.save()
   }
-  if (liquidityTokenBalance == null) log.error('LiquidityTokenBalance is null', [id])
+  if (liquidityTokenBalance === null) log.error('LiquidityTokenBalance is null', [id])
   return liquidityTokenBalance as LiquidityPosition
 }
 
