@@ -336,6 +336,12 @@ export function handleMint(event: Mint): void {
 
 export function handleBurn(event: Burn): void {
   let transaction = Transaction.load(event.transaction.hash.toHexString())
+
+  // safety check
+  if (transaction === null) {
+    return
+  }
+
   let burns = transaction.burns
   let burn = BurnEvent.load(burns[burns.length - 1])
 
