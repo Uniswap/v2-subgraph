@@ -123,6 +123,9 @@ type LiquidityPositionSnapshot @entity {
   reserveUSD: BigDecimal! # snapshot of pair reserves in USD
   liquidityTokenTotalSupply: BigDecimal! # snapshot of pool token supply
   liquidityTokenBalance: BigDecimal! # snapshot of users pool token balance
+  tx: Bytes! # txn hash
+  gasUsed: BigInt!
+  gasPrice: BigInt!
 }
 
 type Transaction @entity {

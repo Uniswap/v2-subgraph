@@ -190,6 +190,9 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   snapshot.liquidityTokenTotalSupply = pair.totalSupply
   snapshot.liquidityTokenBalance = position.liquidityTokenBalance
   snapshot.liquidityPosition = position.id
+  snapshot.tx = event.transaction.hash
+  snapshot.gasUsed = event.transaction.gasUsed
+  snapshot.gasPrice = event.transaction.gasPrice
   snapshot.save()
   position.save()
 }
