@@ -169,6 +169,20 @@ export function createUser(address: Address): void {
 }
 
 export function createLiquiditySnapshot(position: LiquidityPosition, event: EthereumEvent): void {
+  if (User.load(position.user) === null) {
+    log.error(
+      'Null user during snapshot creation. User id: '
+        .concat(position.user)
+        .concat(' position id: ')
+        .concat(position.id)
+        .concat(' tx hash: ')
+        .concat(event.transaction.hash.toHexString())
+        .concat(' --> SKIPPING SNAPSHOT CREATION'),
+      []
+    )
+    return
+  }
+
   let bundle = Bundle.load('1')
   let pair = Pair.load(position.pair)
   let token0 = Token.load(pair.token0)
@@ -176,9 +190,9 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
 
   // create new snapshot
   let id = position.id
-    .concat("-")
+    .concat('-')
     .concat(event.transaction.hash.toHexString())
-    .concat("-")
+    .concat('-')
     .concat(event.logIndex.toString())
   let snapshot = new LiquidityPositionSnapshot(id)
   snapshot.liquidityPosition = position.id
