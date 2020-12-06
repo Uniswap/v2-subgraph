@@ -169,16 +169,20 @@ export function createUser(address: Address): void {
 }
 
 export function createLiquiditySnapshot(position: LiquidityPosition, event: EthereumEvent): void {
-  let timestamp = event.block.timestamp.toI32()
   let bundle = Bundle.load('1')
   let pair = Pair.load(position.pair)
   let token0 = Token.load(pair.token0)
   let token1 = Token.load(pair.token1)
 
   // create new snapshot
-  let snapshot = new LiquidityPositionSnapshot(position.id.concat(timestamp.toString()))
+  let id = position.id
+    .concat("-")
+    .concat(event.transaction.hash.toHexString())
+    .concat("-")
+    .concat(event.logIndex.toString())
+  let snapshot = new LiquidityPositionSnapshot(id)
   snapshot.liquidityPosition = position.id
-  snapshot.timestamp = timestamp
+  snapshot.timestamp = event.block.timestamp.toI32()
   snapshot.block = event.block.number.toI32()
   snapshot.user = position.user
   snapshot.pair = position.pair
