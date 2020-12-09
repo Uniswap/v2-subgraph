@@ -189,11 +189,7 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   let token1 = Token.load(pair.token1)
 
   // create new snapshot
-  let id = position.id
-    .concat('-')
-    .concat(event.transaction.hash.toHexString())
-    .concat('-')
-    .concat(event.logIndex.toString())
+  let id = event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toString())
   let snapshot = new LiquidityPositionSnapshot(id)
   snapshot.liquidityPosition = position.id
   snapshot.timestamp = event.block.timestamp.toI32()
