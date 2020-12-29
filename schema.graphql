@@ -240,6 +240,9 @@ type PairHourData @entity {
   reserve0: BigDecimal!
   reserve1: BigDecimal!
 
+  # total supply for LP historical returns
+  totalSupply: BigDecimal!
+
   # derived liquidity
   reserveUSD: BigDecimal!
 

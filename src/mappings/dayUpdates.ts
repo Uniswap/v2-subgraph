@@ -1,8 +1,8 @@
-import { PairHourData } from './../types/schema'
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal, EthereumEvent } from '@graphprotocol/graph-ts'
-import { Pair, Bundle, Token, UniswapFactory, UniswapDayData, PairDayData, TokenDayData } from '../types/schema'
-import { ONE_BI, ZERO_BD, ZERO_BI, FACTORY_ADDRESS } from './helpers'
+import { BigDecimal, BigInt, EthereumEvent } from '@graphprotocol/graph-ts'
+import { Bundle, Pair, PairDayData, Token, TokenDayData, UniswapDayData, UniswapFactory } from '../types/schema'
+import { PairHourData } from './../types/schema'
+import { FACTORY_ADDRESS, ONE_BI, ZERO_BD, ZERO_BI } from './helpers'
 
 export function updateUniswapDayData(event: EthereumEvent): UniswapDayData {
   let uniswap = UniswapFactory.load(FACTORY_ADDRESS)
@@ -80,6 +80,7 @@ export function updatePairHourData(event: EthereumEvent): PairHourData {
     pairHourData.hourlyTxns = ZERO_BI
   }
 
+  pairHourData.totalSupply = pair.totalSupply
   pairHourData.reserve0 = pair.reserve0
   pairHourData.reserve1 = pair.reserve1
   pairHourData.reserveUSD = pair.reserveUSD
