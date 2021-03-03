@@ -1,28 +1,27 @@
-/* eslint-disable prefer-const */
-import { log } from '@graphprotocol/graph-ts'
-import { UniswapFactory, Pair, Token, Bundle } from '../types/schema'
-import { PairCreated } from '../types/Factory/Factory'
-import { Pair as PairTemplate } from '../types/templates'
+import { log } from "@graphprotocol/graph-ts"
+import { XYZSwapFactory, Bundle, Pair, Token } from "../types/schema"
+import { PairCreated } from "../types/Factory/Factory"
+import { Pair as PairTemplate } from "../types/templates"
 import {
-  FACTORY_ADDRESS,
-  ZERO_BD,
-  ZERO_BI,
+  FACTORY_ADDRESS, ZERO_BD, ZERO_BI, 
   fetchTokenSymbol,
   fetchTokenName,
-  fetchTokenDecimals,
-  fetchTokenTotalSupply
-} from './helpers'
+  fetchTokenTotalSupply,
+  fetchTokenDecimals
+} from "./utils"
 
-export function handleNewPair(event: PairCreated): void {
+export function handlePairCreated(event: PairCreated): void {
   // load factory (create if first exchange)
-  let factory = UniswapFactory.load(FACTORY_ADDRESS)
+  let factory = XYZSwapFactory.load(FACTORY_ADDRESS)
   if (factory === null) {
-    factory = new UniswapFactory(FACTORY_ADDRESS)
+    factory = new XYZSwapFactory(FACTORY_ADDRESS)
     factory.pairCount = 0
     factory.totalVolumeETH = ZERO_BD
     factory.totalLiquidityETH = ZERO_BD
     factory.totalVolumeUSD = ZERO_BD
+    factory.totalFeeUSD = ZERO_BD
     factory.untrackedVolumeUSD = ZERO_BD
+    factory.untrackedFeeUSD = ZERO_BD
     factory.totalLiquidityUSD = ZERO_BD
     factory.txCount = ZERO_BI
 
@@ -99,6 +98,8 @@ export function handleNewPair(event: PairCreated): void {
   pair.volumeToken0 = ZERO_BD
   pair.volumeToken1 = ZERO_BD
   pair.volumeUSD = ZERO_BD
+  pair.feeUSD = ZERO_BD
+  pair.untrackedFeeUSD = ZERO_BD
   pair.untrackedVolumeUSD = ZERO_BD
   pair.token0Price = ZERO_BD
   pair.token1Price = ZERO_BD
