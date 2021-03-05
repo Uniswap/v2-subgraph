@@ -1,4 +1,4 @@
-type XYZSwapFactory @entity {
+type DmmFactory @entity {
   id: ID!
   
    # pair info
@@ -66,6 +66,8 @@ type Pair @entity {
   reserve1: BigDecimal!
   totalSupply: BigDecimal!
 
+  pools: [Pool!]! @derivedFrom(field: "pair") 
+
   # derived liquidity
   reserveETH: BigDecimal!
   reserveUSD: BigDecimal!
@@ -93,12 +95,61 @@ type Pair @entity {
   pairHourData: [PairHourData!]! @derivedFrom(field: "pair")
   liquidityPositions: [LiquidityPosition!]! @derivedFrom(field: "pair")
   liquidityPositionSnapshots: [LiquidityPositionSnapshot!]! @derivedFrom(field: "pair")
-  mints: [Mint!]! @derivedFrom(field: "pair")
-  burns: [Burn!]! @derivedFrom(field: "pair")
-  swaps: [Swap!]! @derivedFrom(field: "pair")
+  # mints: [Mint!]! @derivedFrom(field: "pair")
+  # burns: [Burn!]! @derivedFrom(field: "pair")
+  # swaps: [Swap!]! @derivedFrom(field: "pair")
 }
 
+type Pool @entity {
+  # pair address
+  id: ID!
+  token0: Token!
+  token1: Token!
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
+  totalSupply: BigDecimal!
 
+  pair: Pair!
+   # derived liquidity
+  reserveETH: BigDecimal!
+  reserveUSD: BigDecimal!
+  trackedReserveETH: BigDecimal! # used for separating per pair reserves and global
+
+  volumeUSD: BigDecimal!
+  feeUSD: BigDecimal!
+
+  amp: BigDecimal!
+  liquidityPerRisk: BigDecimal!
+  # apy: BigDecimal!
+
+  token0PriceMin: BigDecimal!
+  token0PriceMax: BigDecimal!
+  token0Price: BigDecimal!
+
+  token1PriceMin: BigDecimal!
+  token1PriceMax: BigDecimal!
+  token1Price: BigDecimal!
+
+
+  mints: [Mint!]! @derivedFrom(field: "pool")
+  burns: [Burn!]! @derivedFrom(field: "pool")
+  swaps: [Swap!]! @derivedFrom(field: "pool")
+
+  # creation stats
+  createdAtTimestamp: BigInt!
+  createdAtBlockNumber: BigInt!
+
+
+  liquidityProviderCount: BigInt! # used to detect new exchanges
+  txCount: BigInt!
+   # lifetime volume stats
+  volumeToken0: BigDecimal!
+  volumeToken1: BigDecimal!
+  untrackedVolumeUSD: BigDecimal!
+  untrackedFeeUSD: BigDecimal!
+
+
+}
 type User @entity {
   id: ID!
   liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "user")
@@ -145,7 +196,8 @@ type Mint @entity {
   id: ID!
   transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
-  pair: Pair!
+  # pair: Pair!
+  pool: Pool!
 
   # populated from the primary Transfer event
   to: Bytes!
@@ -169,7 +221,8 @@ type Burn @entity {
   id: ID!
   transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
-  pair: Pair!
+  # pair: Pair!
+  pool: Pool!
 
   # populated from the primary Transfer event
   liquidity: BigDecimal!
@@ -196,7 +249,8 @@ type Swap @entity {
   id: ID!
   transaction: Transaction!
   timestamp: BigInt! # need this to pull recent txns for specific token or pair
-  pair: Pair!
+  # pair: Pair!
+  pool: Pool!
 
   # populated from the Swap event
   sender: Bytes!

@@ -5,11 +5,11 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Factory
+    name: DmmFactory
     network: ropsten
     source:
-      address: '0x945c725e3ecc3dfdc350c0334f3ff42f08f719ea'
-      abi: Factory
+      address: '0x2f90d05693543b8D7feCD15A2150D9a63E89034A'
+      abi: DmmFactory
       startBlock: 9361295  # contract creation block
     mapping:
       kind: ethereum/events
@@ -20,8 +20,8 @@ dataSources:
         - Pairs
         - Tokens
       abis:
-        - name: Factory
-          file: ./abis/XYZSwapFactory.json
+        - name: DmmFactory
+          file: ./abis/DmmFactory.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: ERC20SymbolBytes
@@ -29,8 +29,8 @@ dataSources:
         - name: ERC20NameBytes
           file: ./abis/ERC20NameBytes.json
       eventHandlers:
-        - event: PairCreated(indexed address,indexed address,address,uint256)
-          handler: handlePairCreated
+        - event: PoolCreated(indexed address,indexed address,address,uint32,uint256)
+          handler: handlePoolCreated
 templates:
   - kind: ethereum/contract
     name: Pair
@@ -49,7 +49,7 @@ templates:
         - name: Pair
           file: ./abis/XYZSwapPair.json
         - name: Factory
-          file: ./abis/XYZSwapFactory.json
+          file: ./abis/DmmFactory.json
       eventHandlers:
         - event: Mint(indexed address,uint256,uint256)
           handler: handleMint

@@ -1,7 +1,7 @@
 import { log, BigDecimal, BigInt, Address, EthereumEvent } from "@graphprotocol/graph-ts"
-import { ERC20 } from "../types/Factory/ERC20"
-import { ERC20SymbolBytes } from "../types/Factory/ERC20SymbolBytes"
-import { ERC20NameBytes } from "../types/Factory/ERC20NameBytes"
+import { ERC20 } from "../types/DmmFactory/ERC20"
+import { ERC20SymbolBytes } from "../types/DmmFactory/ERC20SymbolBytes"
+import { ERC20NameBytes } from "../types/DmmFactory/ERC20NameBytes"
 import { LiquidityPosition, User, Pair, LiquidityPositionSnapshot, Bundle, Token } from "../types/schema"
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
 

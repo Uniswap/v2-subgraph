@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { Pair, Token, Bundle } from '../types/schema'
+import { Pair, Token, Bundle, Pool } from '../types/schema'
 import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from './utils'
 
@@ -83,16 +83,27 @@ export function findEthPerToken(token: Token): BigDecimal {
   }
   // loop through whitelist and check if paired with any
   for (let i = 0; i < WHITELIST.length; ++i) {
-    let pairAddress = factoryContract.getPair(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
-    if (pairAddress.toHexString() != ADDRESS_ZERO) {
-      let pair = Pair.load(pairAddress.toHexString())
-      if (pair.token0 == token.id && pair.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
-        let token1 = Token.load(pair.token1)
-        return pair.token1Price.times(token1.derivedETH as BigDecimal) // return token1 per our token * Eth per token 1
+    let arrayPoolAddresses = factoryContract.getPools(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
+    if (arrayPoolAddresses) {
+      let totalPoolPrice = ZERO_BD
+      let totalPoolNum = ZERO_BD
+      for (let j = 0; j < arrayPoolAddresses.length; ++j) {
+        let pool = Pool.load(arrayPoolAddresses[j].toHexString())
+        if (pool.token0 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
+          let token1 = Token.load(pool.token1)
+          const tokenPrice = pool.token1Price.times(token1.derivedETH as BigDecimal)
+          totalPoolPrice = totalPoolPrice.plus(tokenPrice)  // return token1 per our token * Eth per token 1
+          totalPoolNum = totalPoolNum.plus(ONE_BD)
+        }
+        if (pool.token1 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
+          let token0 = Token.load(pool.token0)
+          const tokenPrice = pool.token0Price.times(token0.derivedETH as BigDecimal)
+          totalPoolPrice = totalPoolPrice.plus(tokenPrice)  // return token0 per our token * ETH per token 0
+          totalPoolNum = totalPoolNum.plus(ONE_BD)
+        }
       }
-      if (pair.token1 == token.id && pair.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
-        let token0 = Token.load(pair.token0)
-        return pair.token0Price.times(token0.derivedETH as BigDecimal) // return token0 per our token * ETH per token 0
+      if(totalPoolNum.gt(ZERO_BD)){
+        return totalPoolPrice.div(totalPoolNum)
       }
     }
   }

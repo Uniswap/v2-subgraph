@@ -1,6 +1,6 @@
 import { BigInt, BigDecimal, store, Address, log } from "@graphprotocol/graph-ts";
 import { Pair as PairContract, Transfer, Mint, Burn, Swap, Sync } from "../types/templates/Pair/Pair";
-import { XYZSwapFactory, 
+import { DmmFactory, 
   Pair, 
   Token,
   Transaction,
@@ -30,7 +30,7 @@ export function handleTransfer(event: Transfer): void {
     return
   }
 
-  let factory = XYZSwapFactory.load(FACTORY_ADDRESS)
+  let factory = DmmFactory.load(FACTORY_ADDRESS)
   let transactionHash = event.transaction.hash.toHexString()
 
   // user stats
@@ -58,7 +58,7 @@ export function handleTransfer(event: Transfer): void {
   }
 
   // mints
-  let mints = transaction.mints
+  const mints = transaction.mints
   if (from.toHexString() == ADDRESS_ZERO) {
     // update total supply
     pair.totalSupply = pair.totalSupply.plus(value)
@@ -66,14 +66,14 @@ export function handleTransfer(event: Transfer): void {
 
     // create new mint if no mints so far or if last one is done already
     if (mints.length === 0 || isCompleteMint(mints[mints.length - 1])) {
-      let mint = new MintEvent(
+      const mint = new MintEvent(
         event.transaction.hash
           .toHexString()
           .concat('-')
           .concat(BigInt.fromI32(mints.length).toString())
       )
       mint.transaction = transaction.id
-      mint.pair = pair.id
+      mint.pool = pair.id
       mint.to = to
       mint.liquidity = value
       mint.timestamp = transaction.timestamp
@@ -91,15 +91,15 @@ export function handleTransfer(event: Transfer): void {
 
   // case where direct send first on ETH withdrawls
   if (event.params.to.toHexString() == pair.id) {
-    let burns = transaction.burns
-    let burn = new BurnEvent(
+    const burns = transaction.burns
+    const burn = new BurnEvent(
       event.transaction.hash
         .toHexString()
         .concat('-')
         .concat(BigInt.fromI32(burns.length).toString())
     )
     burn.transaction = transaction.id
-    burn.pair = pair.id
+    burn.pool = pair.id
     burn.liquidity = value
     burn.timestamp = transaction.timestamp
     burn.to = event.params.to
@@ -121,10 +121,10 @@ export function handleTransfer(event: Transfer): void {
     pair.save()
 
     // this is a new instance of a logical burn
-    let burns = transaction.burns
+    const burns = transaction.burns
     let burn: BurnEvent
     if (burns.length > 0) {
-      let currentBurn = BurnEvent.load(burns[burns.length - 1])
+      const currentBurn = BurnEvent.load(burns[burns.length - 1])
       if (currentBurn.needsComplete) {
         burn = currentBurn as BurnEvent
       } else {
@@ -136,7 +136,7 @@ export function handleTransfer(event: Transfer): void {
         )
         burn.transaction = transaction.id
         burn.needsComplete = false
-        burn.pair = pair.id
+        burn.pool = pair.id
         burn.liquidity = value
         burn.transaction = transaction.id
         burn.timestamp = transaction.timestamp
@@ -150,7 +150,7 @@ export function handleTransfer(event: Transfer): void {
       )
       burn.transaction = transaction.id
       burn.needsComplete = false
-      burn.pair = pair.id
+      burn.pool = pair.id
       burn.liquidity = value
       burn.transaction = transaction.id
       burn.timestamp = transaction.timestamp
@@ -211,7 +211,7 @@ export function handleMint(event: Mint): void {
   let mint = MintEvent.load(mints[mints.length - 1])
 
   let pair = Pair.load(event.address.toHex())
-  let factory = XYZSwapFactory.load(FACTORY_ADDRESS)
+  let factory = DmmFactory.load(FACTORY_ADDRESS)
 
   let token0 = Token.load(pair.token0)
   let token1 = Token.load(pair.token1)
@@ -272,7 +272,7 @@ export function handleBurn(event: Burn): void {
   let burn = BurnEvent.load(burns[burns.length - 1])
 
   let pair = Pair.load(event.address.toHex())
-  let uniswap = XYZSwapFactory.load(FACTORY_ADDRESS)
+  let uniswap = DmmFactory.load(FACTORY_ADDRESS)
 
   //update token info
   let token0 = Token.load(pair.token0)
@@ -385,7 +385,7 @@ export function handleSwap(event: Swap): void {
   pair.save()
 
   // update global values, only used tracked amounts for volume
-  let factory = XYZSwapFactory.load(FACTORY_ADDRESS)
+  const factory = DmmFactory.load(FACTORY_ADDRESS)
   factory.totalVolumeUSD = factory.totalVolumeUSD.plus(trackedAmountUSD)
   factory.totalFeeUSD = factory.totalFeeUSD.plus(trackedAmountUSD.times(feePercent))
   factory.totalVolumeETH = factory.totalVolumeETH.plus(trackedAmountETH)
@@ -409,8 +409,8 @@ export function handleSwap(event: Swap): void {
     transaction.swaps = []
     transaction.burns = []
   }
-  let swaps = transaction.swaps
-  let swap = new SwapEvent(
+  const swaps = transaction.swaps
+  const swap = new SwapEvent(
     event.transaction.hash
       .toHexString()
       .concat('-')
@@ -419,7 +419,7 @@ export function handleSwap(event: Swap): void {
 
   // update swap event
   swap.transaction = transaction.id
-  swap.pair = pair.id
+  swap.pool = pair.id
   swap.timestamp = transaction.timestamp
   swap.transaction = transaction.id
   swap.sender = event.params.sender
@@ -489,7 +489,7 @@ export function handleSync(event: Sync): void {
   let pair = Pair.load(event.address.toHex())
   let token0 = Token.load(pair.token0)
   let token1 = Token.load(pair.token1)
-  let factory = XYZSwapFactory.load(FACTORY_ADDRESS)
+  let factory = DmmFactory.load(FACTORY_ADDRESS)
 
   // reset factory liquidity by subtracting onluy tarcked liquidity
   factory.totalLiquidityETH = factory.totalLiquidityETH.minus(pair.trackedReserveETH as BigDecimal)

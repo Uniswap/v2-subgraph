@@ -1,20 +1,21 @@
 import { log } from "@graphprotocol/graph-ts"
-import { XYZSwapFactory, Bundle, Pair, Token } from "../types/schema"
-import { PairCreated } from "../types/Factory/Factory"
+import { DmmFactory, Bundle, Pair, Token, Pool } from "../types/schema"
+import { PoolCreated } from "../types/DmmFactory/DmmFactory"
 import { Pair as PairTemplate } from "../types/templates"
 import {
-  FACTORY_ADDRESS, ZERO_BD, ZERO_BI, 
+  FACTORY_ADDRESS, ZERO_BD, ZERO_BI, BI_18,
   fetchTokenSymbol,
   fetchTokenName,
   fetchTokenTotalSupply,
-  fetchTokenDecimals
+  fetchTokenDecimals,
+  convertTokenToDecimal
 } from "./utils"
 
-export function handlePairCreated(event: PairCreated): void {
+export function handlePairCreated(event: PoolCreated): void {
   // load factory (create if first exchange)
-  let factory = XYZSwapFactory.load(FACTORY_ADDRESS)
+  let factory = DmmFactory.load(FACTORY_ADDRESS)
   if (factory === null) {
-    factory = new XYZSwapFactory(FACTORY_ADDRESS)
+    factory = new DmmFactory(FACTORY_ADDRESS)
     factory.pairCount = 0
     factory.totalVolumeETH = ZERO_BD
     factory.totalLiquidityETH = ZERO_BD
@@ -26,12 +27,14 @@ export function handlePairCreated(event: PairCreated): void {
     factory.txCount = ZERO_BI
 
     // create new bundle
-    let bundle = new Bundle('1')
+    const bundle = new Bundle('1')
     bundle.ethPrice = ZERO_BD
     bundle.save()
   }
   factory.pairCount = factory.pairCount + 1
   factory.save()
+
+  ///////  PoolCreated (index_topic_1 address token0, index_topic_2 address token1, address pool, uint32 ampBps, uint256 totalPool)
 
   // create the tokens
   let token0 = Token.load(event.params.token0.toHexString())
@@ -43,7 +46,7 @@ export function handlePairCreated(event: PairCreated): void {
     token0.symbol = fetchTokenSymbol(event.params.token0)
     token0.name = fetchTokenName(event.params.token0)
     token0.totalSupply = fetchTokenTotalSupply(event.params.token0)
-    let decimals = fetchTokenDecimals(event.params.token0)
+    const decimals = fetchTokenDecimals(event.params.token0)
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
       log.debug('mybug the decimal on token 0 was null', [])
@@ -66,7 +69,7 @@ export function handlePairCreated(event: PairCreated): void {
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
     token1.totalSupply = fetchTokenTotalSupply(event.params.token1)
-    let decimals = fetchTokenDecimals(event.params.token1)
+    const decimals = fetchTokenDecimals(event.params.token1)
 
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
@@ -82,34 +85,80 @@ export function handlePairCreated(event: PairCreated): void {
     token1.txCount = ZERO_BI
   }
 
-  let pair = new Pair(event.params.pair.toHexString()) as Pair
-  pair.token0 = token0.id
-  pair.token1 = token1.id
-  pair.liquidityProviderCount = ZERO_BI
-  pair.createdAtTimestamp = event.block.timestamp
-  pair.createdAtBlockNumber = event.block.number
-  pair.txCount = ZERO_BI
-  pair.reserve0 = ZERO_BD
-  pair.reserve1 = ZERO_BD
-  pair.trackedReserveETH = ZERO_BD
-  pair.reserveETH = ZERO_BD
-  pair.reserveUSD = ZERO_BD
-  pair.totalSupply = ZERO_BD
-  pair.volumeToken0 = ZERO_BD
-  pair.volumeToken1 = ZERO_BD
-  pair.volumeUSD = ZERO_BD
-  pair.feeUSD = ZERO_BD
-  pair.untrackedFeeUSD = ZERO_BD
-  pair.untrackedVolumeUSD = ZERO_BD
-  pair.token0Price = ZERO_BD
-  pair.token1Price = ZERO_BD
+  // todo find pair with token 0 and token 1
+  // if pair exist   -> add pool to pair
+  // if pair not found  -> create new pair
+  const pairId = token0.id + "-" + token1.id
+  let pair = Pair.load(pairId)
+
+  if (pair == null) {
+    // create new pair
+    const newPair = new Pair(pairId) as Pair
+    newPair.token0 = token0.id
+    newPair.token1 = token1.id
+    newPair.liquidityProviderCount = ZERO_BI
+    newPair.createdAtTimestamp = event.block.timestamp
+    newPair.createdAtBlockNumber = event.block.number
+    newPair.txCount = ZERO_BI
+    newPair.reserve0 = ZERO_BD
+    newPair.reserve1 = ZERO_BD
+    newPair.trackedReserveETH = ZERO_BD
+    newPair.reserveETH = ZERO_BD
+    newPair.reserveUSD = ZERO_BD
+    newPair.totalSupply = ZERO_BD
+    newPair.volumeToken0 = ZERO_BD
+    newPair.volumeToken1 = ZERO_BD
+    newPair.volumeUSD = ZERO_BD
+    newPair.feeUSD = ZERO_BD
+    newPair.untrackedFeeUSD = ZERO_BD
+    newPair.untrackedVolumeUSD = ZERO_BD
+    newPair.token0Price = ZERO_BD
+    newPair.token1Price = ZERO_BD
+    // newPair.save()
+
+    pair = newPair
+  }
+
+  
+  const pool = new Pool(event.params.pool.toHexString()) as Pool
+  pool.token0 = token0.id
+  pool.token1 = token1.id
+  pool.liquidityProviderCount = ZERO_BI
+  pool.createdAtTimestamp = event.block.timestamp
+  pool.createdAtBlockNumber = event.block.number
+  pool.txCount = ZERO_BI
+  pool.reserve0 = ZERO_BD
+  pool.reserve1 = ZERO_BD
+  pool.trackedReserveETH = ZERO_BD
+  pool.reserveETH = ZERO_BD
+  pool.reserveUSD = ZERO_BD
+  pool.totalSupply = ZERO_BD
+  pool.volumeToken0 = ZERO_BD
+  pool.volumeToken1 = ZERO_BD
+  pool.volumeUSD = ZERO_BD
+  pool.feeUSD = ZERO_BD
+  pool.untrackedFeeUSD = ZERO_BD
+  pool.untrackedVolumeUSD = ZERO_BD
+  pool.token0Price = ZERO_BD
+  pool.token1Price = ZERO_BD
+
+  pool.liquidityPerRisk = ZERO_BD
+  pool.amp = convertTokenToDecimal(event.params.ampBps, BI_18)
+  pool.save()
+
+
+  const pairPools = pair.pools 
+
+  pairPools.push(pool.id)
+  pair.pools = pairPools
+  pair.save()
 
   // create the tracked contract based on the template
-  PairTemplate.create(event.params.pair)
+  PairTemplate.create(event.params.pool)
 
   // save updated values
   token0.save()
   token1.save()
   pair.save()
-  factory.save()
+  // factory.save()
 }
