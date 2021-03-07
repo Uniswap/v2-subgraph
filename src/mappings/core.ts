@@ -2,6 +2,7 @@ import { BigInt, BigDecimal, store, Address, log } from "@graphprotocol/graph-ts
 import { Pair as PairContract, Transfer, Mint, Burn, Swap, Sync } from "../types/templates/Pair/Pair";
 import { DmmFactory, 
   Pair, 
+  Pool,
   Token,
   Transaction,
   Mint as MintEvent,
@@ -40,8 +41,13 @@ export function handleTransfer(event: Transfer): void {
   createUser(to)
 
   // get pair and load contract
-  const pair = Pair.load(event.address.toHexString())
-  const pairContract = PairContract.bind(event.address)
+  // const pair = Pair.load(event.address.toHexString())
+  const pool = Pool.load(event.address.toHexString())
+  const poolContract = PairContract.bind(event.address)
+  const token0 = Token.load(pool.token0)
+  const token1 = Token.load(pool.token1)
+
+  const pair = Pair.load(token0.id + "-" + token1.id)
 
   // liquidity token amount being transfered
   const value = convertTokenToDecimal(event.params.value, BI_18)
@@ -64,6 +70,10 @@ export function handleTransfer(event: Transfer): void {
     pair.totalSupply = pair.totalSupply.plus(value)
     pair.save()
 
+    // update total supply pool
+    pool.totalSupply = pool.totalSupply.plus(value)
+    pool.save()
+
     // create new mint if no mints so far or if last one is done already
     if (mints.length === 0 || isCompleteMint(mints[mints.length - 1])) {
       const mint = new MintEvent(
@@ -73,7 +83,8 @@ export function handleTransfer(event: Transfer): void {
           .concat(BigInt.fromI32(mints.length).toString())
       )
       mint.transaction = transaction.id
-      mint.pool = pair.id
+      mint.pool = pool.id
+      mint.pair = pair.id
       mint.to = to
       mint.liquidity = value
       mint.timestamp = transaction.timestamp
@@ -90,7 +101,7 @@ export function handleTransfer(event: Transfer): void {
   }
 
   // case where direct send first on ETH withdrawls
-  if (event.params.to.toHexString() == pair.id) {
+  if (event.params.to.toHexString() == pool.id) {
     const burns = transaction.burns
     const burn = new BurnEvent(
       event.transaction.hash
@@ -99,7 +110,8 @@ export function handleTransfer(event: Transfer): void {
         .concat(BigInt.fromI32(burns.length).toString())
     )
     burn.transaction = transaction.id
-    burn.pool = pair.id
+    burn.pool = pool.id
+    burn.pair = pair.id
     burn.liquidity = value
     burn.timestamp = transaction.timestamp
     burn.to = event.params.to
@@ -116,9 +128,12 @@ export function handleTransfer(event: Transfer): void {
   }
 
   // burn
-  if (event.params.to.toHexString() == ADDRESS_ZERO && event.params.from.toHexString() == pair.id) {
+  if (event.params.to.toHexString() == ADDRESS_ZERO && event.params.from.toHexString() == pool.id) {
     pair.totalSupply = pair.totalSupply.minus(value)
     pair.save()
+
+    pool.totalSupply = pool.totalSupply.minus(value)
+    pool.save()
 
     // this is a new instance of a logical burn
     const burns = transaction.burns
@@ -136,7 +151,8 @@ export function handleTransfer(event: Transfer): void {
         )
         burn.transaction = transaction.id
         burn.needsComplete = false
-        burn.pool = pair.id
+        burn.pool = pool.id
+        burn.pair = pair.id
         burn.liquidity = value
         burn.transaction = transaction.id
         burn.timestamp = transaction.timestamp
@@ -150,7 +166,8 @@ export function handleTransfer(event: Transfer): void {
       )
       burn.transaction = transaction.id
       burn.needsComplete = false
-      burn.pool = pair.id
+      burn.pair = pair.id
+      burn.pool = pool.id
       burn.liquidity = value
       burn.transaction = transaction.id
       burn.timestamp = transaction.timestamp
@@ -210,11 +227,14 @@ export function handleMint(event: Mint): void {
   const mints = transaction.mints
   const mint = MintEvent.load(mints[mints.length - 1])
 
-  const pair = Pair.load(event.address.toHex())
+  // const pair = Pair.load(event.address.toHex())
+  const pool = Pool.load(event.address.toHex())
   const factory = DmmFactory.load(FACTORY_ADDRESS)
 
-  const token0 = Token.load(pair.token0)
-  const token1 = Token.load(pair.token1)
+  const token0 = Token.load(pool.token0)
+  const token1 = Token.load(pool.token1)
+
+  const pair = Pair.load(token0.id + "-" + token1.id)
 
   // update exchange info (except balances, sync will cover that)
   const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
@@ -234,12 +254,14 @@ export function handleMint(event: Mint): void {
   // update txn counts
   pair.txCount = pair.txCount.plus(ONE_BI)
   factory.txCount = factory.txCount.plus(ONE_BI)
+  pool.txCount = pool.txCount.plus(ONE_BI)
 
   // save entities
   token0.save()
   token1.save()
   pair.save()
   factory.save()
+  pool.save()
 
   mint.sender = event.params.sender
   mint.amount0 = token0Amount as BigDecimal
@@ -255,6 +277,8 @@ export function handleMint(event: Mint): void {
   // update day entities
   updatePairDayData(event)
   updatePairHourData(event)
+  // updatePoolDayData(event)
+  // updatePoolHourData(event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
@@ -271,12 +295,16 @@ export function handleBurn(event: Burn): void {
   const burns = transaction.burns
   const burn = BurnEvent.load(burns[burns.length - 1])
 
-  const pair = Pair.load(event.address.toHex())
+  // const pair = Pair.load(event.address.toHex())
+  const pool = Pool.load(event.address.toHex())
   const uniswap = DmmFactory.load(FACTORY_ADDRESS)
 
   //update token info
-  const token0 = Token.load(pair.token0)
-  const token1 = Token.load(pair.token1)
+  const token0 = Token.load(pool.token0)
+  const token1 = Token.load(pool.token1)
+
+  const pair = Pair.load(token0.id + "-" + token1.id)
+
   const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
@@ -294,12 +322,14 @@ export function handleBurn(event: Burn): void {
   // update txn counts
   uniswap.txCount = uniswap.txCount.plus(ONE_BI)
   pair.txCount = pair.txCount.plus(ONE_BI)
+  pool.txCount = pool.txCount.plus(ONE_BI)
 
   // update global counter and save
   token0.save()
   token1.save()
   pair.save()
   uniswap.save()
+  pool.save()
 
   // update burn
   // burn.sender = event.params.sender
@@ -317,6 +347,8 @@ export function handleBurn(event: Burn): void {
   // update day entities
   updatePairDayData(event)
   updatePairHourData(event)
+  // updatePoolDayData(event)
+  // updatePoolHourData(event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
@@ -324,9 +356,12 @@ export function handleBurn(event: Burn): void {
 
 export function handleSwap(event: Swap): void {
 
-  const pair = Pair.load(event.address.toHexString())
-  const token0 = Token.load(pair.token0)
-  const token1 = Token.load(pair.token1)
+  // const pair = Pair.load(event.address.toHexString())
+  const pool = Pool.load(event.address.toHexString())
+  const token0 = Token.load(pool.token0)
+  const token1 = Token.load(pool.token1)
+  const pair = Pair.load(token0.id + "-" + token1.id)
+
   const amount0In = convertTokenToDecimal(event.params.amount0In, token0.decimals)
   const amount1In = convertTokenToDecimal(event.params.amount1In, token1.decimals)
   const amount0Out = convertTokenToDecimal(event.params.amount0Out, token0.decimals)
@@ -384,6 +419,17 @@ export function handleSwap(event: Swap): void {
   pair.txCount = pair.txCount.plus(ONE_BI)
   pair.save()
 
+
+  // update pool volume data, use tracked amount if we have it as its probably more accurate
+  pool.volumeUSD = pool.volumeUSD.plus(trackedAmountUSD)
+  pool.feeUSD = pool.feeUSD.plus(trackedAmountUSD.times(feePercent))
+  pool.volumeToken0 = pool.volumeToken0.plus(amount0Total)
+  pool.volumeToken1 = pool.volumeToken1.plus(amount1Total)
+  pool.untrackedVolumeUSD = pool.untrackedVolumeUSD.plus(derivedAmountUSD)
+  pool.untrackedFeeUSD = pool.untrackedFeeUSD.plus(derivedAmountUSD.times(feePercent))
+  pool.txCount = pool.txCount.plus(ONE_BI)
+  pool.save()
+
   // update global values, only used tracked amounts for volume
   const factory = DmmFactory.load(FACTORY_ADDRESS)
   factory.totalVolumeUSD = factory.totalVolumeUSD.plus(trackedAmountUSD)
@@ -394,6 +440,7 @@ export function handleSwap(event: Swap): void {
   factory.txCount = factory.txCount.plus(ONE_BI)
 
   // save entities
+  pool.save()
   pair.save()
   token0.save()
   token1.save()
@@ -486,9 +533,11 @@ export function handleSwap(event: Swap): void {
 }
 
 export function handleSync(event: Sync): void {
-  const pair = Pair.load(event.address.toHex())
-  const token0 = Token.load(pair.token0)
-  const token1 = Token.load(pair.token1)
+  // const pair = Pair.load(event.address.toHex())
+  const pool = Pool.load(event.address.toHex())
+  const token0 = Token.load(pool.token0)
+  const token1 = Token.load(pool.token1)
+  const pair = Pair.load(token0.id + "-" + token1.id)
   const factory = DmmFactory.load(FACTORY_ADDRESS)
 
   // reset factory liquidity by subtracting onluy tarcked liquidity
@@ -507,6 +556,18 @@ export function handleSync(event: Sync): void {
   else pair.token1Price = ZERO_BD
 
   pair.save()
+
+  // add save for pool
+  pool.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
+  pool.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
+
+  if (pool.reserve1.notEqual(ZERO_BD)) pool.token0Price = pool.reserve0.div(pool.reserve1)
+  else pool.token0Price = ZERO_BD
+  if (pool.reserve0.notEqual(ZERO_BD)) pool.token1Price = pool.reserve1.div(pool.reserve0)
+  else pool.token1Price = ZERO_BD
+
+  pool.save()
+
 
   // update ETH price now that reserves could have changed
   const bundle = Bundle.load('1')
@@ -536,6 +597,14 @@ export function handleSync(event: Sync): void {
     .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
   pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
 
+
+  // use derived amounts within pool
+  pool.trackedReserveETH = trackedLiquidityETH
+  pool.reserveETH = pool.reserve0
+    .times(token0.derivedETH as BigDecimal)
+    .plus(pool.reserve1.times(token1.derivedETH as BigDecimal))
+  pool.reserveUSD = pool.reserveETH.times(bundle.ethPrice)
+
   // use tracked amounts globally
   factory.totalLiquidityETH = factory.totalLiquidityETH.plus(trackedLiquidityETH)
   factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)
@@ -546,6 +615,7 @@ export function handleSync(event: Sync): void {
 
   // save entities
   pair.save()
+  pool.save()
   factory.save()
   token0.save()
   token1.save()
