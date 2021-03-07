@@ -3,7 +3,7 @@ import { ERC20 } from "../types/DmmFactory/ERC20"
 import { ERC20SymbolBytes } from "../types/DmmFactory/ERC20SymbolBytes"
 import { ERC20NameBytes } from "../types/DmmFactory/ERC20NameBytes"
 import { LiquidityPosition, User, Pair, LiquidityPositionSnapshot, Bundle, Token } from "../types/schema"
-import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
+import { Factory as FactoryContract } from '../types/templates/Pool/Factory'
 
 // this need to configure to read from environment variable
 export const FACTORY_ADDRESS = '0x2f90d05693543b8D7feCD15A2150D9a63E89034A'

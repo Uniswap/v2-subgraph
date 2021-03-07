@@ -1,5 +1,5 @@
 import { BigInt, BigDecimal, store, Address, log } from "@graphprotocol/graph-ts";
-import { Pair as PairContract, Transfer, Mint, Burn, Swap, Sync } from "../types/templates/Pair/Pair";
+import { Pool as PoolContract, Transfer, Mint, Burn, Swap, Sync } from "../types/templates/Pool/Pool";
 import { DmmFactory, 
   Pair, 
   Pool,
@@ -43,7 +43,7 @@ export function handleTransfer(event: Transfer): void {
   // get pair and load contract
   // const pair = Pair.load(event.address.toHexString())
   const pool = Pool.load(event.address.toHexString())
-  const poolContract = PairContract.bind(event.address)
+  const poolContract = PoolContract.bind(event.address)
   const token0 = Token.load(pool.token0)
   const token1 = Token.load(pool.token1)
 
@@ -207,14 +207,14 @@ export function handleTransfer(event: Transfer): void {
 
   if (from.toHexString() != ADDRESS_ZERO && from.toHexString() != pair.id) {
     const fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
-    fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(from), BI_18)
+    fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(poolContract.balanceOf(from), BI_18)
     fromUserLiquidityPosition.save()
     createLiquiditySnapshot(fromUserLiquidityPosition, event)
   }
 
   if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pair.id) {
     const toUserLiquidityPosition = createLiquidityPosition(event.address, to)
-    toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(to), BI_18)
+    toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(poolContract.balanceOf(to), BI_18)
     toUserLiquidityPosition.save()
     createLiquiditySnapshot(toUserLiquidityPosition, event)
   }

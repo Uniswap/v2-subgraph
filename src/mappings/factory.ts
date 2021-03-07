@@ -1,7 +1,7 @@
 import { log } from "@graphprotocol/graph-ts"
 import { DmmFactory, Bundle, Pair, Token, Pool } from "../types/schema"
 import { PoolCreated } from "../types/DmmFactory/DmmFactory"
-import { Pair as PairTemplate } from "../types/templates"
+import { Pool as PoolTemplate } from "../types/templates"
 import {
   FACTORY_ADDRESS, ZERO_BD, ZERO_BI, BI_18,
   fetchTokenSymbol,
@@ -156,7 +156,7 @@ export function handlePairCreated(event: PoolCreated): void {
   pair.save()
 
   // create the tracked contract based on the template
-  PairTemplate.create(event.params.pool)
+  PoolTemplate.create(event.params.pool)
 
   // save updated values
   token0.save()
