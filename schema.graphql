@@ -107,6 +107,9 @@ type Pool @entity {
   token1: Token!
   reserve0: BigDecimal!
   reserve1: BigDecimal!
+  vReserve0: BigDecimal!
+  vReserve1: BigDecimal!
+
   totalSupply: BigDecimal!
 
   pair: Pair!

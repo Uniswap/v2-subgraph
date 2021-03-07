@@ -560,6 +560,8 @@ export function handleSync(event: Sync): void {
   // add save for pool
   pool.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
   pool.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
+  pool.vReserve0 = convertTokenToDecimal(event.params.vReserve0, token0.decimals)
+  pool.vReserve1 = convertTokenToDecimal(event.params.vReserve1, token1.decimals)
 
   if (pool.reserve1.notEqual(ZERO_BD)) pool.token0Price = pool.reserve0.div(pool.reserve1)
   else pool.token0Price = ZERO_BD

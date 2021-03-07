@@ -10,7 +10,7 @@ dataSources:
     source:
       address: '0x2f90d05693543b8D7feCD15A2150D9a63E89034A'
       abi: DmmFactory
-      startBlock: 9361295  # contract creation block
+      startBlock: 9767706  # contract creation block
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -18,6 +18,7 @@ dataSources:
       file: ./src/mappings/factory.ts
       entities:   # defines which entities are written to stores
         - Pairs
+        - Pools
         - Tokens
       abis:
         - name: DmmFactory
@@ -33,21 +34,21 @@ dataSources:
           handler: handlePoolCreated
 templates:
   - kind: ethereum/contract
-    name: Pair
+    name: Pool
     network: ropsten
     source:
-      abi: Pair
+      abi: Pool
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       file: ./src/mappings/core.ts
       entities:
-        - Pair
+        - Pool
         - Token
       abis:
-        - name: Pair
-          file: ./abis/XYZSwapPair.json
+        - name: Pool
+          file: ./abis/DmmPool.json
         - name: Factory
           file: ./abis/DmmFactory.json
       eventHandlers:
@@ -59,5 +60,5 @@ templates:
           handler: handleSwap
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
-        - event: Sync(uint112,uint112)
+        - event: Sync(uint256,uint256,uint256,uint256)
           handler: handleSync

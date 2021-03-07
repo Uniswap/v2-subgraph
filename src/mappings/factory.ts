@@ -129,6 +129,8 @@ export function handlePairCreated(event: PoolCreated): void {
   pool.txCount = ZERO_BI
   pool.reserve0 = ZERO_BD
   pool.reserve1 = ZERO_BD
+  pool.vReserve0 = ZERO_BD
+  pool.vReserve1 = ZERO_BD
   pool.trackedReserveETH = ZERO_BD
   pool.reserveETH = ZERO_BD
   pool.reserveUSD = ZERO_BD
