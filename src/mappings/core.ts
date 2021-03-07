@@ -30,21 +30,21 @@ export function handleTransfer(event: Transfer): void {
     return
   }
 
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
-  let transactionHash = event.transaction.hash.toHexString()
+  const factory = DmmFactory.load(FACTORY_ADDRESS)
+  const transactionHash = event.transaction.hash.toHexString()
 
   // user stats
-  let from = event.params.from
+  const from = event.params.from
   createUser(from)
-  let to = event.params.to
+  const to = event.params.to
   createUser(to)
 
   // get pair and load contract
-  let pair = Pair.load(event.address.toHexString())
-  let pairContract = PairContract.bind(event.address)
+  const pair = Pair.load(event.address.toHexString())
+  const pairContract = PairContract.bind(event.address)
 
   // liquidity token amount being transfered
-  let value = convertTokenToDecimal(event.params.value, BI_18)
+  const value = convertTokenToDecimal(event.params.value, BI_18)
 
   // get or create transaction
   let transaction = Transaction.load(transactionHash)
@@ -158,7 +158,7 @@ export function handleTransfer(event: Transfer): void {
 
     // if this logical burn included a fee mint, account for this
     if (mints.length !== 0 && !isCompleteMint(mints[mints.length - 1])) {
-      let mint = MintEvent.load(mints[mints.length - 1])
+      const mint = MintEvent.load(mints[mints.length - 1])
       burn.feeTo = mint.to
       burn.feeLiquidity = mint.liquidity
       // remove the logical mint
@@ -189,14 +189,14 @@ export function handleTransfer(event: Transfer): void {
   }
 
   if (from.toHexString() != ADDRESS_ZERO && from.toHexString() != pair.id) {
-    let fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
+    const fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
     fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(from), BI_18)
     fromUserLiquidityPosition.save()
     createLiquiditySnapshot(fromUserLiquidityPosition, event)
   }
 
   if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pair.id) {
-    let toUserLiquidityPosition = createLiquidityPosition(event.address, to)
+    const toUserLiquidityPosition = createLiquidityPosition(event.address, to)
     toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(to), BI_18)
     toUserLiquidityPosition.save()
     createLiquiditySnapshot(toUserLiquidityPosition, event)
@@ -206,27 +206,27 @@ export function handleTransfer(event: Transfer): void {
 }
 
 export function handleMint(event: Mint): void {
-  let transaction = Transaction.load(event.transaction.hash.toHexString())
-  let mints = transaction.mints
-  let mint = MintEvent.load(mints[mints.length - 1])
+  const transaction = Transaction.load(event.transaction.hash.toHexString())
+  const mints = transaction.mints
+  const mint = MintEvent.load(mints[mints.length - 1])
 
-  let pair = Pair.load(event.address.toHex())
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
+  const pair = Pair.load(event.address.toHex())
+  const factory = DmmFactory.load(FACTORY_ADDRESS)
 
-  let token0 = Token.load(pair.token0)
-  let token1 = Token.load(pair.token1)
+  const token0 = Token.load(pair.token0)
+  const token1 = Token.load(pair.token1)
 
   // update exchange info (except balances, sync will cover that)
-  let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
-  let token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
+  const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
+  const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
   // update txn counts
   token0.txCount = token0.txCount.plus(ONE_BI)
   token1.txCount = token1.txCount.plus(ONE_BI)
 
   // get new amounts of USD and ETH for tracking
-  let bundle = Bundle.load('1')
-  let amountTotalUSD = token1.derivedETH
+  const bundle = Bundle.load('1')
+  const amountTotalUSD = token1.derivedETH
     .times(token1Amount)
     .plus(token0.derivedETH.times(token0Amount))
     .times(bundle.ethPrice)
@@ -249,7 +249,7 @@ export function handleMint(event: Mint): void {
   mint.save()
 
   // update the LP position
-  let liquidityPosition = createLiquidityPosition(event.address, mint.to as Address)
+  const liquidityPosition = createLiquidityPosition(event.address, mint.to as Address)
   createLiquiditySnapshot(liquidityPosition, event)
 
   // update day entities
@@ -261,32 +261,32 @@ export function handleMint(event: Mint): void {
 }
 
 export function handleBurn(event: Burn): void {
-  let transaction = Transaction.load(event.transaction.hash.toHexString())
+  const transaction = Transaction.load(event.transaction.hash.toHexString())
 
   // safety check
   if (transaction === null) {
     return
   }
 
-  let burns = transaction.burns
-  let burn = BurnEvent.load(burns[burns.length - 1])
+  const burns = transaction.burns
+  const burn = BurnEvent.load(burns[burns.length - 1])
 
-  let pair = Pair.load(event.address.toHex())
-  let uniswap = DmmFactory.load(FACTORY_ADDRESS)
+  const pair = Pair.load(event.address.toHex())
+  const uniswap = DmmFactory.load(FACTORY_ADDRESS)
 
   //update token info
-  let token0 = Token.load(pair.token0)
-  let token1 = Token.load(pair.token1)
-  let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
-  let token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
+  const token0 = Token.load(pair.token0)
+  const token1 = Token.load(pair.token1)
+  const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
+  const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
 
   // update txn counts
   token0.txCount = token0.txCount.plus(ONE_BI)
   token1.txCount = token1.txCount.plus(ONE_BI)
 
   // get new amounts of USD and ETH for tracking
-  let bundle = Bundle.load('1')
-  let amountTotalUSD = token1.derivedETH
+  const bundle = Bundle.load('1')
+  const amountTotalUSD = token1.derivedETH
     .times(token1Amount)
     .plus(token0.derivedETH.times(token0Amount))
     .times(bundle.ethPrice)
@@ -311,7 +311,7 @@ export function handleBurn(event: Burn): void {
   burn.save()
 
   // update the LP position
-  let liquidityPosition = createLiquidityPosition(event.address, burn.sender as Address)
+  const liquidityPosition = createLiquidityPosition(event.address, burn.sender as Address)
   createLiquiditySnapshot(liquidityPosition, event)
 
   // update day entities
@@ -324,32 +324,32 @@ export function handleBurn(event: Burn): void {
 
 export function handleSwap(event: Swap): void {
 
-  let pair = Pair.load(event.address.toHexString())
-  let token0 = Token.load(pair.token0)
-  let token1 = Token.load(pair.token1)
-  let amount0In = convertTokenToDecimal(event.params.amount0In, token0.decimals)
-  let amount1In = convertTokenToDecimal(event.params.amount1In, token1.decimals)
-  let amount0Out = convertTokenToDecimal(event.params.amount0Out, token0.decimals)
-  let amount1Out = convertTokenToDecimal(event.params.amount1Out, token1.decimals)
-  let feePercent = convertTokenToDecimal(event.params.feeInPrecision, BI_18)
+  const pair = Pair.load(event.address.toHexString())
+  const token0 = Token.load(pair.token0)
+  const token1 = Token.load(pair.token1)
+  const amount0In = convertTokenToDecimal(event.params.amount0In, token0.decimals)
+  const amount1In = convertTokenToDecimal(event.params.amount1In, token1.decimals)
+  const amount0Out = convertTokenToDecimal(event.params.amount0Out, token0.decimals)
+  const amount1Out = convertTokenToDecimal(event.params.amount1Out, token1.decimals)
+  const feePercent = convertTokenToDecimal(event.params.feeInPrecision, BI_18)
   // totals for volume updates
-  let amount0Total = amount0Out.plus(amount0In)
-  let amount1Total = amount1Out.plus(amount1In)
+  const amount0Total = amount0Out.plus(amount0In)
+  const amount1Total = amount1Out.plus(amount1In)
 
   // ETH/USD prices
-  let bundle = Bundle.load('1')
+  const bundle = Bundle.load('1')
 
   // get total amounts of derived USD and ETH for tracking
-  let derivedAmountETH = token1.derivedETH
+  const derivedAmountETH = token1.derivedETH
     .times(amount1Total)
     .plus(token0.derivedETH.times(amount0Total))
     .div(BigDecimal.fromString('2'))
 
   log.debug("_____________ swap __ derivedAmountETH ____  {}  eth price: {}", [derivedAmountETH.toString(), bundle.ethPrice.toString()])
-  let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
+  const derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
   // only accounts for volume through white listed tokens
-  let trackedAmountUSD = getTrackedVolumeUSD(amount0Total, token0 as Token, amount1Total, token1 as Token, pair as Pair)
+  const trackedAmountUSD = getTrackedVolumeUSD(amount0Total, token0 as Token, amount1Total, token1 as Token, pair as Pair)
 
   log.debug("++++++++ tracked amount usd  {}  ", [trackedAmountUSD.toString()])
 
@@ -444,11 +444,11 @@ export function handleSwap(event: Swap): void {
   transaction.save()
 
   // update day entities
-  let pairDayData = updatePairDayData(event)
-  let pairHourData = updatePairHourData(event)
-  let uniswapDayData = updateUniswapDayData(event)
-  let token0DayData = updateTokenDayData(token0 as Token, event)
-  let token1DayData = updateTokenDayData(token1 as Token, event)
+  const pairDayData = updatePairDayData(event)
+  const pairHourData = updatePairHourData(event)
+  const uniswapDayData = updateUniswapDayData(event)
+  const token0DayData = updateTokenDayData(token0 as Token, event)
+  const token1DayData = updateTokenDayData(token1 as Token, event)
 
   // swap specific updating
   uniswapDayData.dailyVolumeUSD = uniswapDayData.dailyVolumeUSD.plus(trackedAmountUSD)
@@ -486,10 +486,10 @@ export function handleSwap(event: Swap): void {
 }
 
 export function handleSync(event: Sync): void {
-  let pair = Pair.load(event.address.toHex())
-  let token0 = Token.load(pair.token0)
-  let token1 = Token.load(pair.token1)
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
+  const pair = Pair.load(event.address.toHex())
+  const token0 = Token.load(pair.token0)
+  const token1 = Token.load(pair.token1)
+  const factory = DmmFactory.load(FACTORY_ADDRESS)
 
   // reset factory liquidity by subtracting onluy tarcked liquidity
   factory.totalLiquidityETH = factory.totalLiquidityETH.minus(pair.trackedReserveETH as BigDecimal)
@@ -509,7 +509,7 @@ export function handleSync(event: Sync): void {
   pair.save()
 
   // update ETH price now that reserves could have changed
-  let bundle = Bundle.load('1')
+  const bundle = Bundle.load('1')
   bundle.ethPrice = getEthPriceInUSD()
   log.debug("--------------eth price ----------------- {}", [bundle.ethPrice.toString()])
   bundle.save()

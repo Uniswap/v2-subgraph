@@ -6,19 +6,23 @@ import { LiquidityPosition, User, Pair, LiquidityPositionSnapshot, Bundle, Token
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
 
 // this need to configure to read from environment variable
-export const FACTORY_ADDRESS = '0x945c725e3ecc3dfdc350c0334f3ff42f08f719ea'
+export const FACTORY_ADDRESS = '0x2f90d05693543b8D7feCD15A2150D9a63E89034A'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 
-export let factoryContract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
+export const factoryContract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
 
-export let ZERO_BD = BigDecimal.fromString('0')
-export let ONE_BD = BigDecimal.fromString('1')
-export let ZERO_BI = BigInt.fromI32(0)
-export let ONE_BI = BigInt.fromI32(1)
-export let BI_18 = BigInt.fromI32(18)
+export const ZERO_BD = BigDecimal.fromString('0')
+export const ONE_BD = BigDecimal.fromString('1')
+export const ZERO_BI = BigInt.fromI32(0)
+export const ONE_BI = BigInt.fromI32(1)
+export const BI_18 = BigInt.fromI32(18)
 
 export function isNullEthValue(value: string): boolean {
   return value == '0x0000000000000000000000000000000000000000000000000000000000000001'
+}
+
+function isETHToken(tokenAddress: Address): boolean {
+  return (tokenAddress.toHexString() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
 }
 
 export function fetchTokenSymbol(tokenAddress: Address): string {
@@ -33,14 +37,14 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
     return 'ETH'
   }
 
-  let contract = ERC20.bind(tokenAddress)
-  let contractSymbolBytes = ERC20SymbolBytes.bind(tokenAddress)
+  const contract = ERC20.bind(tokenAddress)
+  const contractSymbolBytes = ERC20SymbolBytes.bind(tokenAddress)
 
   // try types string and bytes32 for symbol
   let symbolValue = 'unknown'
-  let symbolResult = contract.try_symbol()
+  const symbolResult = contract.try_symbol()
   if (symbolResult.reverted) {
-    let symbolResultBytes = contractSymbolBytes.try_symbol()
+    const symbolResultBytes = contractSymbolBytes.try_symbol()
     if (!symbolResultBytes.reverted) {
       // for broken pairs that have no symbol function exposed
       if (!isNullEthValue(symbolResultBytes.value.toHexString())) {
@@ -66,14 +70,14 @@ export function fetchTokenName(tokenAddress: Address): string {
     return 'Ethereum'
   }
 
-  let contract = ERC20.bind(tokenAddress)
-  let contractNameBytes = ERC20NameBytes.bind(tokenAddress)
+  const contract = ERC20.bind(tokenAddress)
+  const contractNameBytes = ERC20NameBytes.bind(tokenAddress)
 
   // try types string and bytes32 for name
   let nameValue = 'unknown'
-  let nameResult = contract.try_name()
+  const nameResult = contract.try_name()
   if (nameResult.reverted) {
-    let nameResultBytes = contractNameBytes.try_name()
+    const nameResultBytes = contractNameBytes.try_name()
     if (!nameResultBytes.reverted) {
       // for broken exchanges that have no name function exposed
       if (!isNullEthValue(nameResultBytes.value.toHexString())) {
@@ -92,9 +96,9 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
     return BigInt.fromI32(1)
   }
 
-  let contract = ERC20.bind(tokenAddress)
+  const contract = ERC20.bind(tokenAddress)
   let totalSupplyValue = null
-  let totalSupplyResult = contract.try_totalSupply()
+  const totalSupplyResult = contract.try_totalSupply()
   if (!totalSupplyResult.reverted) {
     totalSupplyValue = totalSupplyResult as i32
   }
@@ -112,10 +116,10 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
     return BigInt.fromI32(18)
   }
 
-  let contract = ERC20.bind(tokenAddress)
+  const contract = ERC20.bind(tokenAddress)
   // try types uint8 for decimals
   let decimalValue = null
-  let decimalResult = contract.try_decimals()
+  const decimalResult = contract.try_decimals()
   if (!decimalResult.reverted) {
     decimalValue = decimalResult.value
   }
@@ -131,13 +135,6 @@ export function createUser(address: Address): void {
   }
 }
 
-export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {
-  if (exchangeDecimals == ZERO_BI) {
-    return tokenAmount.toBigDecimal()
-  }
-  return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals))
-}
-
 export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
   let bd = BigDecimal.fromString('1')
   for (let i = ZERO_BI; i.lt(decimals as BigInt); i = i.plus(ONE_BI)) {
@@ -146,14 +143,23 @@ export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
   return bd
 }
 
+
+export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {
+  if (exchangeDecimals == ZERO_BI) {
+    return tokenAmount.toBigDecimal()
+  }
+  return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals))
+}
+
+
 export function createLiquidityPosition(exchange: Address, user: Address): LiquidityPosition {
-  let id = exchange
+  const id = exchange
     .toHexString()
     .concat('-')
     .concat(user.toHexString())
   let liquidityTokenBalance = LiquidityPosition.load(id)
   if (liquidityTokenBalance === null) {
-    let pair = Pair.load(exchange.toHexString())
+    const pair = Pair.load(exchange.toHexString())
     pair.liquidityProviderCount = pair.liquidityProviderCount.plus(ONE_BI)
     liquidityTokenBalance = new LiquidityPosition(id)
     liquidityTokenBalance.liquidityTokenBalance = ZERO_BD
@@ -166,14 +172,14 @@ export function createLiquidityPosition(exchange: Address, user: Address): Liqui
 }
 
 export function createLiquiditySnapshot(position: LiquidityPosition, event: EthereumEvent): void {
-  let timestamp = event.block.timestamp.toI32()
-  let bundle = Bundle.load('1')
-  let pair = Pair.load(position.pair)
-  let token0 = Token.load(pair.token0)
-  let token1 = Token.load(pair.token1)
+  const timestamp = event.block.timestamp.toI32()
+  const bundle = Bundle.load('1')
+  const pair = Pair.load(position.pair)
+  const token0 = Token.load(pair.token0)
+  const token1 = Token.load(pair.token1)
 
   // create new snapshot
-  let snapshot = new LiquidityPositionSnapshot(position.id.concat(timestamp.toString()))
+  const snapshot = new LiquidityPositionSnapshot(position.id.concat(timestamp.toString()))
   snapshot.liquidityPosition = position.id
   snapshot.timestamp = timestamp
   snapshot.block = event.block.number.toI32()
@@ -191,6 +197,3 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   position.save()
 }
 
-function isETHToken(tokenAddress: Address): boolean {
-  return (tokenAddress.toHexString() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
-}
