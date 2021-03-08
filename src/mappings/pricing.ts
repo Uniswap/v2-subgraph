@@ -4,7 +4,6 @@ import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from './utils'
 
 const WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
-const ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
 const USDC_WETH_POOL = '0x98bfbce42f48463d5450f8d0ac3abff330853f4b' // created 9225802
 const DAI_WETH_POOL = '0x601437d2a76672bf9b71fc159f659c0a7b53d03c' // created block 9225783
 const USDT_WETH_POOL = '0x0c941ac3317e27c6d1cf061901f8639d8c23ccec' // created block 9225800

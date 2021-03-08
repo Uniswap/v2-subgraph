@@ -23,10 +23,6 @@ export function isNullEthValue(value: string): boolean {
   return value == '0x0000000000000000000000000000000000000000000000000000000000000001'
 }
 
-function isETHToken(tokenAddress: Address): boolean {
-  return tokenAddress.toHexString() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-}
-
 export function fetchTokenSymbol(tokenAddress: Address): string {
   // hard coded overrides
   if (tokenAddress.toHexString() == '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a') {
@@ -34,9 +30,6 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
   }
   if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
     return 'AAVE'
-  }
-  if (isETHToken(tokenAddress)) {
-    return 'ETH'
   }
 
   let contract = ERC20.bind(tokenAddress)
@@ -68,9 +61,6 @@ export function fetchTokenName(tokenAddress: Address): string {
   if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
     return 'Aave Token'
   }
-  if (isETHToken(tokenAddress)) {
-    return 'Ethereum'
-  }
 
   let contract = ERC20.bind(tokenAddress)
   let contractNameBytes = ERC20NameBytes.bind(tokenAddress)
@@ -94,9 +84,6 @@ export function fetchTokenName(tokenAddress: Address): string {
 }
 
 export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
-  if (isETHToken(tokenAddress)) {
-    return BigInt.fromI32(1)
-  }
 
   let contract = ERC20.bind(tokenAddress)
   let totalSupplyValue = null
@@ -111,9 +98,6 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   // hardcode overrides
   if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
-    return BigInt.fromI32(18)
-  }
-  if (isETHToken(tokenAddress)) {
     return BigInt.fromI32(18)
   }
 
