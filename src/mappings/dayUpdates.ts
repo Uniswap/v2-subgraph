@@ -35,7 +35,7 @@ export function updatePairDayData(event: EthereumEvent, pairId: string): PairDay
   let dayPairID = pairId
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
-  let pair = Pair.load(event.address.toHexString())
+  let pair = Pair.load(pairId)
   let pairDayData = PairDayData.load(dayPairID)
   if (pairDayData === null) {
     pairDayData = new PairDayData(dayPairID)
@@ -66,12 +66,12 @@ export function updatePairHourData(event: EthereumEvent, pairId: string): PairHo
   let hourPairID = pairId
     .concat('-')
     .concat(BigInt.fromI32(hourIndex).toString())
-  let pair = Pair.load(event.address.toHexString())
+  let pair = Pair.load(pairId)
   let pairHourData = PairHourData.load(hourPairID)
   if (pairHourData === null) {
     pairHourData = new PairHourData(hourPairID)
     pairHourData.hourStartUnix = hourStartUnix
-    pairHourData.pair = event.address.toHexString()
+    pairHourData.pair = pairId
     pairHourData.hourlyVolumeToken0 = ZERO_BD
     pairHourData.hourlyVolumeToken1 = ZERO_BD
     pairHourData.hourlyVolumeUSD = ZERO_BD

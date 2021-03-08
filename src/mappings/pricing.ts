@@ -5,40 +5,40 @@ import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from './utils'
 
 const WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
 const ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-const USDC_WETH_PAIR = '0x770a86279fe70a7d4dc5ce9772526ef9c5c0110a' // created 9225802
-const DAI_WETH_PAIR = '0x3c67d84eb6c0e11325091256cbc3deacaaf3945e' // created block 9225783
-const USDT_WETH_PAIR = '0x998265e9aad3e9bcef2ca13c84b9472cfb611557' // created block 9225800
+const USDC_WETH_POOL = '0x98bfbce42f48463d5450f8d0ac3abff330853f4b' // created 9225802
+const DAI_WETH_POOL = '0x601437d2a76672bf9b71fc159f659c0a7b53d03c' // created block 9225783
+const USDT_WETH_POOL = '0x0c941ac3317e27c6d1cf061901f8639d8c23ccec' // created block 9225800
 
 export function getEthPriceInUSD(): BigDecimal {
   // fetch eth prices for each stablecoin
-  let daiPair = Pair.load(DAI_WETH_PAIR) // dai is token0
-  let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token0
-  let usdtPair = Pair.load(USDT_WETH_PAIR) // usdt is token1
+  let daiPool = Pool.load(DAI_WETH_POOL) // dai is token0
+  let usdcPool = Pool.load(USDC_WETH_POOL) // usdc is token0
+  let usdtPool = Pool.load(USDT_WETH_POOL) // usdt is token1
 
   // all 3 have been created
-  if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
+  if (daiPool !== null && usdcPool !== null && usdtPool !== null) {
     
-    let totalLiquidityETH = daiPair.reserve1.plus(usdcPair.reserve1).plus(usdtPair.reserve1)
+    let totalLiquidityETH = daiPool.reserve1.plus(usdcPool.reserve1).plus(usdtPool.reserve1)
     log.debug("---------------- token have full pair {}", [totalLiquidityETH.toString()])
-    let daiWeight = daiPair.reserve1.div(totalLiquidityETH)
-    let usdcWeight = usdcPair.reserve1.div(totalLiquidityETH)
-    let usdtWeight = usdtPair.reserve1.div(totalLiquidityETH)
-    return daiPair.token0Price
+    let daiWeight = daiPool.reserve1.div(totalLiquidityETH)
+    let usdcWeight = usdcPool.reserve1.div(totalLiquidityETH)
+    let usdtWeight = usdtPool.reserve1.div(totalLiquidityETH)
+    return daiPool.token0Price
       .times(daiWeight)
-      .plus(usdcPair.token0Price.times(usdcWeight))
-      .plus(usdtPair.token0Price.times(usdtWeight))
+      .plus(usdcPool.token0Price.times(usdcWeight))
+      .plus(usdtPool.token0Price.times(usdtWeight))
     // dai and USDC have been created
-  } else if (daiPair !== null && usdcPair !== null) {
+  } else if (daiPool !== null && usdcPool !== null) {
     
-    let totalLiquidityETH = daiPair.reserve1.plus(usdcPair.reserve1)
+    let totalLiquidityETH = daiPool.reserve1.plus(usdcPool.reserve1)
     log.debug("---------------- token only has dai and ust pair", [totalLiquidityETH.toString()])
-    let daiWeight = daiPair.reserve1.div(totalLiquidityETH)
-    let usdcWeight = usdcPair.reserve1.div(totalLiquidityETH)
-    return daiPair.token0Price.times(daiWeight).plus(usdcPair.token0Price.times(usdcWeight))
+    let daiWeight = daiPool.reserve1.div(totalLiquidityETH)
+    let usdcWeight = usdcPool.reserve1.div(totalLiquidityETH)
+    return daiPool.token0Price.times(daiWeight).plus(usdcPool.token0Price.times(usdcWeight))
     // USDC is the only pair so far
-  } else if (usdcPair !== null) {
+  } else if (usdcPool !== null) {
     log.debug("---------------- token only usdc pair -------------", [])
-    return usdcPair.token0Price
+    return usdcPool.token0Price
   } else {
     log.debug("---------------- token dont have any pair -------------", [])
     return ZERO_BD
@@ -91,13 +91,13 @@ export function findEthPerToken(token: Token): BigDecimal {
         let pool = Pool.load(arrayPoolAddresses[j].toHexString())
         if (pool.token0 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
           let token1 = Token.load(pool.token1)
-          const tokenPrice = pool.token1Price.times(token1.derivedETH as BigDecimal)
+          let tokenPrice = pool.token1Price.times(token1.derivedETH as BigDecimal)
           totalPoolPrice = totalPoolPrice.plus(tokenPrice)  // return token1 per our token * Eth per token 1
           totalPoolNum = totalPoolNum.plus(ONE_BD)
         }
         if (pool.token1 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
           let token0 = Token.load(pool.token0)
-          const tokenPrice = pool.token0Price.times(token0.derivedETH as BigDecimal)
+          let tokenPrice = pool.token0Price.times(token0.derivedETH as BigDecimal)
           totalPoolPrice = totalPoolPrice.plus(tokenPrice)  // return token0 per our token * ETH per token 0
           totalPoolNum = totalPoolNum.plus(ONE_BD)
         }

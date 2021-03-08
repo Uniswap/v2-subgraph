@@ -66,7 +66,7 @@ type Pair @entity {
   reserve1: BigDecimal!
   totalSupply: BigDecimal!
 
-  pools: [Pool!]! @derivedFrom(field: "pair") 
+  pools: [Pool!]! @derivedFrom(field: "pair")
 
   # derived liquidity
   reserveETH: BigDecimal!
