@@ -9,6 +9,27 @@ const USDC_WETH_POOL = '0x98bfbce42f48463d5450f8d0ac3abff330853f4b' // created 9
 const DAI_WETH_POOL = '0x601437d2a76672bf9b71fc159f659c0a7b53d03c' // created block 9225783
 const USDT_WETH_POOL = '0x0c941ac3317e27c6d1cf061901f8639d8c23ccec' // created block 9225800
 
+export function getPairReserve(pair: Pair, isToken0: boolean): BigDecimal {
+  log.debug("______________ load pair id", [])
+  let totalReserve = ZERO_BD
+
+  let arrayPoolAddresses = factoryContract.getPools(Address.fromString(pair.token0), Address.fromString(pair.token1))
+
+  for (let i = 0; i < arrayPoolAddresses.length; ++i) {
+    let poolAddr = arrayPoolAddresses[i]
+    let pool = Pool.load(poolAddr.toHexString())
+    if (pool !== null) {
+      if(isToken0){
+        totalReserve = totalReserve.plus(pool.reserve0)
+      } else {
+        totalReserve = totalReserve.plus(pool.reserve1)
+      }
+    }
+  }
+  return totalReserve
+}
+
+
 export function getEthPriceInUSD(): BigDecimal {
   // fetch eth prices for each stablecoin
   let daiPool = Pool.load(DAI_WETH_POOL) // dai is token0
@@ -131,9 +152,11 @@ export function getTrackedVolumeUSD(
 
   // if less than 5 LPs, require high minimum reserve amount amount or return 0
   if (pair.liquidityProviderCount.lt(BigInt.fromI32(5))) {
-    
-    let reserve0USD = pair.reserve0.times(price0)
-    let reserve1USD = pair.reserve1.times(price1)
+    let totalPairReserve0 = getPairReserve(pair, true)
+    let totalPairReserve1 = getPairReserve(pair, false)
+  
+    let reserve0USD = totalPairReserve0.times(price0)
+    let reserve1USD = totalPairReserve1.times(price1)
 
     log.debug("!!!!!!!!!!!!! if less than 5 LPs, require high minimum reserve amount amount or return 0 {} {} {}", [reserve0USD.toString(), reserve1USD.toString(), MINIMUM_USD_THRESHOLD_NEW_PAIRS.toString()])
     if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
