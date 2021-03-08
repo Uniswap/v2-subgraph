@@ -9,8 +9,7 @@ const USDC_WETH_POOL = '0x98bfbce42f48463d5450f8d0ac3abff330853f4b' // created 9
 const DAI_WETH_POOL = '0x601437d2a76672bf9b71fc159f659c0a7b53d03c' // created block 9225783
 const USDT_WETH_POOL = '0x0c941ac3317e27c6d1cf061901f8639d8c23ccec' // created block 9225800
 
-export function getPairReserve(pair: Pair, isToken0: boolean): BigDecimal {
-  log.debug("______________ load pair id", [])
+export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal {
   let totalReserve = ZERO_BD
 
   let arrayPoolAddresses = factoryContract.getPools(Address.fromString(pair.token0), Address.fromString(pair.token1))

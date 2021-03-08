@@ -19,6 +19,7 @@ export function handlePoolCreated(event: PoolCreated): void {
   if (factory === null) {
     factory = new DmmFactory(FACTORY_ADDRESS)
     factory.pairCount = 0
+    factory.poolCount = 0
     factory.totalVolumeETH = ZERO_BD
     factory.totalLiquidityETH = ZERO_BD
     factory.totalVolumeUSD = ZERO_BD
@@ -33,7 +34,7 @@ export function handlePoolCreated(event: PoolCreated): void {
     bundle.ethPrice = ZERO_BD
     bundle.save()
   }
-  factory.pairCount = factory.pairCount + 1
+  factory.poolCount = factory.poolCount + 1
   factory.save()
 
   log.debug("222------save factory success ------ ", [])
@@ -124,6 +125,9 @@ export function handlePoolCreated(event: PoolCreated): void {
     newPair.save()
 
     pair = newPair
+
+    factory.pairCount = factory.pairCount + 1
+    factory.save()
   }
 
 

@@ -3,6 +3,7 @@ import { PairHourData, PoolHourData } from './../types/schema'
 import { BigInt, BigDecimal, EthereumEvent } from '@graphprotocol/graph-ts'
 import { Pair,Pool, Bundle, Token, DmmFactory, UniswapDayData, PairDayData, TokenDayData, PoolDayData } from '../types/schema'
 import { ONE_BI, ZERO_BD, ZERO_BI, FACTORY_ADDRESS } from './utils'
+import { getPairReserve } from './pricing';
 
 export function updateUniswapDayData(event: EthereumEvent): UniswapDayData {
   let uniswap = DmmFactory.load(FACTORY_ADDRESS)
@@ -49,9 +50,12 @@ export function updatePairDayData(event: EthereumEvent, pairId: string): PairDay
     pairDayData.dailyTxns = ZERO_BI
   }
 
+  let totalPairReserve0 = getPairReserve(pair, true)
+  let totalPairReserve1 = getPairReserve(pair, false)
+
   pairDayData.totalSupply = pair.totalSupply
-  pairDayData.reserve0 = pair.reserve0
-  pairDayData.reserve1 = pair.reserve1
+  pairDayData.reserve0 = totalPairReserve0
+  pairDayData.reserve1 = totalPairReserve1
   pairDayData.reserveUSD = pair.reserveUSD
   pairDayData.dailyTxns = pairDayData.dailyTxns.plus(ONE_BI)
   pairDayData.save()
@@ -77,9 +81,10 @@ export function updatePairHourData(event: EthereumEvent, pairId: string): PairHo
     pairHourData.hourlyVolumeUSD = ZERO_BD
     pairHourData.hourlyTxns = ZERO_BI
   }
-
-  pairHourData.reserve0 = pair.reserve0
-  pairHourData.reserve1 = pair.reserve1
+  let totalPairReserve0 = getPairReserve(pair, true)
+  let totalPairReserve1 = getPairReserve(pair, false)
+  pairHourData.reserve0 = totalPairReserve0
+  pairHourData.reserve1 = totalPairReserve1
   pairHourData.reserveUSD = pair.reserveUSD
   pairHourData.hourlyTxns = pairHourData.hourlyTxns.plus(ONE_BI)
   pairHourData.save()
