@@ -353,6 +353,8 @@ type PoolHourData @entity {
   # reserves
   reserve0: BigDecimal!
   reserve1: BigDecimal!
+  vReserve0: BigDecimal!
+  vReserve1: BigDecimal!
 
   # derived liquidity
   reserveUSD: BigDecimal!
@@ -375,6 +377,8 @@ type PoolDayData @entity {
   # reserves
   reserve0: BigDecimal!
   reserve1: BigDecimal!
+  vReserve0: BigDecimal!
+  vReserve1: BigDecimal!
 
   # total supply for LP historical returns
   totalSupply: BigDecimal!

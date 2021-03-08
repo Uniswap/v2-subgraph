@@ -9,7 +9,7 @@ import { DmmFactory,
   Burn as BurnEvent,
   Swap as SwapEvent,
   Bundle } from "../types/schema";
-import { updatePairDayData, updateTokenDayData, updateUniswapDayData, updatePairHourData } from './dayUpdates';
+import { updatePairDayData, updateTokenDayData, updateUniswapDayData, updatePairHourData, updatePoolDayData, updatePoolHourData } from './dayUpdates';
 import { getEthPriceInUSD, findEthPerToken, getTrackedVolumeUSD, getTrackedLiquidityUSD } from './pricing';
 import { createUser, 
   convertTokenToDecimal, 
@@ -277,8 +277,8 @@ export function handleMint(event: Mint): void {
   // update day entities
   updatePairDayData(event)
   updatePairHourData(event)
-  // updatePoolDayData(event)
-  // updatePoolHourData(event)
+  updatePoolDayData(event)
+  updatePoolHourData(event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
@@ -347,8 +347,8 @@ export function handleBurn(event: Burn): void {
   // update day entities
   updatePairDayData(event)
   updatePairHourData(event)
-  // updatePoolDayData(event)
-  // updatePoolHourData(event)
+  updatePoolDayData(event)
+  updatePoolHourData(event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
