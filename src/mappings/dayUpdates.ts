@@ -1,9 +1,19 @@
 import { PairHourData, PoolHourData } from './../types/schema'
 /* eslint-disable prefer-const */
 import { BigInt, BigDecimal, EthereumEvent } from '@graphprotocol/graph-ts'
-import { Pair,Pool, Bundle, Token, DmmFactory, UniswapDayData, PairDayData, TokenDayData, PoolDayData } from '../types/schema'
+import {
+  Pair,
+  Pool,
+  Bundle,
+  Token,
+  DmmFactory,
+  UniswapDayData,
+  PairDayData,
+  TokenDayData,
+  PoolDayData
+} from '../types/schema'
 import { ONE_BI, ZERO_BD, ZERO_BI, FACTORY_ADDRESS } from './utils'
-import { getPairReserve } from './pricing';
+import { getPairReserve } from './pricing'
 
 export function updateUniswapDayData(event: EthereumEvent): UniswapDayData {
   let uniswap = DmmFactory.load(FACTORY_ADDRESS)
@@ -33,9 +43,7 @@ export function updatePairDayData(event: EthereumEvent, pairId: string): PairDay
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
-  let dayPairID = pairId
-    .concat('-')
-    .concat(BigInt.fromI32(dayID).toString())
+  let dayPairID = pairId.concat('-').concat(BigInt.fromI32(dayID).toString())
   let pair = Pair.load(pairId)
   let pairDayData = PairDayData.load(dayPairID)
   if (pairDayData === null) {
@@ -67,9 +75,7 @@ export function updatePairHourData(event: EthereumEvent, pairId: string): PairHo
   let timestamp = event.block.timestamp.toI32()
   let hourIndex = timestamp / 3600 // get unique hour within unix history
   let hourStartUnix = hourIndex * 3600 // want the rounded effect
-  let hourPairID = pairId
-    .concat('-')
-    .concat(BigInt.fromI32(hourIndex).toString())
+  let hourPairID = pairId.concat('-').concat(BigInt.fromI32(hourIndex).toString())
   let pair = Pair.load(pairId)
   let pairHourData = PairHourData.load(hourPairID)
   if (pairHourData === null) {
@@ -91,7 +97,6 @@ export function updatePairHourData(event: EthereumEvent, pairId: string): PairHo
 
   return pairHourData as PairHourData
 }
-
 
 export function updatePoolDayData(event: EthereumEvent): PoolDayData {
   let timestamp = event.block.timestamp.toI32()
@@ -157,9 +162,6 @@ export function updatePoolHourData(event: EthereumEvent): PoolHourData {
 
   return poolHourData as PoolHourData
 }
-
-
-
 
 export function updateTokenDayData(token: Token, event: EthereumEvent): TokenDayData {
   let bundle = Bundle.load('1')

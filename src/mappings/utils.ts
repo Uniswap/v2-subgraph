@@ -1,14 +1,15 @@
 /* eslint-disable prefer-const */
-import { log, BigDecimal, BigInt, Address, EthereumEvent } from "@graphprotocol/graph-ts"
-import { ERC20 } from "../types/DmmFactory/ERC20"
-import { ERC20SymbolBytes } from "../types/DmmFactory/ERC20SymbolBytes"
-import { ERC20NameBytes } from "../types/DmmFactory/ERC20NameBytes"
-import { LiquidityPosition, User, Pair, Pool, LiquidityPositionSnapshot, Bundle, Token } from "../types/schema"
+import { log, BigDecimal, BigInt, Address, EthereumEvent } from '@graphprotocol/graph-ts'
+import { ERC20 } from '../types/DmmFactory/ERC20'
+import { ERC20SymbolBytes } from '../types/DmmFactory/ERC20SymbolBytes'
+import { ERC20NameBytes } from '../types/DmmFactory/ERC20NameBytes'
+import { LiquidityPosition, User, Pair, Pool, LiquidityPositionSnapshot, Bundle, Token } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pool/Factory'
 
 // this need to configure to read from environment variable
 export let FACTORY_ADDRESS = '0xe25d045d9b65f5428b231f46bba2b3f351a97f3b'
 export let ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
+export const ADDRESS_LOCK = '0xffffffffffffffffffffffffffffffffffffffff'
 
 export let factoryContract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
 
@@ -23,7 +24,7 @@ export function isNullEthValue(value: string): boolean {
 }
 
 function isETHToken(tokenAddress: Address): boolean {
-  return (tokenAddress.toHexString() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+  return tokenAddress.toHexString() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
 }
 
 export function fetchTokenSymbol(tokenAddress: Address): string {
@@ -103,10 +104,9 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
   if (!totalSupplyResult.reverted) {
     totalSupplyValue = totalSupplyResult as i32
   }
-  log.debug("totalSupply", [tokenAddress.toHexString(), totalSupplyValue.toString()])
+  log.debug('totalSupply', [tokenAddress.toHexString(), totalSupplyValue.toString()])
   return BigInt.fromI32(totalSupplyValue as i32)
 }
-
 
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   // hardcode overrides
@@ -144,14 +144,12 @@ export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
   return bd
 }
 
-
 export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {
   if (exchangeDecimals == ZERO_BI) {
     return tokenAmount.toBigDecimal()
   }
   return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals))
 }
-
 
 export function createLiquidityPosition(poolAddress: Address, pair: string, user: Address): LiquidityPosition {
   let id = poolAddress
@@ -200,4 +198,3 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   snapshot.save()
   position.save()
 }
-
