@@ -28,12 +28,11 @@ export function updateUniswapDayData(event: EthereumEvent): UniswapDayData {
   return uniswapDayData as UniswapDayData
 }
 
-export function updatePairDayData(event: EthereumEvent): PairDayData {
+export function updatePairDayData(event: EthereumEvent, pairId: string): PairDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
-  let dayPairID = event.address
-    .toHexString()
+  let dayPairID = pairId
     .concat('-')
     .concat(BigInt.fromI32(dayID).toString())
   let pair = Pair.load(event.address.toHexString())
@@ -59,6 +58,35 @@ export function updatePairDayData(event: EthereumEvent): PairDayData {
 
   return pairDayData as PairDayData
 }
+
+export function updatePairHourData(event: EthereumEvent, pairId: string): PairHourData {
+  let timestamp = event.block.timestamp.toI32()
+  let hourIndex = timestamp / 3600 // get unique hour within unix history
+  let hourStartUnix = hourIndex * 3600 // want the rounded effect
+  let hourPairID = pairId
+    .concat('-')
+    .concat(BigInt.fromI32(hourIndex).toString())
+  let pair = Pair.load(event.address.toHexString())
+  let pairHourData = PairHourData.load(hourPairID)
+  if (pairHourData === null) {
+    pairHourData = new PairHourData(hourPairID)
+    pairHourData.hourStartUnix = hourStartUnix
+    pairHourData.pair = event.address.toHexString()
+    pairHourData.hourlyVolumeToken0 = ZERO_BD
+    pairHourData.hourlyVolumeToken1 = ZERO_BD
+    pairHourData.hourlyVolumeUSD = ZERO_BD
+    pairHourData.hourlyTxns = ZERO_BI
+  }
+
+  pairHourData.reserve0 = pair.reserve0
+  pairHourData.reserve1 = pair.reserve1
+  pairHourData.reserveUSD = pair.reserveUSD
+  pairHourData.hourlyTxns = pairHourData.hourlyTxns.plus(ONE_BI)
+  pairHourData.save()
+
+  return pairHourData as PairHourData
+}
+
 
 export function updatePoolDayData(event: EthereumEvent): PoolDayData {
   let timestamp = event.block.timestamp.toI32()
@@ -126,34 +154,7 @@ export function updatePoolHourData(event: EthereumEvent): PoolHourData {
 }
 
 
-export function updatePairHourData(event: EthereumEvent): PairHourData {
-  let timestamp = event.block.timestamp.toI32()
-  let hourIndex = timestamp / 3600 // get unique hour within unix history
-  let hourStartUnix = hourIndex * 3600 // want the rounded effect
-  let hourPairID = event.address
-    .toHexString()
-    .concat('-')
-    .concat(BigInt.fromI32(hourIndex).toString())
-  let pair = Pair.load(event.address.toHexString())
-  let pairHourData = PairHourData.load(hourPairID)
-  if (pairHourData === null) {
-    pairHourData = new PairHourData(hourPairID)
-    pairHourData.hourStartUnix = hourStartUnix
-    pairHourData.pair = event.address.toHexString()
-    pairHourData.hourlyVolumeToken0 = ZERO_BD
-    pairHourData.hourlyVolumeToken1 = ZERO_BD
-    pairHourData.hourlyVolumeUSD = ZERO_BD
-    pairHourData.hourlyTxns = ZERO_BI
-  }
 
-  pairHourData.reserve0 = pair.reserve0
-  pairHourData.reserve1 = pair.reserve1
-  pairHourData.reserveUSD = pair.reserveUSD
-  pairHourData.hourlyTxns = pairHourData.hourlyTxns.plus(ONE_BI)
-  pairHourData.save()
-
-  return pairHourData as PairHourData
-}
 
 export function updateTokenDayData(token: Token, event: EthereumEvent): TokenDayData {
   let bundle = Bundle.load('1')

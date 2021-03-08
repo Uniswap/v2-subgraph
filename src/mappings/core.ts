@@ -234,7 +234,8 @@ export function handleMint(event: Mint): void {
   const token0 = Token.load(pool.token0)
   const token1 = Token.load(pool.token1)
 
-  const pair = Pair.load(token0.id + "-" + token1.id)
+  const pairId = token0.id + "-" + token1.id
+  const pair = Pair.load(pairId)
 
   // update exchange info (except balances, sync will cover that)
   const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
@@ -275,8 +276,8 @@ export function handleMint(event: Mint): void {
   createLiquiditySnapshot(liquidityPosition, event)
 
   // update day entities
-  updatePairDayData(event)
-  updatePairHourData(event)
+  updatePairDayData(event, pairId)
+  updatePairHourData(event, pairId)
   updatePoolDayData(event)
   updatePoolHourData(event)
   updateUniswapDayData(event)
@@ -303,7 +304,8 @@ export function handleBurn(event: Burn): void {
   const token0 = Token.load(pool.token0)
   const token1 = Token.load(pool.token1)
 
-  const pair = Pair.load(token0.id + "-" + token1.id)
+  const pairId = token0.id + "-" + token1.id
+  const pair = Pair.load(pairId)
 
   const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
@@ -345,8 +347,8 @@ export function handleBurn(event: Burn): void {
   createLiquiditySnapshot(liquidityPosition, event)
 
   // update day entities
-  updatePairDayData(event)
-  updatePairHourData(event)
+  updatePairDayData(event, pairId)
+  updatePairHourData(event, pairId)
   updatePoolDayData(event)
   updatePoolHourData(event)
   updateUniswapDayData(event)
@@ -360,7 +362,8 @@ export function handleSwap(event: Swap): void {
   const pool = Pool.load(event.address.toHexString())
   const token0 = Token.load(pool.token0)
   const token1 = Token.load(pool.token1)
-  const pair = Pair.load(token0.id + "-" + token1.id)
+  const pairId = token0.id + "-" + token1.id
+  const pair = Pair.load(pairId)
 
   const amount0In = convertTokenToDecimal(event.params.amount0In, token0.decimals)
   const amount1In = convertTokenToDecimal(event.params.amount1In, token1.decimals)
@@ -466,7 +469,8 @@ export function handleSwap(event: Swap): void {
 
   // update swap event
   swap.transaction = transaction.id
-  swap.pool = pair.id
+  swap.pool = pool.id
+  swap.pair = pair.id
   swap.timestamp = transaction.timestamp
   swap.transaction = transaction.id
   swap.sender = event.params.sender
@@ -491,8 +495,8 @@ export function handleSwap(event: Swap): void {
   transaction.save()
 
   // update day entities
-  const pairDayData = updatePairDayData(event)
-  const pairHourData = updatePairHourData(event)
+  const pairDayData = updatePairDayData(event, pairId)
+  const pairHourData = updatePairHourData(event, pairId)
   const uniswapDayData = updateUniswapDayData(event)
   const token0DayData = updateTokenDayData(token0 as Token, event)
   const token1DayData = updateTokenDayData(token1 as Token, event)
