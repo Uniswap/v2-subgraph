@@ -20,7 +20,12 @@ import {
   updatePoolDayData,
   updatePoolHourData
 } from './dayUpdates'
-import { getEthPriceInUSD, findEthPerToken, getTrackedVolumeUSD, getTrackedLiquidityUSD, getPairReserve } from './pricing'
+import {
+  getEthPriceInUSD,
+  findEthPerToken,
+  getTrackedVolumeUSD,
+  getTrackedLiquidityUSD
+} from './pricing'
 import {
   createUser,
   convertTokenToDecimal,
@@ -592,16 +597,15 @@ export function handleSync(event: Sync): void {
   token0.totalLiquidity = token0.totalLiquidity.minus(pool.reserve0)
   token1.totalLiquidity = token1.totalLiquidity.minus(pool.reserve1)
 
-  // // remove save data for pair
-  // pair.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
-  // pair.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
+  // reset pair reserves
+  pair.reserve0 = pair.reserve0.minus(pool.reserve0)
+  pair.reserve1 = pair.reserve1.minus(pool.reserve1)
 
+  // TODO: check if we need to update pair price
   // if (pair.reserve1.notEqual(ZERO_BD)) pair.token0Price = pair.reserve0.div(pair.reserve1)
   // else pair.token0Price = ZERO_BD
   // if (pair.reserve0.notEqual(ZERO_BD)) pair.token1Price = pair.reserve1.div(pair.reserve0)
   // else pair.token1Price = ZERO_BD
-
-  // pair.save()
 
   // add save for pool
   pool.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
@@ -617,6 +621,11 @@ export function handleSync(event: Sync): void {
 
   pool.save()
 
+  // now correctly set reserves for pair
+  pair.reserve0 = pair.reserve0.plus(pool.reserve0)
+  pair.reserve1 = pair.reserve1.plus(pool.reserve1)
+  pair.save()
+
   // update ETH price now that reserves could have changed
   let bundle = Bundle.load('1')
   bundle.ethPrice = getEthPriceInUSD()
@@ -631,9 +640,8 @@ export function handleSync(event: Sync): void {
   // get tracked liquidity - will be 0 if neither is in whitelist
   let trackedLiquidityETH: BigDecimal
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    let totalPairReserve0 = getPairReserve(pair, true)
     trackedLiquidityETH = getTrackedLiquidityUSD(
-      totalPairReserve0,
+      pair.reserve0,
       token0 as Token,
       pair.reserve1,
       token1 as Token
@@ -642,14 +650,10 @@ export function handleSync(event: Sync): void {
     trackedLiquidityETH = ZERO_BD
   }
 
-  //TODO  use derived amounts within pair !!!
-  let totalPairReserve0 = getPairReserve(pair, true)
-  let totalPairReserve1 = getPairReserve(pair, false)
-
   pair.trackedReserveETH = trackedLiquidityETH
-  pair.reserveETH = totalPairReserve0
+  pair.reserveETH = pair.reserve0
     .times(token0.derivedETH as BigDecimal)
-    .plus(totalPairReserve1.times(token1.derivedETH as BigDecimal))
+    .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
   pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
 
   // use derived amounts within pool
