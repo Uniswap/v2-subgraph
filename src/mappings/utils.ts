@@ -1,14 +1,15 @@
 /* eslint-disable prefer-const */
-import { log, BigDecimal, BigInt, Address, EthereumEvent } from "@graphprotocol/graph-ts"
-import { ERC20 } from "../types/DmmFactory/ERC20"
-import { ERC20SymbolBytes } from "../types/DmmFactory/ERC20SymbolBytes"
-import { ERC20NameBytes } from "../types/DmmFactory/ERC20NameBytes"
-import { LiquidityPosition, User, Pair, Pool, LiquidityPositionSnapshot, Bundle, Token } from "../types/schema"
+import { log, BigDecimal, BigInt, Address, EthereumEvent } from '@graphprotocol/graph-ts'
+import { ERC20 } from '../types/DmmFactory/ERC20'
+import { ERC20SymbolBytes } from '../types/DmmFactory/ERC20SymbolBytes'
+import { ERC20NameBytes } from '../types/DmmFactory/ERC20NameBytes'
+import { LiquidityPosition, User, Pair, Pool, LiquidityPositionSnapshot, Bundle, Token } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pool/Factory'
 
 // this need to configure to read from environment variable
 export let FACTORY_ADDRESS = '0xe25d045d9b65f5428b231f46bba2b3f351a97f3b'
 export let ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
+export const ADDRESS_LOCK = '0xffffffffffffffffffffffffffffffffffffffff'
 
 export let factoryContract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
 
@@ -22,10 +23,6 @@ export function isNullEthValue(value: string): boolean {
   return value == '0x0000000000000000000000000000000000000000000000000000000000000001'
 }
 
-function isETHToken(tokenAddress: Address): boolean {
-  return (tokenAddress.toHexString() == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
-}
-
 export function fetchTokenSymbol(tokenAddress: Address): string {
   // hard coded overrides
   if (tokenAddress.toHexString() == '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a') {
@@ -33,9 +30,6 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
   }
   if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
     return 'AAVE'
-  }
-  if (isETHToken(tokenAddress)) {
-    return 'ETH'
   }
 
   let contract = ERC20.bind(tokenAddress)
@@ -67,9 +61,6 @@ export function fetchTokenName(tokenAddress: Address): string {
   if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
     return 'Aave Token'
   }
-  if (isETHToken(tokenAddress)) {
-    return 'Ethereum'
-  }
 
   let contract = ERC20.bind(tokenAddress)
   let contractNameBytes = ERC20NameBytes.bind(tokenAddress)
@@ -93,27 +84,19 @@ export function fetchTokenName(tokenAddress: Address): string {
 }
 
 export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
-  if (isETHToken(tokenAddress)) {
-    return BigInt.fromI32(1)
-  }
-
   let contract = ERC20.bind(tokenAddress)
   let totalSupplyValue = null
   let totalSupplyResult = contract.try_totalSupply()
   if (!totalSupplyResult.reverted) {
     totalSupplyValue = totalSupplyResult as i32
   }
-  log.debug("totalSupply", [tokenAddress.toHexString(), totalSupplyValue.toString()])
+  log.debug('totalSupply', [tokenAddress.toHexString(), totalSupplyValue.toString()])
   return BigInt.fromI32(totalSupplyValue as i32)
 }
-
 
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   // hardcode overrides
   if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
-    return BigInt.fromI32(18)
-  }
-  if (isETHToken(tokenAddress)) {
     return BigInt.fromI32(18)
   }
 
@@ -144,14 +127,12 @@ export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
   return bd
 }
 
-
 export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {
   if (exchangeDecimals == ZERO_BI) {
     return tokenAmount.toBigDecimal()
   }
   return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals))
 }
-
 
 export function createLiquidityPosition(poolAddress: Address, pair: string, user: Address): LiquidityPosition {
   let id = poolAddress
@@ -200,4 +181,3 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   snapshot.save()
   position.save()
 }
-

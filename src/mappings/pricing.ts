@@ -4,7 +4,6 @@ import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from './utils'
 
 const WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
-const ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
 const USDC_WETH_POOL = '0x98bfbce42f48463d5450f8d0ac3abff330853f4b' // created 9225802
 const DAI_WETH_POOL = '0x601437d2a76672bf9b71fc159f659c0a7b53d03c' // created block 9225783
 const USDT_WETH_POOL = '0x0c941ac3317e27c6d1cf061901f8639d8c23ccec' // created block 9225800
@@ -18,7 +17,7 @@ export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal
     let poolAddr = arrayPoolAddresses[i]
     let pool = Pool.load(poolAddr.toHexString())
     if (pool !== null) {
-      if(isToken0){
+      if (isToken0) {
         totalReserve = totalReserve.plus(pool.reserve0)
       } else {
         totalReserve = totalReserve.plus(pool.reserve1)
@@ -28,7 +27,6 @@ export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal
   return totalReserve
 }
 
-
 export function getEthPriceInUSD(): BigDecimal {
   // fetch eth prices for each stablecoin
   let daiPool = Pool.load(DAI_WETH_POOL) // dai is token0
@@ -37,30 +35,28 @@ export function getEthPriceInUSD(): BigDecimal {
 
   // all 3 have been created
   if (daiPool !== null && usdcPool !== null && usdtPool !== null) {
-    
-    let totalLiquidityETH = daiPool.reserve1.plus(usdcPool.reserve1).plus(usdtPool.reserve1)
-    log.debug("---------------- token have full pair {}", [totalLiquidityETH.toString()])
-    let daiWeight = daiPool.reserve1.div(totalLiquidityETH)
-    let usdcWeight = usdcPool.reserve1.div(totalLiquidityETH)
-    let usdtWeight = usdtPool.reserve1.div(totalLiquidityETH)
+    let totalLiquidityETH = daiPool.vReserve1.plus(usdcPool.vReserve1).plus(usdtPool.vReserve1)
+    log.debug('---------------- token have full pair {}', [totalLiquidityETH.toString()])
+    let daiWeight = daiPool.vReserve1.div(totalLiquidityETH)
+    let usdcWeight = usdcPool.vReserve1.div(totalLiquidityETH)
+    let usdtWeight = usdtPool.vReserve1.div(totalLiquidityETH)
     return daiPool.token0Price
       .times(daiWeight)
       .plus(usdcPool.token0Price.times(usdcWeight))
       .plus(usdtPool.token0Price.times(usdtWeight))
     // dai and USDC have been created
   } else if (daiPool !== null && usdcPool !== null) {
-    
-    let totalLiquidityETH = daiPool.reserve1.plus(usdcPool.reserve1)
-    log.debug("---------------- token only has dai and ust pair", [totalLiquidityETH.toString()])
-    let daiWeight = daiPool.reserve1.div(totalLiquidityETH)
-    let usdcWeight = usdcPool.reserve1.div(totalLiquidityETH)
+    let totalLiquidityETH = daiPool.vReserve1.plus(usdcPool.vReserve1)
+    log.debug('---------------- token only has dai and ust pair', [totalLiquidityETH.toString()])
+    let daiWeight = daiPool.vReserve1.div(totalLiquidityETH)
+    let usdcWeight = usdcPool.vReserve1.div(totalLiquidityETH)
     return daiPool.token0Price.times(daiWeight).plus(usdcPool.token0Price.times(usdcWeight))
     // USDC is the only pair so far
   } else if (usdcPool !== null) {
-    log.debug("---------------- token only usdc pair -------------", [])
+    log.debug('---------------- token only usdc pair -------------', [])
     return usdcPool.token0Price
   } else {
-    log.debug("---------------- token dont have any pair -------------", [])
+    log.debug('---------------- token dont have any pair -------------', [])
     return ZERO_BD
   }
 }
@@ -70,7 +66,7 @@ let WHITELIST: string[] = [
   '0xc778417e063141139fce010982780140aa0cd5ab', // WETH
   '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI
   '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC
-  '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3', // USDT
+  '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3' // USDT
   // '0x0000000000085d4780b73119b644ae5ecd22b376', // TUSD
   // '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643', // cDAI
   // '0x39aa39c021dfbae8fac545936693ac917d5e7563', // cUSDC
@@ -91,7 +87,7 @@ let WHITELIST: string[] = [
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('1')
 
 // minimum liquidity for price to get tracked
-let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('0')    // default is 2
+let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('0') // default is 2
 
 /**
  * Search through graph to find derived Eth per token.
@@ -112,17 +108,17 @@ export function findEthPerToken(token: Token): BigDecimal {
         if (pool.token0 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
           let token1 = Token.load(pool.token1)
           let tokenPrice = pool.token1Price.times(token1.derivedETH as BigDecimal)
-          totalPoolPrice = totalPoolPrice.plus(tokenPrice)  // return token1 per our token * Eth per token 1
+          totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token1 per our token * Eth per token 1
           totalPoolNum = totalPoolNum.plus(ONE_BD)
         }
         if (pool.token1 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
           let token0 = Token.load(pool.token0)
           let tokenPrice = pool.token0Price.times(token0.derivedETH as BigDecimal)
-          totalPoolPrice = totalPoolPrice.plus(tokenPrice)  // return token0 per our token * ETH per token 0
+          totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token0 per our token * ETH per token 0
           totalPoolNum = totalPoolNum.plus(ONE_BD)
         }
       }
-      if(totalPoolNum.gt(ZERO_BD)){
+      if (totalPoolNum.gt(ZERO_BD)) {
         return totalPoolPrice.div(totalPoolNum)
       }
     }
@@ -141,23 +137,29 @@ export function getTrackedVolumeUSD(
   token0: Token,
   tokenAmount1: BigDecimal,
   token1: Token,
-  pair: Pair
+  pool: Pool
 ): BigDecimal {
   let bundle = Bundle.load('1')
   let price0 = token0.derivedETH.times(bundle.ethPrice)
   let price1 = token1.derivedETH.times(bundle.ethPrice)
 
-  log.debug("__________ get tracked volume usd ___________ {} {} {} {} ", [token0.id, tokenAmount0.toString(), token1.id, tokenAmount1.toString()])
+  log.debug('__________ get tracked volume usd ___________ {} {} {} {} ', [
+    token0.id,
+    tokenAmount0.toString(),
+    token1.id,
+    tokenAmount1.toString()
+  ])
 
   // if less than 5 LPs, require high minimum reserve amount amount or return 0
-  if (pair.liquidityProviderCount.lt(BigInt.fromI32(5))) {
-    let totalPairReserve0 = getPairReserve(pair, true)
-    let totalPairReserve1 = getPairReserve(pair, false)
-  
-    let reserve0USD = totalPairReserve0.times(price0)
-    let reserve1USD = totalPairReserve1.times(price1)
+  if (pool.liquidityProviderCount.lt(BigInt.fromI32(5))) {
+    let reserve0USD = pool.reserve0.times(price0)
+    let reserve1USD = pool.reserve1.times(price1)
 
-    log.debug("!!!!!!!!!!!!! if less than 5 LPs, require high minimum reserve amount amount or return 0 {} {} {}", [reserve0USD.toString(), reserve1USD.toString(), MINIMUM_USD_THRESHOLD_NEW_PAIRS.toString()])
+    log.debug('!!!!!!!!!!!!! if less than 5 LPs, require high minimum reserve amount amount or return 0 {} {} {}', [
+      reserve0USD.toString(),
+      reserve1USD.toString(),
+      MINIMUM_USD_THRESHOLD_NEW_PAIRS.toString()
+    ])
     if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
       if (reserve0USD.plus(reserve1USD).lt(MINIMUM_USD_THRESHOLD_NEW_PAIRS)) {
         return ZERO_BD
@@ -175,7 +177,7 @@ export function getTrackedVolumeUSD(
     }
   }
 
-  log.debug("******************* both are whitelist tokens, take average of both amounts* ", [])
+  log.debug('******************* both are whitelist tokens, take average of both amounts* ', [])
 
   // both are whitelist tokens, take average of both amounts
   if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
