@@ -60,7 +60,7 @@ export function handleTransfer(event: Transfer): void {
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
 
-  const pair = Pair.load(token0.id + '-' + token1.id)
+  let pair = Pair.load(token0.id + '_' + token1.id)
 
   // liquidity token amount being transfered
   let value = convertTokenToDecimal(event.params.value, BI_18)
@@ -250,8 +250,8 @@ export function handleMint(event: Mint): void {
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
 
-  const pairId = token0.id + '-' + token1.id
-  const pair = Pair.load(pairId)
+  let pairId = token0.id + '_' + token1.id
+  let pair = Pair.load(pairId)
 
   // update exchange info (except balances, sync will cover that)
   let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
@@ -321,7 +321,7 @@ export function handleBurn(event: Burn): void {
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
 
-  let pairId = token0.id + '-' + token1.id
+  let pairId = token0.id + '_' + token1.id
   let pair = Pair.load(pairId)
 
   let token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
@@ -380,7 +380,7 @@ export function handleSwap(event: Swap): void {
   let pool = Pool.load(event.address.toHexString())
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
-  let pairId = token0.id + '-' + token1.id
+  let pairId = token0.id + '_' + token1.id
   let pair = Pair.load(pairId)
 
   let amount0In = convertTokenToDecimal(event.params.amount0In, token0.decimals)
@@ -405,10 +405,10 @@ export function handleSwap(event: Swap): void {
     derivedAmountETH.toString(),
     bundle.ethPrice.toString()
   ])
-  const derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
+  let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
   // only accounts for volume through white listed tokens
-  const trackedAmountUSD = getTrackedVolumeUSD(
+  let trackedAmountUSD = getTrackedVolumeUSD(
     amount0Total,
     token0 as Token,
     amount1Total,
@@ -582,7 +582,7 @@ export function handleSync(event: Sync): void {
   let pool = Pool.load(event.address.toHex())
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
-  let pair = Pair.load(token0.id + '-' + token1.id)
+  let pair = Pair.load(token0.id + '_' + token1.id)
   let factory = DmmFactory.load(FACTORY_ADDRESS)
 
   // reset factory liquidity by subtracting onluy tarcked liquidity

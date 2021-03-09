@@ -8,7 +8,7 @@ dataSources:
     name: DmmFactory
     network: ropsten
     source:
-      address: '0xe25d045d9b65f5428b231f46bba2b3f351a97f3b'
+      address: '0x2f90d05693543b8D7feCD15A2150D9a63E89034A'
       abi: DmmFactory
       startBlock: 9729095  # contract creation block
     mapping:

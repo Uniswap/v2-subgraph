@@ -98,7 +98,7 @@ export function handlePoolCreated(event: PoolCreated): void {
   // todo find pair with token 0 and token 1
   // if pair exist   -> add pool to pair
   // if pair not found  -> create new pair
-  let pairId = token0.id + '-' + token1.id
+  let pairId = token0.id + '_' + token1.id
   let pair = Pair.load(pairId)
 
   if (pair == null) {
