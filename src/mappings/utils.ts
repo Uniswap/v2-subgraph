@@ -84,7 +84,6 @@ export function fetchTokenName(tokenAddress: Address): string {
 }
 
 export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
-
   let contract = ERC20.bind(tokenAddress)
   let totalSupplyValue = null
   let totalSupplyResult = contract.try_totalSupply()

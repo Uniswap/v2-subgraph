@@ -20,12 +20,7 @@ import {
   updatePoolDayData,
   updatePoolHourData
 } from './dayUpdates'
-import {
-  getEthPriceInUSD,
-  findEthPerToken,
-  getTrackedVolumeUSD,
-  getTrackedLiquidityUSD
-} from './pricing'
+import { getEthPriceInUSD, findEthPerToken, getTrackedVolumeUSD, getTrackedLiquidityUSD } from './pricing'
 import {
   createUser,
   convertTokenToDecimal,
@@ -640,12 +635,9 @@ export function handleSync(event: Sync): void {
   // get tracked liquidity - will be 0 if neither is in whitelist
   let trackedLiquidityETH: BigDecimal
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    trackedLiquidityETH = getTrackedLiquidityUSD(
-      pair.reserve0,
-      token0 as Token,
-      pair.reserve1,
-      token1 as Token
-    ).div(bundle.ethPrice)
+    trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token).div(
+      bundle.ethPrice
+    )
   } else {
     trackedLiquidityETH = ZERO_BD
   }

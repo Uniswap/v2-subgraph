@@ -1,19 +1,22 @@
 /* eslint-disable prefer-const */
-import { log } from "@graphprotocol/graph-ts"
-import { DmmFactory, Bundle, Pair, Token, Pool } from "../types/schema"
-import { PoolCreated } from "../types/DmmFactory/DmmFactory"
-import { Pool as PoolTemplate } from "../types/templates"
+import { log } from '@graphprotocol/graph-ts'
+import { DmmFactory, Bundle, Pair, Token, Pool } from '../types/schema'
+import { PoolCreated } from '../types/DmmFactory/DmmFactory'
+import { Pool as PoolTemplate } from '../types/templates'
 import {
-  FACTORY_ADDRESS, ZERO_BD, ZERO_BI, BI_18,
+  FACTORY_ADDRESS,
+  ZERO_BD,
+  ZERO_BI,
+  BI_18,
   fetchTokenSymbol,
   fetchTokenName,
   fetchTokenTotalSupply,
   fetchTokenDecimals,
   convertTokenToDecimal
-} from "./utils"
+} from './utils'
 
 export function handlePoolCreated(event: PoolCreated): void {
-  log.debug("------run to handle pool created ------ ", [])
+  log.debug('------run to handle pool created ------ ', [])
   // load factory (create if first exchange)
   let factory = DmmFactory.load(FACTORY_ADDRESS)
   if (factory === null) {
@@ -37,7 +40,7 @@ export function handlePoolCreated(event: PoolCreated): void {
   factory.poolCount = factory.poolCount + 1
   factory.save()
 
-  log.debug("222------save factory success ------ ", [])
+  log.debug('222------save factory success ------ ', [])
   ///////  PoolCreated (index_topic_1 address token0, index_topic_2 address token1, address pool, uint32 ampBps, uint256 totalPool)
 
   // create the tokens
@@ -67,7 +70,7 @@ export function handlePoolCreated(event: PoolCreated): void {
     token0.txCount = ZERO_BI
   }
 
-  log.debug("333------token 000 success ------ ", [])
+  log.debug('333------token 000 success ------ ', [])
 
   // fetch info if null
   if (token1 === null) {
@@ -95,7 +98,7 @@ export function handlePoolCreated(event: PoolCreated): void {
   // todo find pair with token 0 and token 1
   // if pair exist   -> add pool to pair
   // if pair not found  -> create new pair
-  let pairId = token0.id + "-" + token1.id
+  let pairId = token0.id + '-' + token1.id
   let pair = Pair.load(pairId)
 
   if (pair == null) {
@@ -130,10 +133,8 @@ export function handlePoolCreated(event: PoolCreated): void {
     factory.save()
   }
 
-
   // log.debug("555------pair success ------ ", [])
 
-  
   let pool = new Pool(event.params.pool.toHexString()) as Pool
   pool.token0 = token0.id
   pool.token1 = token1.id
@@ -168,8 +169,7 @@ export function handlePoolCreated(event: PoolCreated): void {
   pool.amp = event.params.ampBps.toBigDecimal()
   pool.save()
 
-
-  // let pairPools = pair.pools 
+  // let pairPools = pair.pools
   // pairPools.push(pool.id)
   // pair.pools = pairPools
   // pair.save()
