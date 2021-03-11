@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal, store, Address } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, store, Address, log } from '@graphprotocol/graph-ts'
 import {
   Pair,
   Token,
@@ -8,7 +8,7 @@ import {
   Mint as MintEvent,
   Burn as BurnEvent,
   Swap as SwapEvent,
-  Bundle
+  Bundle, LiquidityPosition
 } from '../types/schema'
 import { Pair as PairContract, Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Pair/Pair'
 import { updatePairDayData, updateTokenDayData, updateUniswapDayData, updatePairHourData } from './dayUpdates'
@@ -197,16 +197,24 @@ export function handleTransfer(event: Transfer): void {
 
   if (from.toHexString() != ADDRESS_ZERO && from.toHexString() != pair.id) {
     let fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
-    fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(from), BI_18)
-    fromUserLiquidityPosition.save()
-    createLiquiditySnapshot(fromUserLiquidityPosition, event)
+    if (fromUserLiquidityPosition !== null) {
+      fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(from), BI_18)
+      fromUserLiquidityPosition.save()
+      createLiquiditySnapshot(fromUserLiquidityPosition as LiquidityPosition, event)
+    }
   }
 
   if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pair.id) {
-    let toUserLiquidityPosition = createLiquidityPosition(event.address, to)
-    toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(to), BI_18)
-    toUserLiquidityPosition.save()
-    createLiquiditySnapshot(toUserLiquidityPosition, event)
+    if (to.toHexString() !== ADDRESS_ZERO) {
+      let toUserLiquidityPosition = createLiquidityPosition(event.address, to)
+      if (toUserLiquidityPosition !== null) {
+        toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(to), BI_18)
+        toUserLiquidityPosition.save()
+        createLiquiditySnapshot(toUserLiquidityPosition as LiquidityPosition, event)
+      }
+    } else {
+      log.warning('Detected 0 address in handleTransfer', [])
+    }
   }
 
   transaction.save()
@@ -320,9 +328,17 @@ export function handleMint(event: Mint): void {
   mint.amountUSD = amountTotalUSD as BigDecimal
   mint.save()
 
-  // update the LP position
-  let liquidityPosition = createLiquidityPosition(event.address, mint.to as Address)
-  createLiquiditySnapshot(liquidityPosition, event)
+  let to = mint.to as Address
+  if (to.toHexString() !== ADDRESS_ZERO) {
+    let liquidityPosition = createLiquidityPosition(event.address, to)
+    if (liquidityPosition !== null) {
+      createLiquiditySnapshot(liquidityPosition as LiquidityPosition, event)
+    } else {
+      log.warning('null position in handleMint', [])
+    }
+  } else {
+    log.warning('Detected 0 address in handleMint', [])
+  }
 
   // update day entities
   updatePairDayData(event)
@@ -383,8 +399,22 @@ export function handleBurn(event: Burn): void {
   burn.save()
 
   // update the LP position
-  let liquidityPosition = createLiquidityPosition(event.address, burn.sender as Address)
-  createLiquiditySnapshot(liquidityPosition, event)
+  let to = burn.sender as Address
+  if (burn.sender.toHexString() != '0x') {
+    let liquidityPosition = createLiquidityPosition(event.address, to)
+    if (liquidityPosition !== null) {
+      createLiquiditySnapshot(liquidityPosition as LiquidityPosition, event)
+    } else {
+      log.warning('null position in handleBurn: '
+        .concat(burn.sender.toHexString()).concat(' ')
+        .concat(ADDRESS_ZERO)
+        .concat(', tx_hash: ')
+        .concat(event.transaction.hash.toHexString()), [])
+    }
+  } else {
+    log.warning('Detected 0x address in handleBurn'.concat(', tx_hash: ')
+      .concat(event.transaction.hash.toHexString()), [])
+  }
 
   // update day entities
   updatePairDayData(event)

@@ -139,7 +139,18 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   return BigInt.fromI32(decimalValue as i32)
 }
 
-export function createLiquidityPosition(exchange: Address, user: Address): LiquidityPosition {
+export function createLiquidityPosition(exchange: Address, user: Address): LiquidityPosition | null {
+  if (User.load(user.toHexString()) === null) {
+    log.error(
+      'Null user during snapshot creation. User address: '
+        .concat(user.toHexString())
+        .concat(' exchange address: ')
+        .concat(exchange.toHexString())
+        .concat(' --> SKIPPING POSITION CREATION'),
+      []
+    )
+    return null
+  }
   let id = exchange
     .toHexString()
     .concat('-')
@@ -169,20 +180,6 @@ export function createUser(address: Address): void {
 }
 
 export function createLiquiditySnapshot(position: LiquidityPosition, event: EthereumEvent): void {
-  if (User.load(position.user) === null) {
-    log.error(
-      'Null user during snapshot creation. User id: '
-        .concat(position.user)
-        .concat(' position id: ')
-        .concat(position.id)
-        .concat(' tx hash: ')
-        .concat(event.transaction.hash.toHexString())
-        .concat(' --> SKIPPING SNAPSHOT CREATION'),
-      []
-    )
-    return
-  }
-
   let bundle = Bundle.load('1')
   let pair = Pair.load(position.pair)
   let token0 = Token.load(pair.token0)
