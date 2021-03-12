@@ -30,6 +30,7 @@ import {
   ONE_BI,
   ZERO_BD,
   BI_18,
+  BD_10000,
   createLiquidityPosition,
   createLiquiditySnapshot
 } from './utils'
@@ -605,15 +606,14 @@ export function handleSync(event: Sync): void {
   // add save for pool
   pool.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
   pool.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
-  pool.vReserve0 = convertTokenToDecimal(event.params.vReserve0, token0.decimals)
-  pool.vReserve1 = convertTokenToDecimal(event.params.vReserve1, token1.decimals)
+  pool.vReserve0 = convertTokenToDecimal(pool.amp == BD_10000 ? event.params.reserve0 : event.params.vReserve0, token0.decimals)
+  pool.vReserve1 = convertTokenToDecimal(pool.amp == BD_10000 ? event.params.reserve1 : event.params.vReserve1, token1.decimals)
   pool.liquidityPerRisk = pool.reserve0.times(pool.reserve1)
 
   if (pool.vReserve1.notEqual(ZERO_BD)) pool.token0Price = pool.vReserve0.div(pool.vReserve1)
   else pool.token0Price = ZERO_BD
   if (pool.vReserve0.notEqual(ZERO_BD)) pool.token1Price = pool.vReserve1.div(pool.vReserve0)
   else pool.token1Price = ZERO_BD
-
   pool.save()
 
   // now correctly set reserves for pair

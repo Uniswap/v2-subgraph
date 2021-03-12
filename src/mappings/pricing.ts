@@ -1,12 +1,12 @@
 /* eslint-disable prefer-const */
 import { Pair, Token, Bundle, Pool } from '../types/schema'
 import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
-import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from './utils'
+import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, BD_10000 } from './utils'
 
 const WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
-const USDC_WETH_POOL = '0x98bfbce42f48463d5450f8d0ac3abff330853f4b' // created 9225802
-const DAI_WETH_POOL = '0x601437d2a76672bf9b71fc159f659c0a7b53d03c' // created block 9225783
-const USDT_WETH_POOL = '0x0c941ac3317e27c6d1cf061901f8639d8c23ccec' // created block 9225800
+const USDC_WETH_POOL = '0x24653323aaf9b363d6a25cca041ee2c7fee38d52' // created 9225802
+const DAI_WETH_POOL = '0xddfabdaaa80e0dde63707f93afe9eeed9e850209' // created block 9225783
+const USDT_WETH_POOL = '0x9b4d148f95150ac06ecf9681c2b305c0eaf4c84b' // created block 9225800
 
 export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal {
   let totalReserve = ZERO_BD
