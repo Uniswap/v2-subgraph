@@ -610,10 +610,35 @@ export function handleSync(event: Sync): void {
   pool.vReserve1 = convertTokenToDecimal(pool.amp == BD_10000 ? event.params.reserve1 : event.params.vReserve1, token1.decimals)
   pool.liquidityPerRisk = pool.reserve0.times(pool.reserve1)
 
-  if (pool.vReserve1.notEqual(ZERO_BD)) pool.token0Price = pool.vReserve0.div(pool.vReserve1)
-  else pool.token0Price = ZERO_BD
-  if (pool.vReserve0.notEqual(ZERO_BD)) pool.token1Price = pool.vReserve1.div(pool.vReserve0)
-  else pool.token1Price = ZERO_BD
+  if (pool.vReserve1.notEqual(ZERO_BD) && pool.vReserve0.notEqual(ZERO_BD)) {
+    pool.token0Price = pool.vReserve0.div(pool.vReserve1)   // P0
+    pool.token1Price = pool.vReserve1.div(pool.vReserve0)
+
+    if(pool.amp.equals(BD_10000)){
+      pool.token0PriceMax = null
+      pool.token0PriceMin = ZERO_BD
+
+      pool.token1PriceMax = null
+      pool.token1PriceMin = ZERO_BD
+    } else {
+      pool.token0PriceMax = pool.vReserve1.times(pool.vReserve0).div( (pool.vReserve1.minus(pool.reserve1)).times(  pool.vReserve1.minus(pool.reserve1)  ))
+      pool.token0PriceMin = (pool.vReserve0.minus(pool.reserve0)).times(  pool.vReserve0.minus(pool.reserve0)  ).div(pool.vReserve1.times(pool.vReserve0))
+
+      pool.token1PriceMax = pool.vReserve0.times(pool.vReserve1).div( (pool.vReserve0.minus(pool.reserve0)).times(pool.vReserve0.minus(pool.reserve0) ))
+      pool.token1PriceMin = (pool.vReserve1.minus(pool.reserve1)).times( pool.vReserve1.minus(pool.reserve1) ).div(pool.vReserve0.times(pool.vReserve1))
+    }
+    
+  }
+  else {
+    pool.token0Price = ZERO_BD
+    pool.token0PriceMax = ZERO_BD
+    pool.token0PriceMin = ZERO_BD
+
+    pool.token1Price = ZERO_BD
+    pool.token1PriceMax = ZERO_BD
+    pool.token1PriceMin = ZERO_BD
+  }
+
   pool.save()
 
   // now correctly set reserves for pair
@@ -654,6 +679,8 @@ export function handleSync(event: Sync): void {
     .times(token0.derivedETH as BigDecimal)
     .plus(pool.reserve1.times(token1.derivedETH as BigDecimal))
   pool.reserveUSD = pool.reserveETH.times(bundle.ethPrice)
+
+  log.error("++++++++++ calculate pool reserve eth {} - {} {} {} {} {}", [pool.id, pool.reserve0.toString(), token0.derivedETH.toString(), pool.reserve1.toString(), token1.derivedETH.toString(), pool.reserveETH.toString()])
 
   // use tracked amounts globally
   factory.totalLiquidityETH = factory.totalLiquidityETH.plus(trackedLiquidityETH)
