@@ -323,7 +323,7 @@ type PairHourData @entity {
 type PairDayData @entity {
   id: ID!
   date: Int!
-  pairAddress: Bytes!
+  pairAddress: String!
   token0: Token!
   token1: Token!
 
