@@ -123,12 +123,15 @@ type LiquidityPositionSnapshot @entity {
   reserveUSD: BigDecimal! # snapshot of pair reserves in USD
   liquidityTokenTotalSupply: BigDecimal! # snapshot of pool token supply
   liquidityTokenBalance: BigDecimal! # snapshot of users pool token balance
+  transaction: Transaction!
 }
 
 type Transaction @entity {
   id: ID! # txn hash
   blockNumber: BigInt!
   timestamp: BigInt!
+  gasUsed: BigInt!
+  gasPrice: BigInt!
   # This is not the reverse of Mint.transaction; it is only used to
   # track incomplete mints (similar for burns and swaps)
   mints: [Mint]!

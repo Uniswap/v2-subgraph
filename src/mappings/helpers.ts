@@ -139,7 +139,18 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   return BigInt.fromI32(decimalValue as i32)
 }
 
-export function createLiquidityPosition(exchange: Address, user: Address): LiquidityPosition {
+export function createLiquidityPosition(exchange: Address, user: Address): LiquidityPosition | null {
+  if (User.load(user.toHexString()) === null) {
+    log.error(
+      'Null user during snapshot creation. User address: '
+        .concat(user.toHexString())
+        .concat(' exchange address: ')
+        .concat(exchange.toHexString())
+        .concat(' --> SKIPPING POSITION CREATION'),
+      []
+    )
+    return null
+  }
   let id = exchange
     .toHexString()
     .concat('-')
@@ -169,16 +180,16 @@ export function createUser(address: Address): void {
 }
 
 export function createLiquiditySnapshot(position: LiquidityPosition, event: EthereumEvent): void {
-  let timestamp = event.block.timestamp.toI32()
   let bundle = Bundle.load('1')
   let pair = Pair.load(position.pair)
   let token0 = Token.load(pair.token0)
   let token1 = Token.load(pair.token1)
 
   // create new snapshot
-  let snapshot = new LiquidityPositionSnapshot(position.id.concat(timestamp.toString()))
+  let id = event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toString())
+  let snapshot = new LiquidityPositionSnapshot(id)
   snapshot.liquidityPosition = position.id
-  snapshot.timestamp = timestamp
+  snapshot.timestamp = event.block.timestamp.toI32()
   snapshot.block = event.block.number.toI32()
   snapshot.user = position.user
   snapshot.pair = position.pair
@@ -190,6 +201,7 @@ export function createLiquiditySnapshot(position: LiquidityPosition, event: Ethe
   snapshot.liquidityTokenTotalSupply = pair.totalSupply
   snapshot.liquidityTokenBalance = position.liquidityTokenBalance
   snapshot.liquidityPosition = position.id
+  snapshot.transaction = event.transaction.hash.toHexString()
   snapshot.save()
   position.save()
 }
