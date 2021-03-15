@@ -67,6 +67,9 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
   if (tokenAddress.toHexString() == '0xbdeb4b83251fb146687fa19d1c660f99411eefe3') {
     return 'SVD'
   }
+  if (tokenAddress.toHexString() == '0xbb9bc244d798123fde783fcc1c72d3bb8c189413') {
+    return 'TheDAO'
+  }
 
   let contract = ERC20.bind(tokenAddress)
   let contractSymbolBytes = ERC20SymbolBytes.bind(tokenAddress)
@@ -102,6 +105,9 @@ export function fetchTokenName(tokenAddress: Address): string {
   }
   if (tokenAddress.toHexString() == '0xbdeb4b83251fb146687fa19d1c660f99411eefe3') {
     return 'savedroid'
+  }
+  if (tokenAddress.toHexString() == '0xbb9bc244d798123fde783fcc1c72d3bb8c189413') {
+    return 'TheDAO'
   }
 
   let contract = ERC20.bind(tokenAddress)
@@ -145,6 +151,9 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   }
   if (tokenAddress.toHexString() == '0xbdeb4b83251fb146687fa19d1c660f99411eefe3') {
     return BigInt.fromI32(18)
+  }
+  if (tokenAddress.toHexString() == '0xbb9bc244d798123fde783fcc1c72d3bb8c189413') {
+    return BigInt.fromI32(16)
   }
 
   let contract = ERC20.bind(tokenAddress)
