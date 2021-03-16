@@ -271,6 +271,7 @@ type Swap @entity {
   amount1Out: BigDecimal!
   to: Bytes!
   logIndex: BigInt
+  origin: Bytes!
 
   # derived info
   amountUSD: BigDecimal!
