@@ -111,6 +111,7 @@ export function updatePoolDayData(event: EthereumEvent): PoolDayData {
     poolDayData.dailyVolumeToken0 = ZERO_BD
     poolDayData.dailyVolumeToken1 = ZERO_BD
     poolDayData.dailyVolumeUSD = ZERO_BD
+    poolDayData.dailyFeeUSD = ZERO_BD
     poolDayData.dailyTxns = ZERO_BI
   }
 
@@ -143,6 +144,7 @@ export function updatePoolHourData(event: EthereumEvent): PoolHourData {
     poolHourData.hourlyVolumeToken0 = ZERO_BD
     poolHourData.hourlyVolumeToken1 = ZERO_BD
     poolHourData.hourlyVolumeUSD = ZERO_BD
+    poolHourData.hourlyFeeUSD = ZERO_BD
     poolHourData.hourlyTxns = ZERO_BI
   }
 

@@ -554,12 +554,14 @@ export function handleSwap(event: Swap): void {
   poolDayData.dailyVolumeToken0 = poolDayData.dailyVolumeToken0.plus(amount0Total)
   poolDayData.dailyVolumeToken1 = poolDayData.dailyVolumeToken1.plus(amount1Total)
   poolDayData.dailyVolumeUSD = poolDayData.dailyVolumeUSD.plus(trackedAmountUSD)
+  poolDayData.dailyFeeUSD = poolDayData.dailyFeeUSD.plus(trackedAmountUSD.times(feePercent))
   poolDayData.save()
 
   // update hourly pool data
   poolHourData.hourlyVolumeToken0 = poolHourData.hourlyVolumeToken0.plus(amount0Total)
   poolHourData.hourlyVolumeToken1 = poolHourData.hourlyVolumeToken1.plus(amount1Total)
   poolHourData.hourlyVolumeUSD = poolHourData.hourlyVolumeUSD.plus(trackedAmountUSD)
+  poolHourData.hourlyFeeUSD = poolHourData.hourlyFeeUSD.plus(trackedAmountUSD.times(feePercent))
   poolHourData.save()
 
   // swap specific updating for token0

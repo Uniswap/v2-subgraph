@@ -365,6 +365,7 @@ type PoolHourData @entity {
   hourlyVolumeToken0: BigDecimal!
   hourlyVolumeToken1: BigDecimal!
   hourlyVolumeUSD: BigDecimal!
+  hourlyFeeUSD: BigDecimal!
   hourlyTxns: BigInt!
 }
 
@@ -392,6 +393,7 @@ type PoolDayData @entity {
   dailyVolumeToken0: BigDecimal!
   dailyVolumeToken1: BigDecimal!
   dailyVolumeUSD: BigDecimal!
+  dailyFeeUSD: BigDecimal!
   dailyTxns: BigInt!
 }
 
