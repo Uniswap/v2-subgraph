@@ -64,12 +64,14 @@ export function getEthPriceInUSD(): BigDecimal {
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
   '0xc778417e063141139fce010982780140aa0cd5ab', // WETH
-  '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI
-  '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC
-  '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3', // USDT
+  // '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI
+  // '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC
+  // '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3', // USDT
 
   '0x65bd1f48f1dd07bb285a3715c588f75684128ace', // new USDT
-  '0x068b43f7f2f2c6a662c36e201144ae45f7a1c040'  // new USDC
+  '0x068b43f7f2f2c6a662c36e201144ae45f7a1c040',  // new USDC
+  '0xad6d458402f60fd3bd25163575031acdce07538d', // new DAI
+
 
   // '0x0000000000085d4780b73119b644ae5ecd22b376', // TUSD
   // '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643', // cDAI
