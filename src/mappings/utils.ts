@@ -20,6 +20,9 @@ export let ZERO_BI = BigInt.fromI32(0)
 export let ONE_BI = BigInt.fromI32(1)
 export let BI_18 = BigInt.fromI32(18)
 export let BD_10000 = BigDecimal.fromString('10000')
+export let BD_100 = BigDecimal.fromString('100')
+export let BD_90 = BigDecimal.fromString('90')
+export let BD_10 = BigDecimal.fromString('10')
 
 export function isNullEthValue(value: string): boolean {
   return value == '0x0000000000000000000000000000000000000000000000000000000000000001'

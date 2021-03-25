@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { Pair, Token, Bundle, Pool } from '../types/schema'
 import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
-import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, BD_10000 } from './utils'
+import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, BD_10000, BD_100, BD_90, BD_10 } from './utils'
 
 const WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
 const USDC_WETH_POOL = '0xd943f2578490d5e2e0d540e7d082844530948ac5' // created 9225802
@@ -111,6 +111,11 @@ export function findEthPerToken(token: Token): BigDecimal {
       let totalPoolNum = ZERO_BD
       for (let j = 0; j < arrayPoolAddresses.length; ++j) {
         let pool = Pool.load(arrayPoolAddresses[j].toHexString())
+
+        let percentToken0 = pool.reserve0.div(pool.vReserve0).times(BD_100).div(  pool.reserve0.div(pool.vReserve0).plus(pool.reserve1.div(pool.vReserve1)) )
+
+        if (percentToken0.gt(BD_90) || percentToken0.lt(BD_10)) continue
+ 
         if (pool.token0 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
           let token1 = Token.load(pool.token1)
           let tokenPrice = pool.token1Price.times(token1.derivedETH as BigDecimal)
