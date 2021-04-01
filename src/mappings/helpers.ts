@@ -5,6 +5,7 @@ import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
 import { User, Bundle, Token, LiquidityPosition, LiquidityPositionSnapshot, Pair } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
+import { TokenDefinition } from './tokenDefinition'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
@@ -54,24 +55,10 @@ export function isNullEthValue(value: string): boolean {
 }
 
 export function fetchTokenSymbol(tokenAddress: Address): string {
-  // hard coded overrides
-  if (tokenAddress.toHexString() == '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a') {
-    return 'DGD'
-  }
-  if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
-    return 'AAVE'
-  }
-  if (tokenAddress.toHexString() == '0xeb9951021698b42e4399f9cbb6267aa35f82d59d') {
-    return 'LIF'
-  }
-  if (tokenAddress.toHexString() == '0xbdeb4b83251fb146687fa19d1c660f99411eefe3') {
-    return 'SVD'
-  }
-  if (tokenAddress.toHexString() == '0xbb9bc244d798123fde783fcc1c72d3bb8c189413') {
-    return 'TheDAO'
-  }
-  if (tokenAddress.toHexString() == '0x38c6a68304cdefb9bec48bbfaaba5c5b47818bb2') {
-    return 'HPB'
+  // static definitions overrides
+  let staticDefinition = TokenDefinition.fromAddress(tokenAddress)
+  if(staticDefinition != null) {
+    return (staticDefinition as TokenDefinition).symbol
   }
 
   let contract = ERC20.bind(tokenAddress)
@@ -96,24 +83,10 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
 }
 
 export function fetchTokenName(tokenAddress: Address): string {
-  // hard coded overrides
-  if (tokenAddress.toHexString() == '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a') {
-    return 'DGD'
-  }
-  if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
-    return 'Aave Token'
-  }
-  if (tokenAddress.toHexString() == '0xeb9951021698b42e4399f9cbb6267aa35f82d59d') {
-    return 'Lif'
-  }
-  if (tokenAddress.toHexString() == '0xbdeb4b83251fb146687fa19d1c660f99411eefe3') {
-    return 'savedroid'
-  }
-  if (tokenAddress.toHexString() == '0xbb9bc244d798123fde783fcc1c72d3bb8c189413') {
-    return 'TheDAO'
-  }
-  if (tokenAddress.toHexString() == '0x38c6a68304cdefb9bec48bbfaaba5c5b47818bb2') {
-    return 'HPBCoin'
+  // static definitions overrides
+  let staticDefinition = TokenDefinition.fromAddress(tokenAddress)
+  if(staticDefinition != null) {
+    return (staticDefinition as TokenDefinition).name
   }
 
   let contract = ERC20.bind(tokenAddress)
@@ -148,21 +121,10 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
 }
 
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
-  // hardcode overrides
-  if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
-    return BigInt.fromI32(18)
-  }
-  if (tokenAddress.toHexString() == '0xeb9951021698b42e4399f9cbb6267aa35f82d59d') {
-    return BigInt.fromI32(18)
-  }
-  if (tokenAddress.toHexString() == '0xbdeb4b83251fb146687fa19d1c660f99411eefe3') {
-    return BigInt.fromI32(18)
-  }
-  if (tokenAddress.toHexString() == '0xbb9bc244d798123fde783fcc1c72d3bb8c189413') {
-    return BigInt.fromI32(16)
-  }
-  if (tokenAddress.toHexString() == '0x38c6a68304cdefb9bec48bbfaaba5c5b47818bb2') {
-    return BigInt.fromI32(18)
+  // static definitions overrides
+  let staticDefinition = TokenDefinition.fromAddress(tokenAddress)
+  if(staticDefinition != null) {
+    return (staticDefinition as TokenDefinition).decimals
   }
 
   let contract = ERC20.bind(tokenAddress)
