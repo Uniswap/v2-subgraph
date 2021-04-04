@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: DmmFactory
-    network: ropsten
+    network: mainnet
     source:
-      address: '0x2f90d05693543b8D7feCD15A2150D9a63E89034A'
+      address: '0x5c1cbdc3b8dd2a3456643a62547ef9aa5e1571f3'
       abi: DmmFactory
-      startBlock: 9729095  # contract creation block
+      startBlock: 12165500  # contract creation block
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -35,7 +35,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Pool
-    network: ropsten
+    network: mainnet
     source:
       abi: Pool
     mapping:

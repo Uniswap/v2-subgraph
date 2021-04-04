@@ -3,10 +3,10 @@ import { Pair, Token, Bundle, Pool } from '../types/schema'
 import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, BD_10000, BD_100, BD_90, BD_10 } from './utils'
 
-const WETH_ADDRESS = '0xc778417e063141139fce010982780140aa0cd5ab'
-const USDC_WETH_POOL = '0xd943f2578490d5e2e0d540e7d082844530948ac5' // created 9225802
-const DAI_WETH_POOL = '0xfd9dbebcc376b79c874c75e77951d0255882d712' // created block 9225783
-const USDT_WETH_POOL = '0x486356d72cc47be0d283dd2a8e7bd2f49d1c4290' // created block 9225800
+const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+const USDC_WETH_POOL = '0x23c0e614f660aeef5daf87de483931d145b7f5b8' // created 9225802
+const DAI_WETH_POOL = '0xda2d12bcc6343f84b627d18fb240ba73141b048a' // created block 9225783
+const USDT_WETH_POOL = '0x9744bdde8dd5c6441f797ec9e04fb337ff41d8d9' // created block 9225800
 
 export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal {
   let totalReserve = ZERO_BD
@@ -35,15 +35,15 @@ export function getEthPriceInUSD(): BigDecimal {
 
   // all 3 have been created
   if (daiPool !== null && usdcPool !== null && usdtPool !== null) {
-    let totalLiquidityETH = daiPool.vReserve1.plus(usdcPool.vReserve1).plus(usdtPool.vReserve1)
+    let totalLiquidityETH = daiPool.vReserve1.plus(usdcPool.vReserve1).plus(usdtPool.vReserve0)
     log.debug('---------------- token have full pair {}', [totalLiquidityETH.toString()])
     let daiWeight = daiPool.vReserve1.div(totalLiquidityETH)
     let usdcWeight = usdcPool.vReserve1.div(totalLiquidityETH)
-    let usdtWeight = usdtPool.vReserve1.div(totalLiquidityETH)
+    let usdtWeight = usdtPool.vReserve0.div(totalLiquidityETH)
     return daiPool.token0Price
       .times(daiWeight)
       .plus(usdcPool.token0Price.times(usdcWeight))
-      .plus(usdtPool.token0Price.times(usdtWeight))
+      .plus(usdtPool.token1Price.times(usdtWeight))
     // dai and USDC have been created
   } else if (daiPool !== null && usdcPool !== null) {
     let totalLiquidityETH = daiPool.vReserve1.plus(usdcPool.vReserve1)
@@ -63,14 +63,14 @@ export function getEthPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0xc778417e063141139fce010982780140aa0cd5ab', // WETH
+  '0x5c1cbdc3b8dd2a3456643a62547ef9aa5e1571f3', // WETH
   // '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI
   // '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC
   // '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3', // USDT
 
-  '0x65bd1f48f1dd07bb285a3715c588f75684128ace', // new USDT
-  '0x068b43f7f2f2c6a662c36e201144ae45f7a1c040',  // new USDC
-  '0xad6d458402f60fd3bd25163575031acdce07538d', // new DAI
+  '0xdac17f958d2ee523a2206206994597c13d831ec7', // new USDT
+  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',  // new USDC
+  '0x6b175474e89094c44da98b954eedeac495271d0f', // new DAI
 
 
   // '0x0000000000085d4780b73119b644ae5ecd22b376', // TUSD

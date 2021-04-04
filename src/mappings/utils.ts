@@ -7,7 +7,7 @@ import { LiquidityPosition, User, Pair, Pool, LiquidityPositionSnapshot, Bundle,
 import { Factory as FactoryContract } from '../types/templates/Pool/Factory'
 
 // this need to configure to read from environment variable
-export let FACTORY_ADDRESS = '0x2f90d05693543b8D7feCD15A2150D9a63E89034A'
+export let FACTORY_ADDRESS = '0x5c1cbdc3b8dd2a3456643a62547ef9aa5e1571f3'
 export let ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const ADDRESS_LOCK = '0xffffffffffffffffffffffffffffffffffffffff'
 

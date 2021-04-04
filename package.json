@@ -9,12 +9,13 @@
     "create-local": "graph create davekaj/uniswap --node http://127.0.0.1:8020",
     "deploy-local": "graph deploy davekaj/uniswap --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "deploy": "graph deploy edwardevans094/dmm --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
-    "deploy-staging": "graph deploy edwardevans094/dmmv2 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy-staging": "graph deploy edwardevans094/stagingdmm --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy-dev": "graph deploy edwardevans094/devdmm --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "watch-local": "graph deploy graphprotocol/Uniswap2 --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001",
     "prettier": "./node_modules/.bin/prettier --write src/mappings/*"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.16.0",
+    "@graphprotocol/graph-cli": "^0.16.2",
     "@graphprotocol/graph-ts": "^0.16.0",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
