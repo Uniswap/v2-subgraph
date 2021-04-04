@@ -63,7 +63,7 @@ export function getEthPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0x5c1cbdc3b8dd2a3456643a62547ef9aa5e1571f3', // WETH
+  '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
   // '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI
   // '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC
   // '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3', // USDT
