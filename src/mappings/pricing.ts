@@ -4,9 +4,9 @@ import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, BD_10000, BD_100, BD_90, BD_10 } from './utils'
 
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-const USDC_WETH_POOL = '0x23c0e614f660aeef5daf87de483931d145b7f5b8' // created 9225802
-const DAI_WETH_POOL = '0xda2d12bcc6343f84b627d18fb240ba73141b048a' // created block 9225783
-const USDT_WETH_POOL = '0x9744bdde8dd5c6441f797ec9e04fb337ff41d8d9' // created block 9225800
+const USDC_WETH_POOL = '0xd478953d5572f829f457a5052580cbeaee36c1aa' // created 9225802
+const DAI_WETH_POOL = '0x20d6b227f4a5a2a13d520329f01bb1f8f9d2d628' // created block 9225783
+const USDT_WETH_POOL = '0xf8467ef9de03e83b5a778ac858ea5c2d1fc47188' // created block 9225800
 
 export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal {
   let totalReserve = ZERO_BD
