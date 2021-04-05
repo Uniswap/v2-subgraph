@@ -675,7 +675,7 @@ export function handleSync(event: Sync): void {
   // get tracked liquidity - will be 0 if neither is in whitelist
   let trackedLiquidityETH: BigDecimal
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token).div(
+    trackedLiquidityETH = getTrackedLiquidityUSD(pool.reserve0, token0 as Token, pool.reserve1, token1 as Token).div(
       bundle.ethPrice
     )
   } else {
@@ -697,6 +697,7 @@ export function handleSync(event: Sync): void {
 
   // log.error("++++++++++ calculate pool reserve eth {} - {} {} {} {} {}", [pool.id, pool.reserve0.toString(), token0.derivedETH.toString(), pool.reserve1.toString(), token1.derivedETH.toString(), pool.reserveETH.toString()])
 
+  log.error("============ tracked liquidity =================== {}", [trackedLiquidityETH.toString()])
   // use tracked amounts globally
   factory.totalLiquidityETH = factory.totalLiquidityETH.plus(trackedLiquidityETH)
   factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)
