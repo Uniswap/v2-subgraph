@@ -1,16 +1,12 @@
 /* eslint-disable prefer-const */
 import { log, BigDecimal, BigInt, Address, EthereumEvent } from '@graphprotocol/graph-ts'
+import { FACTORY_ADDRESS } from '../config/constants'
 import { ERC20 } from '../types/DmmFactory/ERC20'
 import { ERC20SymbolBytes } from '../types/DmmFactory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/DmmFactory/ERC20NameBytes'
 import { LiquidityPosition, User, Pair, Pool, LiquidityPositionSnapshot, Bundle, Token } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pool/Factory'
 import { KNC_ADDRESS, KNC_NAME, KNC_SYMBOL, KNCL_ADDRESS, KNCL_NAME, KNCL_SYMBOL } from '../config/constants'
-
-// this need to configure to read from environment variable
-export let FACTORY_ADDRESS = '0x833e4083b7ae46cea85695c4f7ed25cdad8886de'
-export let ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
-export const ADDRESS_LOCK = '0xffffffffffffffffffffffffffffffffffffffff'
 
 export let factoryContract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
 

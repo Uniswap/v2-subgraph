@@ -1,6 +1,7 @@
 import { PairHourData, PoolHourData } from './../types/schema'
 /* eslint-disable prefer-const */
 import { BigInt, BigDecimal, EthereumEvent } from '@graphprotocol/graph-ts'
+import { FACTORY_ADDRESS } from '../config/constants'
 import {
   Pair,
   Pool,
@@ -12,7 +13,7 @@ import {
   TokenDayData,
   PoolDayData
 } from '../types/schema'
-import { ONE_BI, ZERO_BD, ZERO_BI, FACTORY_ADDRESS } from './utils'
+import { ONE_BI, ZERO_BD, ZERO_BI } from './utils'
 
 export function updateDmmDayData(event: EthereumEvent): DmmDayData {
   let factory = DmmFactory.load(FACTORY_ADDRESS)
