@@ -112,6 +112,9 @@ export function findEthPerToken(token: Token): BigDecimal {
       for (let j = 0; j < arrayPoolAddresses.length; ++j) {
         let pool = Pool.load(arrayPoolAddresses[j].toHexString())
 
+        // if pool is just created, skip it
+        if(pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue;
+
         let percentToken0 = pool.reserve0.div(pool.vReserve0).times(BD_100).div(  pool.reserve0.div(pool.vReserve0).plus(pool.reserve1.div(pool.vReserve1)) )
 
         if (percentToken0.gt(BD_90) || percentToken0.lt(BD_10)) continue
