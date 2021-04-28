@@ -5,6 +5,7 @@ import { ERC20SymbolBytes } from '../types/DmmFactory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/DmmFactory/ERC20NameBytes'
 import { LiquidityPosition, User, Pair, Pool, LiquidityPositionSnapshot, Bundle, Token } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pool/Factory'
+import { KNC_ADDRESS, KNC_NAME, KNC_SYMBOL, KNCL_ADDRESS, KNCL_NAME, KNCL_SYMBOL } from '../config/constants'
 
 // this need to configure to read from environment variable
 export let FACTORY_ADDRESS = '0x833e4083b7ae46cea85695c4f7ed25cdad8886de'
@@ -37,6 +38,14 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
     return 'AAVE'
   }
 
+  if (tokenAddress.toHexString() == KNC_ADDRESS) {
+    return KNC_SYMBOL
+  }
+
+  if (tokenAddress.toHexString() == KNCL_ADDRESS) {
+    return KNCL_SYMBOL
+  }
+
   let contract = ERC20.bind(tokenAddress)
   let contractSymbolBytes = ERC20SymbolBytes.bind(tokenAddress)
 
@@ -65,6 +74,14 @@ export function fetchTokenName(tokenAddress: Address): string {
   }
   if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
     return 'Aave Token'
+  }
+
+  if (tokenAddress.toHexString() == KNC_ADDRESS) {
+    return KNC_NAME
+  }
+
+  if (tokenAddress.toHexString() == KNCL_ADDRESS) {
+    return KNCL_NAME
   }
 
   let contract = ERC20.bind(tokenAddress)
