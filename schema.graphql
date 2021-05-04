@@ -284,7 +284,7 @@ type Bundle @entity {
   ethPrice: BigDecimal! # price of ETH usd
 }
 
-# Data accumulated and condensed into day stats for all of Uniswap
+# Data accumulated and condensed into day stats for all of DMM
 type DmmDayData @entity {
   id: ID! # timestamp rounded to current day by dividing by 86400
   date: Int!

@@ -64,8 +64,8 @@ export function getEthPriceInUSD(): BigDecimal {
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-  // '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI
-  // '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC
+  // '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI - ropsten
+  // '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC - ropsten
   // '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3', // USDT
 
   '0xdac17f958d2ee523a2206206994597c13d831ec7', // new USDT
@@ -88,12 +88,12 @@ let WHITELIST: string[] = [
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
-// let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('400000')
-
-let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('1')
+// let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('1') // ropsten
+let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('4000') // mainnet
 
 // minimum liquidity for price to get tracked
-let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('0') // default is 2
+// let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('0') // ropsten
+let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('2') // mainnet
 
 /**
  * Search through graph to find derived Eth per token.
