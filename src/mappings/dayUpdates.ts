@@ -14,7 +14,7 @@ import {
 } from '../types/schema'
 import { ONE_BI, ZERO_BD, ZERO_BI, FACTORY_ADDRESS } from './utils'
 
-export function updateUniswapDayData(event: EthereumEvent): DmmDayData {
+export function updateDmmDayData(event: EthereumEvent): DmmDayData {
   let factory = DmmFactory.load(FACTORY_ADDRESS)
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400

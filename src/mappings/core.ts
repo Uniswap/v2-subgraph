@@ -15,7 +15,7 @@ import {
 import {
   updatePairDayData,
   updateTokenDayData,
-  updateUniswapDayData,
+  updateDmmDayData,
   updatePairHourData,
   updatePoolDayData,
   updatePoolHourData
@@ -298,7 +298,7 @@ export function handleMint(event: Mint): void {
   updatePairHourData(event, pairId)
   updatePoolDayData(event)
   updatePoolHourData(event)
-  updateUniswapDayData(event)
+  updateDmmDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
 }
@@ -317,7 +317,7 @@ export function handleBurn(event: Burn): void {
 
   // const pair = Pair.load(event.address.toHex())
   let pool = Pool.load(event.address.toHex())
-  let uniswap = DmmFactory.load(FACTORY_ADDRESS)
+  let factory = DmmFactory.load(FACTORY_ADDRESS)
 
   //update token info
   let token0 = Token.load(pool.token0)
@@ -341,7 +341,7 @@ export function handleBurn(event: Burn): void {
     .times(bundle.ethPrice)
 
   // update txn counts
-  uniswap.txCount = uniswap.txCount.plus(ONE_BI)
+  factory.txCount = factory.txCount.plus(ONE_BI)
   pair.txCount = pair.txCount.plus(ONE_BI)
   pool.txCount = pool.txCount.plus(ONE_BI)
 
@@ -349,7 +349,7 @@ export function handleBurn(event: Burn): void {
   token0.save()
   token1.save()
   pair.save()
-  uniswap.save()
+  factory.save()
   pool.save()
 
   // update burn
@@ -370,7 +370,7 @@ export function handleBurn(event: Burn): void {
   updatePairHourData(event, pairId)
   updatePoolDayData(event)
   updatePoolHourData(event)
-  updateUniswapDayData(event)
+  updateDmmDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
 }
@@ -528,15 +528,15 @@ export function handleSwap(event: Swap): void {
   let pairHourData = updatePairHourData(event, pairId)
   let poolDayData = updatePoolDayData(event)
   let poolHourData = updatePoolHourData(event)
-  let uniswapDayData = updateUniswapDayData(event)
+  let dmmDayData = updateDmmDayData(event)
   let token0DayData = updateTokenDayData(token0 as Token, event)
   let token1DayData = updateTokenDayData(token1 as Token, event)
 
   // swap specific updating
-  uniswapDayData.dailyVolumeUSD = uniswapDayData.dailyVolumeUSD.plus(trackedAmountUSD)
-  uniswapDayData.dailyVolumeETH = uniswapDayData.dailyVolumeETH.plus(trackedAmountETH)
-  uniswapDayData.dailyVolumeUntracked = uniswapDayData.dailyVolumeUntracked.plus(derivedAmountUSD)
-  uniswapDayData.save()
+  dmmDayData.dailyVolumeUSD = dmmDayData.dailyVolumeUSD.plus(trackedAmountUSD)
+  dmmDayData.dailyVolumeETH = dmmDayData.dailyVolumeETH.plus(trackedAmountETH)
+  dmmDayData.dailyVolumeUntracked = dmmDayData.dailyVolumeUntracked.plus(derivedAmountUSD)
+  dmmDayData.save()
 
   // swap specific updating for pair
   pairDayData.dailyVolumeToken0 = pairDayData.dailyVolumeToken0.plus(amount0Total)
