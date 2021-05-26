@@ -68,7 +68,9 @@ type Pair @entity {
   # derived liquidity
   reserveETH: BigDecimal!
   reserveUSD: BigDecimal!
-  trackedReserveETH: BigDecimal! # used for separating per pair reserves and global
+  # used for separating per pair reserves and global
+  trackedReserveETH: BigDecimal!
+
   # Price in terms of the asset pair
   token0Price: BigDecimal!
   token1Price: BigDecimal!

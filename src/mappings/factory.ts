@@ -45,6 +45,7 @@ export function handleNewPair(event: PairCreated): void {
     token0.name = fetchTokenName(event.params.token0)
     token0.totalSupply = fetchTokenTotalSupply(event.params.token0)
     let decimals = fetchTokenDecimals(event.params.token0)
+
     // bail if we couldn't figure out the decimals
     if (decimals === null) {
       log.debug('mybug the decimal on token 0 was null', [])

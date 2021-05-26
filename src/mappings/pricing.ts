@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { Pair, Token, Bundle } from '../types/schema'
 import { BigDecimal, Address, BigInt } from '@graphprotocol/graph-ts/index'
-import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD } from './helpers'
+import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, UNTRACKED_PAIRS } from './helpers'
 
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 const USDC_WETH_PAIR = '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc' // created 10008355
@@ -55,7 +55,11 @@ let WHITELIST: string[] = [
   '0x960b236a07cf122663c4303350609a66a7b288c0', //ANT
   '0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f', //SNX
   '0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e', //YFI
-  '0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8' // yCurv
+  '0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8', // yCurv
+  '0x853d955acef822db058eb8505911ed77f175b99e', // FRAX
+  '0xa47c8bf37f92abed4a126bda807a7b7498661acd', // WUST
+  '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', // UNI
+  '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599' // WBTC
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
@@ -106,6 +110,11 @@ export function getTrackedVolumeUSD(
   let bundle = Bundle.load('1')
   let price0 = token0.derivedETH.times(bundle.ethPrice)
   let price1 = token1.derivedETH.times(bundle.ethPrice)
+
+  // dont count tracked volume on these pairs - usually rebass tokens
+  if (UNTRACKED_PAIRS.includes(pair.id)) {
+    return ZERO_BD
+  }
 
   // if less than 5 LPs, require high minimum reserve amount amount or return 0
   if (pair.liquidityProviderCount.lt(BigInt.fromI32(5))) {
