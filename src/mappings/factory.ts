@@ -30,6 +30,8 @@ export function handlePoolCreated(event: PoolCreated): void {
     factory.untrackedVolumeUSD = ZERO_BD
     factory.untrackedFeeUSD = ZERO_BD
     factory.totalLiquidityUSD = ZERO_BD
+    factory.totalAmplifiedLiquidityETH = ZERO_BD
+    factory.totalAmplifiedLiquidityUSD = ZERO_BD
     factory.txCount = ZERO_BI
 
     // create new bundle
@@ -144,6 +146,7 @@ export function handlePoolCreated(event: PoolCreated): void {
   pool.vReserve0 = ZERO_BD
   pool.vReserve1 = ZERO_BD
   pool.trackedReserveETH = ZERO_BD
+  pool.amplifiedTrackedLiquidityEth = ZERO_BD
   pool.reserveETH = ZERO_BD
   pool.reserveUSD = ZERO_BD
   pool.totalSupply = ZERO_BD
