@@ -1,5 +1,6 @@
 /* eslint-disable prefer-const */
 import { BigInt, BigDecimal, store, Address, log } from '@graphprotocol/graph-ts'
+import { FACTORY_ADDRESS, ADDRESS_ZERO, ADDRESS_LOCK } from '../config/constants'
 import { Pool as PoolContract, Transfer, Mint, Burn, Swap, Sync } from '../types/templates/Pool/Pool'
 import {
   DmmFactory,
@@ -24,9 +25,6 @@ import { getEthPriceInUSD, findEthPerToken, getTrackedVolumeUSD, getTrackedLiqui
 import {
   createUser,
   convertTokenToDecimal,
-  ADDRESS_ZERO,
-  ADDRESS_LOCK,
-  FACTORY_ADDRESS,
   ONE_BI,
   ZERO_BD,
   MINUS_BD,
@@ -410,13 +408,7 @@ export function handleSwap(event: Swap): void {
   let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
   // only accounts for volume through white listed tokens
-  let trackedAmountUSD = getTrackedVolumeUSD(
-    amount0Total,
-    token0 as Token,
-    amount1Total,
-    token1 as Token,
-    pool as Pool
-  )
+  let trackedAmountUSD = getTrackedVolumeUSD(amount0Total, token0 as Token, amount1Total, token1 as Token, pool as Pool)
 
   log.debug('++++++++ tracked amount usd  {}  ', [trackedAmountUSD.toString()])
 
@@ -610,41 +602,55 @@ export function handleSync(event: Sync): void {
   // add save for pool
   pool.reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
   pool.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
-  pool.vReserve0 = convertTokenToDecimal(pool.amp == BD_10000 ? event.params.reserve0 : event.params.vReserve0, token0.decimals)
-  pool.vReserve1 = convertTokenToDecimal(pool.amp == BD_10000 ? event.params.reserve1 : event.params.vReserve1, token1.decimals)
+  pool.vReserve0 = convertTokenToDecimal(
+    pool.amp == BD_10000 ? event.params.reserve0 : event.params.vReserve0,
+    token0.decimals
+  )
+  pool.vReserve1 = convertTokenToDecimal(
+    pool.amp == BD_10000 ? event.params.reserve1 : event.params.vReserve1,
+    token1.decimals
+  )
   pool.liquidityPerRisk = pool.reserve0.times(pool.reserve1)
 
   if (pool.vReserve1.notEqual(ZERO_BD) && pool.vReserve0.notEqual(ZERO_BD)) {
-    pool.token0Price = pool.vReserve0.div(pool.vReserve1)   // P0
+    pool.token0Price = pool.vReserve0.div(pool.vReserve1) // P0
     pool.token1Price = pool.vReserve1.div(pool.vReserve0)
 
-    if(pool.amp.equals(BD_10000)){
+    if (pool.amp.equals(BD_10000)) {
       pool.token0PriceMax = MINUS_BD
       pool.token0PriceMin = ZERO_BD
 
       pool.token1PriceMax = MINUS_BD
       pool.token1PriceMin = ZERO_BD
     } else {
-      if(pool.vReserve0.equals(pool.reserve0)){
+      if (pool.vReserve0.equals(pool.reserve0)) {
         pool.token1PriceMax = MINUS_BD
-        log.error("!!!!!!!!!!!!!! vReserve equal reserve {}", [event.transaction.hash.toHexString()])
+        log.error('!!!!!!!!!!!!!! vReserve equal reserve {}', [event.transaction.hash.toHexString()])
       } else {
-        pool.token1PriceMax = pool.vReserve0.times(pool.vReserve1).div( (pool.vReserve0.minus(pool.reserve0)).times(pool.vReserve0.minus(pool.reserve0) ))
-      }
-      
-      if(pool.vReserve1.equals(pool.reserve1)){
-        pool.token0PriceMax = MINUS_BD
-        log.error("!!!!!!!!!!!!!! vReserve equal reserve {}", [event.transaction.hash.toHexString()])
-      } else {
-        pool.token0PriceMax = pool.vReserve1.times(pool.vReserve0).div( (pool.vReserve1.minus(pool.reserve1)).times(  pool.vReserve1.minus(pool.reserve1)  ))
+        pool.token1PriceMax = pool.vReserve0
+          .times(pool.vReserve1)
+          .div(pool.vReserve0.minus(pool.reserve0).times(pool.vReserve0.minus(pool.reserve0)))
       }
 
-      pool.token0PriceMin = (pool.vReserve0.minus(pool.reserve0)).times(  pool.vReserve0.minus(pool.reserve0)  ).div(pool.vReserve1.times(pool.vReserve0))
-      pool.token1PriceMin = (pool.vReserve1.minus(pool.reserve1)).times( pool.vReserve1.minus(pool.reserve1) ).div(pool.vReserve0.times(pool.vReserve1))
+      if (pool.vReserve1.equals(pool.reserve1)) {
+        pool.token0PriceMax = MINUS_BD
+        log.error('!!!!!!!!!!!!!! vReserve equal reserve {}', [event.transaction.hash.toHexString()])
+      } else {
+        pool.token0PriceMax = pool.vReserve1
+          .times(pool.vReserve0)
+          .div(pool.vReserve1.minus(pool.reserve1).times(pool.vReserve1.minus(pool.reserve1)))
+      }
+
+      pool.token0PriceMin = pool.vReserve0
+        .minus(pool.reserve0)
+        .times(pool.vReserve0.minus(pool.reserve0))
+        .div(pool.vReserve1.times(pool.vReserve0))
+      pool.token1PriceMin = pool.vReserve1
+        .minus(pool.reserve1)
+        .times(pool.vReserve1.minus(pool.reserve1))
+        .div(pool.vReserve0.times(pool.vReserve1))
     }
-    
-  }
-  else {
+  } else {
     pool.token0Price = ZERO_BD
     pool.token0PriceMax = ZERO_BD
     pool.token0PriceMin = ZERO_BD
@@ -697,7 +703,7 @@ export function handleSync(event: Sync): void {
 
   // log.error("++++++++++ calculate pool reserve eth {} - {} {} {} {} {}", [pool.id, pool.reserve0.toString(), token0.derivedETH.toString(), pool.reserve1.toString(), token1.derivedETH.toString(), pool.reserveETH.toString()])
 
-  log.error("============ tracked liquidity =================== {}", [trackedLiquidityETH.toString()])
+  log.error('============ tracked liquidity =================== {}', [trackedLiquidityETH.toString()])
   // use tracked amounts globally
   factory.totalLiquidityETH = factory.totalLiquidityETH.plus(trackedLiquidityETH)
   factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)

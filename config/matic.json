@@ -1,0 +1,17 @@
+{
+  "network": "matic",
+  "address": "0x7900309d0b1c8d3d665ae40e712e8ba4fc4f5453",
+  "startBlock": "14376251",
+  "factory_address": "0x7900309d0b1c8d3d665ae40e712e8ba4fc4f5453",
+  "usdc_weth_unamplified_pool": "0xd478953d5572f829f457a5052580cbeaee36c1aa",
+  "dai_weth_unamplified_pool": "0x20d6b227f4a5a2a13d520329f01bb1f8f9d2d628",
+  "usdt_weth_unamplified_pool": "0xf8467ef9de03e83b5a778ac858ea5c2d1fc47188",
+  "weth_address": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+  "dai_address": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+  "usdc_address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+  "usdt_address": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+  "knc_address": "0xdefa4e8a7bcba345f687a2f1456f5edd9ce97202",
+  "kncl_address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+  "minimum_usd_threshold_new_pairs": "1",
+  "minimum_liquidity_threshold_eth": "0"
+}

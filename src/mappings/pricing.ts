@@ -1,12 +1,18 @@
 /* eslint-disable prefer-const */
 import { Pair, Token, Bundle, Pool } from '../types/schema'
 import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
-import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, BD_10000, BD_100, BD_90, BD_10 } from './utils'
-
-const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-const USDC_WETH_POOL = '0xd478953d5572f829f457a5052580cbeaee36c1aa' // created 9225802
-const DAI_WETH_POOL = '0x20d6b227f4a5a2a13d520329f01bb1f8f9d2d628' // created block 9225783
-const USDT_WETH_POOL = '0xf8467ef9de03e83b5a778ac858ea5c2d1fc47188' // created block 9225800
+import {
+  WETH_ADDRESS,
+  DAI_ADDRESS,
+  USDC_ADDRESS,
+  USDT_ADDRESS,
+  USDC_WETH_UNAMPLIFIED_POOL,
+  DAI_WETH_UNAMPLIFIED_POOL,
+  USDT_WETH_UNAMPLIFIED_POOL,
+  MINIMUM_USD_THRESHOLD_NEW_PAIRS,
+  MINIMUM_LIQUIDITY_THRESHOLD_ETH
+} from '../config/constants'
+import { ZERO_BD, factoryContract, ONE_BD, BD_100, BD_90, BD_10 } from './utils'
 
 export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal {
   let totalReserve = ZERO_BD
@@ -29,9 +35,9 @@ export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal
 
 export function getEthPriceInUSD(): BigDecimal {
   // fetch eth prices for each stablecoin
-  let daiPool = Pool.load(DAI_WETH_POOL) // dai is token0
-  let usdcPool = Pool.load(USDC_WETH_POOL) // usdc is token0
-  let usdtPool = Pool.load(USDT_WETH_POOL) // usdt is token1
+  let daiPool = Pool.load(DAI_WETH_UNAMPLIFIED_POOL) // dai is token0
+  let usdcPool = Pool.load(USDC_WETH_UNAMPLIFIED_POOL) // usdc is token0
+  let usdtPool = Pool.load(USDT_WETH_UNAMPLIFIED_POOL) // usdt is token1
 
   // all 3 have been created
   if (daiPool !== null && usdcPool !== null && usdtPool !== null) {
@@ -63,15 +69,14 @@ export function getEthPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+  WETH_ADDRESS, // WETH
   // '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI - ropsten
   // '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC - ropsten
   // '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3', // USDT
 
-  '0xdac17f958d2ee523a2206206994597c13d831ec7', // new USDT
-  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',  // new USDC
-  '0x6b175474e89094c44da98b954eedeac495271d0f', // new DAI
-
+  USDT_ADDRESS, // new USDT
+  USDC_ADDRESS, // new USDC
+  DAI_ADDRESS // new DAI
 
   // '0x0000000000085d4780b73119b644ae5ecd22b376', // TUSD
   // '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643', // cDAI
@@ -86,14 +91,6 @@ let WHITELIST: string[] = [
   // '0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e', //YFI
   // '0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8' // yCurv
 ]
-
-// minimum liquidity required to count towards tracked volume for pairs with small # of Lps
-// let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('1') // ropsten
-let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('4000') // mainnet
-
-// minimum liquidity for price to get tracked
-// let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('0') // ropsten
-let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('2') // mainnet
 
 /**
  * Search through graph to find derived Eth per token.
@@ -113,12 +110,15 @@ export function findEthPerToken(token: Token): BigDecimal {
         let pool = Pool.load(arrayPoolAddresses[j].toHexString())
 
         // if pool is just created, skip it
-        if(pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue;
+        if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue
 
-        let percentToken0 = pool.reserve0.div(pool.vReserve0).times(BD_100).div(  pool.reserve0.div(pool.vReserve0).plus(pool.reserve1.div(pool.vReserve1)) )
+        let percentToken0 = pool.reserve0
+          .div(pool.vReserve0)
+          .times(BD_100)
+          .div(pool.reserve0.div(pool.vReserve0).plus(pool.reserve1.div(pool.vReserve1)))
 
         if (percentToken0.gt(BD_90) || percentToken0.lt(BD_10)) continue
- 
+
         if (pool.token0 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
           let token1 = Token.load(pool.token1)
           let tokenPrice = pool.token1Price.times(token1.derivedETH as BigDecimal)

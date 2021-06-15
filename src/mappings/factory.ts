@@ -1,10 +1,10 @@
 /* eslint-disable prefer-const */
 import { log } from '@graphprotocol/graph-ts'
+import { FACTORY_ADDRESS } from '../config/constants'
 import { DmmFactory, Bundle, Pair, Token, Pool } from '../types/schema'
 import { PoolCreated } from '../types/DmmFactory/DmmFactory'
 import { Pool as PoolTemplate } from '../types/templates'
 import {
-  FACTORY_ADDRESS,
   ZERO_BD,
   ZERO_BI,
   BI_18,
