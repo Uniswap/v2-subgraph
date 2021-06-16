@@ -13,10 +13,10 @@ export const DAI_WETH_UNAMPLIFIED_POOL = '0x20d6b227f4a5a2a13d520329f01bb1f8f9d2
 export const USDT_WETH_UNAMPLIFIED_POOL = '0xf8467ef9de03e83b5a778ac858ea5c2d1fc47188'
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
-export const MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('4000')
+export let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('4000')
 
 // minimum liquidity for price to get tracked
-export const MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('2') // default is 2
+export let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('2') // default is 2
 
 export const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 export const DAI_ADDRESS = '0x6b175474e89094c44da98b954eedeac495271d0f'

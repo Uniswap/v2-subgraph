@@ -18,6 +18,8 @@ type DmmFactory @entity {
   # total liquidity
   totalLiquidityUSD: BigDecimal!
   totalLiquidityETH: BigDecimal!
+  totalAmplifiedLiquidityUSD: BigDecimal!
+  totalAmplifiedLiquidityETH: BigDecimal!
 
   # transactions
   txCount: BigInt!
@@ -118,6 +120,7 @@ type Pool @entity {
   reserveETH: BigDecimal!
   reserveUSD: BigDecimal!
   trackedReserveETH: BigDecimal! # used for separating per pair reserves and global
+  amplifiedTrackedLiquidityEth: BigDecimal! # tracked liquidity with amp factor
 
   volumeUSD: BigDecimal!
   feeUSD: BigDecimal!

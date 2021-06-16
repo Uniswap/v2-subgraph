@@ -584,6 +584,9 @@ export function handleSync(event: Sync): void {
 
   // reset factory liquidity by subtracting onluy tarcked liquidity
   factory.totalLiquidityETH = factory.totalLiquidityETH.minus(pool.trackedReserveETH as BigDecimal)
+  factory.totalAmplifiedLiquidityETH = factory.totalAmplifiedLiquidityETH.minus(
+    pool.amplifiedTrackedLiquidityEth as BigDecimal
+  )
 
   // reset token total liquidity amounts
   token0.totalLiquidity = token0.totalLiquidity.minus(pool.reserve0)
@@ -680,12 +683,22 @@ export function handleSync(event: Sync): void {
 
   // get tracked liquidity - will be 0 if neither is in whitelist
   let trackedLiquidityETH: BigDecimal
+  let amplifiedTrackedLiquidityEth: BigDecimal
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
     trackedLiquidityETH = getTrackedLiquidityUSD(pool.reserve0, token0 as Token, pool.reserve1, token1 as Token).div(
       bundle.ethPrice
     )
+    amplifiedTrackedLiquidityEth = getTrackedLiquidityUSD(
+      pool.vReserve0,
+      token0 as Token,
+      pool.vReserve1,
+      token1 as Token
+    ).div(
+      bundle.ethPrice
+    )
   } else {
     trackedLiquidityETH = ZERO_BD
+    amplifiedTrackedLiquidityEth = ZERO_BD
   }
 
   pair.trackedReserveETH = trackedLiquidityETH
@@ -696,6 +709,8 @@ export function handleSync(event: Sync): void {
 
   // use derived amounts within pool
   pool.trackedReserveETH = trackedLiquidityETH
+  pool.amplifiedTrackedLiquidityEth = amplifiedTrackedLiquidityEth
+
   pool.reserveETH = pool.reserve0
     .times(token0.derivedETH as BigDecimal)
     .plus(pool.reserve1.times(token1.derivedETH as BigDecimal))
@@ -707,6 +722,10 @@ export function handleSync(event: Sync): void {
   // use tracked amounts globally
   factory.totalLiquidityETH = factory.totalLiquidityETH.plus(trackedLiquidityETH)
   factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)
+  factory.totalAmplifiedLiquidityETH = factory.totalAmplifiedLiquidityETH.plus(
+    pool.amplifiedTrackedLiquidityEth as BigDecimal
+  )
+  factory.totalAmplifiedLiquidityUSD = factory.totalAmplifiedLiquidityETH.times(bundle.ethPrice)
 
   // now correctly set liquidity amounts for each token
   token0.totalLiquidity = token0.totalLiquidity.plus(pool.reserve0)
