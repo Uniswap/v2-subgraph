@@ -53,7 +53,7 @@ dataSources:
         - name: KyberFairLaunch
           file: ./abis/KyberFairLaunch.json
       eventHandlers:
-        - event: RewardContractAdded(indexed address,bool)
+        - event: RewardContractAdded(indexed address,indexed address,bool)
           handler: handleRewardContractAdded
         - event: Vested(indexed address,indexed address,uint256,uint256)
           handler: handleVestd

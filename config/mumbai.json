@@ -8,8 +8,12 @@
   "dai_address": "0x5e2de02472ac02736b43054f095837725a5870ef",
   "usdc_address": "0x2cec76b26a8d96bf3072d34a01bb3a4ede7c06be",
   "usdt_address": "0x064b91bda6d178dfe03835de9450bfe78201c43f",
-  "knc_address": "0xdefa4e8a7bcba345f687a2f1456f5edd9ce97202",
+  "knc_address": "0xfd1f9381cb641dc76fe8087dbcf8ea84a2c77cbe",
   "kncl_address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
   "minimum_usd_threshold_new_pairs": "1",
-  "minimum_liquidity_threshold_eth": "0"
+  "minimum_liquidity_threshold_eth": "0",
+  "reward_locker": {
+    "address": "0x467e5df4fccb44af4c5904f7eafb94e3503bd391",
+    "startBlock": "15656941"
+  }
 }

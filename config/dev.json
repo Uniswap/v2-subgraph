@@ -13,7 +13,7 @@
   "minimum_usd_threshold_new_pairs": "1",
   "minimum_liquidity_threshold_eth": "0",
   "reward_locker": {
-    "address": "0x97d0308d0174fb088f2bfdb3e365eec8e9dc1666",
-    "startBlock": "10393949"
+    "address": "0x912d70cedbe55e9ab36431e3a86bad5351da80b3",
+    "startBlock": "10527092"
   }
 }

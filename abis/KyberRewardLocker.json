@@ -39,6 +39,12 @@
         "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "contract IERC20Ext",
+        "name": "token",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "bool",
         "name": "isAdded",
