@@ -1,7 +1,7 @@
 type DmmFactory @entity {
   id: ID!
-  
-   # pair info
+
+  # pair info
   pairCount: Int!
   poolCount: Int!
 
@@ -34,7 +34,7 @@ type Token @entity {
   name: String!
   decimals: BigInt!
 
-   # used for other stats like marketcap
+  # used for other stats like marketcap
   totalSupply: BigInt!
 
   # token specific volume
@@ -116,12 +116,11 @@ type Pool @entity {
   totalSupply: BigDecimal!
 
   pair: Pair!
-   # derived liquidity
+  # derived liquidity
   reserveETH: BigDecimal!
   reserveUSD: BigDecimal!
   trackedReserveETH: BigDecimal! # used for separating per pair reserves and global
   amplifiedTrackedLiquidityEth: BigDecimal! # tracked liquidity with amp factor
-
   volumeUSD: BigDecimal!
   feeUSD: BigDecimal!
 
@@ -137,7 +136,6 @@ type Pool @entity {
   token1PriceMax: BigDecimal!
   token1Price: BigDecimal!
 
-
   mints: [Mint!]! @derivedFrom(field: "pool")
   burns: [Burn!]! @derivedFrom(field: "pool")
   swaps: [Swap!]! @derivedFrom(field: "pool")
@@ -146,10 +144,9 @@ type Pool @entity {
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
 
-
   liquidityProviderCount: BigInt! # used to detect new exchanges
   txCount: BigInt!
-   # lifetime volume stats
+  # lifetime volume stats
   volumeToken0: BigDecimal!
   volumeToken1: BigDecimal!
   untrackedVolumeUSD: BigDecimal!
@@ -158,8 +155,6 @@ type Pool @entity {
   poolHourData: [PoolHourData!]! @derivedFrom(field: "pool")
   liquidityPositions: [LiquidityPosition!]! @derivedFrom(field: "pool")
   liquidityPositionSnapshots: [LiquidityPositionSnapshot!]! @derivedFrom(field: "pool")
-
-
 }
 type User @entity {
   id: ID!
@@ -202,6 +197,10 @@ type Transaction @entity {
   mints: [Mint]!
   burns: [Burn]!
   swaps: [Swap]!
+  harvests: [Harvest]!
+  vests: [Vest]!
+  deposits: [Deposit]!
+  withdraws: [Withdraw]!
 }
 
 type Mint @entity {
@@ -348,8 +347,6 @@ type PairDayData @entity {
   dailyTxns: BigInt!
 }
 
-
-
 type PoolHourData @entity {
   id: ID!
   hourStartUnix: Int! # unix timestamp for start of hour
@@ -418,4 +415,64 @@ type TokenDayData @entity {
 
   # price stats
   priceUSD: BigDecimal!
+}
+
+type KyberFairLaunch @entity {
+  id: ID!
+
+  rewardTokens: [Bytes!]!
+  stakeTokens: [Bytes!]!
+}
+
+type Harvest @entity {
+  # transaction hash + "-" + index in harvests Transaction array
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  #data
+  user: Bytes!
+  fairLaunch: KyberFairLaunch!
+  poolID: Int!
+  rewardToken: Bytes!
+  stakeToken: Bytes!
+  amount: BigInt!
+}
+
+type Vest @entity {
+  # transaction hash + "-" + index in vests Transaction array
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+  # data
+  rewardToken: Bytes!
+  amount: BigInt!
+  user: Bytes!
+}
+
+type Deposit @entity {
+  # transaction hash + "-" + index in deposits Transaction array
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+
+  # data
+  user: Bytes!
+  fairLaunch: KyberFairLaunch!
+  poolID: Int!
+  stakeToken: Bytes!
+  amount: BigInt!
+}
+
+type Withdraw @entity {
+  # transaction hash + "-" + index in withdraws Transaction array
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt!
+
+  # data
+  user: Bytes!
+  fairLaunch: KyberFairLaunch!
+  poolID: Int!
+  stakeToken: Bytes!
+  amount: BigInt!
 }

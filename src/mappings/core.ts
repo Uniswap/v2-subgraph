@@ -31,7 +31,8 @@ import {
   BI_18,
   BD_10000,
   createLiquidityPosition,
-  createLiquiditySnapshot
+  createLiquiditySnapshot,
+  createOrLoadTransaction
 } from './utils'
 
 function isCompleteMint(mintId: string): boolean {
@@ -66,15 +67,7 @@ export function handleTransfer(event: Transfer): void {
   let value = convertTokenToDecimal(event.params.value, BI_18)
 
   // get or create transaction
-  let transaction = Transaction.load(transactionHash)
-  if (transaction === null) {
-    transaction = new Transaction(transactionHash)
-    transaction.blockNumber = event.block.number
-    transaction.timestamp = event.block.timestamp
-    transaction.mints = []
-    transaction.burns = []
-    transaction.swaps = []
-  }
+  let transaction = createOrLoadTransaction(event.transaction.hash, event.block)
 
   // mints
   let mints = transaction.mints
@@ -238,7 +231,7 @@ export function handleTransfer(event: Transfer): void {
 export function handleMint(event: Mint): void {
   log.debug('___ handle mint ___', [])
   log.debug('!__________ run to handle mint {}', [event.transaction.hash.toHexString()])
-  let transaction = Transaction.load(event.transaction.hash.toHexString())
+  let transaction = createOrLoadTransaction(event.transaction.hash, event.block)
   let mints = transaction.mints
   let mint = MintEvent.load(mints[mints.length - 1])
 
@@ -303,7 +296,7 @@ export function handleMint(event: Mint): void {
 
 export function handleBurn(event: Burn): void {
   log.debug('___ handle burnt ___', [])
-  let transaction = Transaction.load(event.transaction.hash.toHexString())
+  let transaction = createOrLoadTransaction(event.transaction.hash, event.block)
 
   // safety check
   if (transaction === null) {
@@ -470,15 +463,7 @@ export function handleSwap(event: Swap): void {
   factory.save()
   log.debug('_________ swap saved factory ______________', [])
 
-  let transaction = Transaction.load(event.transaction.hash.toHexString())
-  if (transaction === null) {
-    transaction = new Transaction(event.transaction.hash.toHexString())
-    transaction.blockNumber = event.block.number
-    transaction.timestamp = event.block.timestamp
-    transaction.mints = []
-    transaction.swaps = []
-    transaction.burns = []
-  }
+  let transaction = createOrLoadTransaction(event.transaction.hash, event.block)
   let swaps = transaction.swaps
   let swap = new SwapEvent(
     event.transaction.hash
@@ -693,9 +678,7 @@ export function handleSync(event: Sync): void {
       token0 as Token,
       pool.vReserve1,
       token1 as Token
-    ).div(
-      bundle.ethPrice
-    )
+    ).div(bundle.ethPrice)
   } else {
     trackedLiquidityETH = ZERO_BD
     amplifiedTrackedLiquidityEth = ZERO_BD

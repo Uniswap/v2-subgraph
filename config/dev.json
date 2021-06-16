@@ -13,5 +13,9 @@
   "knc_address": "0x8b4ddf9f13f382aff76d262f6c8c50e6d7961b94",
   "kncl_address": "0x7b2810576aa1cce68f2b118cef1f36467c648f92",
   "minimum_usd_threshold_new_pairs": "1",
-  "minimum_liquidity_threshold_eth": "0"
+  "minimum_liquidity_threshold_eth": "0",
+  "reward_locker": {
+    "address": "0x97d0308d0174fb088f2bfdb3e365eec8e9dc1666",
+    "startBlock": "10393949"
+  }
 }
