@@ -1,10 +1,19 @@
 /* eslint-disable prefer-const */
-import { log, BigDecimal, BigInt, Address, EthereumEvent } from '@graphprotocol/graph-ts'
+import { log, BigDecimal, BigInt, Address, EthereumEvent, EthereumBlock, Bytes } from '@graphprotocol/graph-ts'
 import { FACTORY_ADDRESS } from '../config/constants'
 import { ERC20 } from '../types/DmmFactory/ERC20'
 import { ERC20SymbolBytes } from '../types/DmmFactory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/DmmFactory/ERC20NameBytes'
-import { LiquidityPosition, User, Pair, Pool, LiquidityPositionSnapshot, Bundle, Token } from '../types/schema'
+import {
+  LiquidityPosition,
+  User,
+  Pair,
+  Pool,
+  LiquidityPositionSnapshot,
+  Bundle,
+  Token,
+  Transaction
+} from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pool/Factory'
 import { KNC_ADDRESS, KNC_NAME, KNC_SYMBOL, KNCL_ADDRESS, KNCL_NAME, KNCL_SYMBOL } from '../config/constants'
 
@@ -135,6 +144,23 @@ export function createUser(address: Address): void {
     user.usdSwapped = ZERO_BD
     user.save()
   }
+}
+
+export function createOrLoadTransaction(txHash: Bytes, block: EthereumBlock): Transaction {
+  let tx = Transaction.load(txHash.toHexString())
+  if (tx === null) {
+    tx = new Transaction(txHash.toHexString())
+    tx.blockNumber = block.number
+    tx.timestamp = block.timestamp
+    tx.mints = []
+    tx.swaps = []
+    tx.burns = []
+    tx.deposits = []
+    tx.withdraws = []
+    tx.harvests = []
+    tx.vests = []
+  }
+  return tx as Transaction
 }
 
 export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
