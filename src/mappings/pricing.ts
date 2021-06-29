@@ -38,14 +38,6 @@ function getAvgPrice(pools: Pool[], totalLiquidityETH: BigDecimal): BigDecimal {
     let vReserveEth = pool.token0 == WETH_ADDRESS ? pool.vReserve0 : pool.vReserve1
     let vReserveUSD = pool.token0 == WETH_ADDRESS ? pool.vReserve1 : pool.vReserve0
     let poolPrice = vReserveUSD.div(vReserveEth)
-    log.debug('---------------- getAvgPrice 1 {} {} {} -------------', [
-      poolPrice.toString(),
-      vReserveEth.toString(),
-      poolPrice
-        .times(vReserveEth)
-        .div(totalLiquidityETH)
-        .toString()
-    ])
     price = price.plus(poolPrice.times(vReserveEth).div(totalLiquidityETH))
   }
   log.debug('---------------- getAvgPrice {} {} ------------', [price.toString(), totalLiquidityETH.toString()])
