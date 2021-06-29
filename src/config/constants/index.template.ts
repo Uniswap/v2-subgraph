@@ -6,11 +6,7 @@ export const ADDRESS_LOCK = '0xffffffffffffffffffffffffffffffffffffffff'
 
 export const FACTORY_ADDRESS = '{{ factory_address }}'
 
-export const USDC_WETH_UNAMPLIFIED_POOL = '{{ usdc_weth_unamplified_pool }}'
-
-export const DAI_WETH_UNAMPLIFIED_POOL = '{{ dai_weth_unamplified_pool }}'
-
-export const USDT_WETH_UNAMPLIFIED_POOL = '{{ usdt_weth_unamplified_pool }}'
+export const ETH_PRICING_POOLS = '{{ eth_pricing_pools }}'
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 export let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('{{ minimum_usd_threshold_new_pairs }}')
