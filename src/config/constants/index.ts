@@ -6,11 +6,7 @@ export const ADDRESS_LOCK = '0xffffffffffffffffffffffffffffffffffffffff'
 
 export const FACTORY_ADDRESS = '0x833e4083b7ae46cea85695c4f7ed25cdad8886de'
 
-export const USDC_WETH_UNAMPLIFIED_POOL = '0xd478953d5572f829f457a5052580cbeaee36c1aa'
-
-export const DAI_WETH_UNAMPLIFIED_POOL = '0x20d6b227f4a5a2a13d520329f01bb1f8f9d2d628'
-
-export const USDT_WETH_UNAMPLIFIED_POOL = '0xf8467ef9de03e83b5a778ac858ea5c2d1fc47188'
+export const ETH_PRICING_POOLS = '0xd478953d5572f829f457a5052580cbeaee36c1aa|0x20d6b227f4a5a2a13d520329f01bb1f8f9d2d628|0xf8467ef9de03e83b5a778ac858ea5c2d1fc47188|0xce9874c42dce7fffbe5e48b026ff1182733266cb'
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 export let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('4000')

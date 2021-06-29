@@ -6,9 +6,7 @@ import {
   DAI_ADDRESS,
   USDC_ADDRESS,
   USDT_ADDRESS,
-  USDC_WETH_UNAMPLIFIED_POOL,
-  DAI_WETH_UNAMPLIFIED_POOL,
-  USDT_WETH_UNAMPLIFIED_POOL,
+  ETH_PRICING_POOLS,
   MINIMUM_USD_THRESHOLD_NEW_PAIRS,
   MINIMUM_LIQUIDITY_THRESHOLD_ETH
 } from '../config/constants'
@@ -33,38 +31,67 @@ export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal
   return totalReserve
 }
 
-export function getEthPriceInUSD(): BigDecimal {
-  // fetch eth prices for each stablecoin
-  let daiPool = Pool.load(DAI_WETH_UNAMPLIFIED_POOL) // dai is token0
-  let usdcPool = Pool.load(USDC_WETH_UNAMPLIFIED_POOL) // usdc is token0
-  let usdtPool = Pool.load(USDT_WETH_UNAMPLIFIED_POOL) // usdt is token1
-
-  // all 3 have been created
-  if (daiPool !== null && usdcPool !== null && usdtPool !== null) {
-    let totalLiquidityETH = daiPool.vReserve1.plus(usdcPool.vReserve1).plus(usdtPool.vReserve0)
-    log.debug('---------------- token have full pair {}', [totalLiquidityETH.toString()])
-    let daiWeight = daiPool.vReserve1.div(totalLiquidityETH)
-    let usdcWeight = usdcPool.vReserve1.div(totalLiquidityETH)
-    let usdtWeight = usdtPool.vReserve0.div(totalLiquidityETH)
-    return daiPool.token0Price
-      .times(daiWeight)
-      .plus(usdcPool.token0Price.times(usdcWeight))
-      .plus(usdtPool.token1Price.times(usdtWeight))
-    // dai and USDC have been created
-  } else if (daiPool !== null && usdcPool !== null) {
-    let totalLiquidityETH = daiPool.vReserve1.plus(usdcPool.vReserve1)
-    log.debug('---------------- token only has dai and ust pair', [totalLiquidityETH.toString()])
-    let daiWeight = daiPool.vReserve1.div(totalLiquidityETH)
-    let usdcWeight = usdcPool.vReserve1.div(totalLiquidityETH)
-    return daiPool.token0Price.times(daiWeight).plus(usdcPool.token0Price.times(usdcWeight))
-    // USDC is the only pair so far
-  } else if (usdcPool !== null) {
-    log.debug('---------------- token only usdc pair -------------', [])
-    return usdcPool.token0Price
-  } else {
-    log.debug('---------------- token dont have any pair -------------', [])
-    return ZERO_BD
+function getAvgPrice(pools: Pool[], totalLiquidityETH: BigDecimal): BigDecimal {
+  let price = ZERO_BD
+  for (let i = 0; i < pools.length; ++i) {
+    let pool = pools[i]
+    let vReserveEth = pool.token0 == WETH_ADDRESS ? pool.vReserve0 : pool.vReserve1
+    let vReserveUSD = pool.token0 == WETH_ADDRESS ? pool.vReserve1 : pool.vReserve0
+    let poolPrice = vReserveUSD.div(vReserveEth)
+    price = price.plus(poolPrice.times(vReserveEth).div(totalLiquidityETH))
   }
+  log.debug('---------------- getAvgPrice {} {} ------------', [price.toString(), totalLiquidityETH.toString()])
+  return price
+}
+
+export function getEthPriceInUSD(): BigDecimal {
+  let pools: Pool[] = []
+  let totalLiquidityETH = ZERO_BD
+  let splits = ETH_PRICING_POOLS.split('|')
+
+  for (let i = 0; i < splits.length; ++i) {
+    let address = splits[i]
+    let pool = Pool.load(address)
+
+    if (pool === null) continue
+    if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue // pool is not initialized yet
+
+    let percentToken0 = pool.reserve0
+      .div(pool.vReserve0)
+      .times(BD_100)
+      .div(pool.reserve0.div(pool.vReserve0).plus(pool.reserve1.div(pool.vReserve1)))
+    if (percentToken0.gt(BD_90) || percentToken0.lt(BD_10)) continue // pool depleted in 1 side
+
+    let vReserveEth = pool.token0 == WETH_ADDRESS ? pool.vReserve0 : pool.vReserve1
+    let reserveEth = pool.token0 == WETH_ADDRESS ? pool.reserve0 : pool.reserve1
+    if (reserveEth.le(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) continue
+
+    totalLiquidityETH = totalLiquidityETH.plus(vReserveEth)
+    pools.push(pool!)
+  }
+  // has at least 1 pool meet all criteria
+  if (pools.length != 0) {
+    return getAvgPrice(pools, totalLiquidityETH)
+  }
+
+  log.debug('---------------- eth bundle dont have any pair meeting all criteria-------------', [])
+  for (let i = 0; i < splits.length; ++i) {
+    let address = splits[i]
+    let pool = Pool.load(address)
+
+    if (pool === null) continue
+    if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue // pool is not initialized yet
+
+    let vReserveEth = pool.token0 == WETH_ADDRESS ? pool.vReserve0 : pool.vReserve1
+    totalLiquidityETH = totalLiquidityETH.plus(vReserveEth)
+    pools.push(pool!)
+  }
+  if (pools.length != 0) {
+    return getAvgPrice(pools, totalLiquidityETH)
+  }
+
+  log.debug('---------------- eth bundle dont have any pair -------------', [])
+  return ZERO_BD
 }
 
 // token where amounts should contribute to tracked volume and liquidity
