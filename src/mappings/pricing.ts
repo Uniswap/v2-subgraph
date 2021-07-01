@@ -10,23 +10,7 @@ import {
   MINIMUM_USD_THRESHOLD_NEW_PAIRS,
   MINIMUM_LIQUIDITY_THRESHOLD_ETH
 } from '../config/constants'
-import { ZERO_BD, factoryContract, ONE_BD, BD_100, BD_90, BD_10 } from './utils'
-
-export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal {
-  let totalReserve = ZERO_BD
-  let poolAddresses = pair.pools
-  for (let i = 0; i < poolAddresses.length; ++i) {
-    let pool = Pool.load(poolAddresses[i])
-    if (pool !== null) {
-      if (isToken0) {
-        totalReserve = totalReserve.plus(pool.reserve0)
-      } else {
-        totalReserve = totalReserve.plus(pool.reserve1)
-      }
-    }
-  }
-  return totalReserve
-}
+import { ZERO_BD, ONE_BD, BD_100, BD_90, BD_10 } from './utils'
 
 function getAvgPrice(pools: Pool[], totalLiquidityETH: BigDecimal): BigDecimal {
   let price = ZERO_BD
@@ -73,8 +57,7 @@ export function getEthPriceInUSD(): BigDecimal {
 
   log.debug('---------------- eth bundle dont have any pair meeting all criteria-------------', [])
   for (let i = 0; i < splits.length; ++i) {
-    let address = splits[i]
-    let pool = Pool.load(address)
+    let pool = Pool.load(splits[i])
 
     if (pool === null) continue
     if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue // pool is not initialized yet
@@ -130,42 +113,48 @@ export function findEthPerToken(token: Token): BigDecimal {
 
   // loop through whitelist and check if paired with any
   for (let i = 0; i < WHITELIST.length; ++i) {
-    let arrayPoolAddresses = factoryContract.getPools(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
-    if (arrayPoolAddresses) {
-      for (let j = 0; j < arrayPoolAddresses.length; ++j) {
-        let pool = Pool.load(arrayPoolAddresses[j].toHexString())
-        // there is a case when 2 pools are created at the same blocks
-        // so the 2nd pool is not exist in the storage yet
-        if (pool === null) continue
+    let pair = Pair.load(token.id + '_' + WHITELIST[i])
+    if (pair === null) {
+      pair = Pair.load(WHITELIST[i] + '_' + token.id)
+    }
+    if (pair === null) {
+      continue
+    }
 
-        // if pool is just created, skip it
-        if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue
+    let pools = pair.pools
+    for (let j = 0; j < pools.length; ++j) {
+      let pool = Pool.load(pools[j])
+      // there is a case when 2 pools are created at the same blocks
+      // so the 2nd pool is not exist in the storage yet
+      if (pool === null) continue
 
-        let percentToken0 = pool.reserve0
-          .div(pool.vReserve0)
-          .times(BD_100)
-          .div(pool.reserve0.div(pool.vReserve0).plus(pool.reserve1.div(pool.vReserve1)))
+      // if pool is just created, skip it
+      if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue
 
-        if (percentToken0.gt(BD_90) || percentToken0.lt(BD_10)) continue
+      let percentToken0 = pool.reserve0
+        .div(pool.vReserve0)
+        .times(BD_100)
+        .div(pool.reserve0.div(pool.vReserve0).plus(pool.reserve1.div(pool.vReserve1)))
 
-        if (pool.token0 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
-          let token1 = Token.load(pool.token1)
-          if (token1 === null) {
-            continue
-          }
-          let tokenPrice = pool.token1Price.times(token1.derivedETH)
-          totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token1 per our token * Eth per token 1
-          totalPoolNum = totalPoolNum.plus(ONE_BD)
+      if (percentToken0.gt(BD_90) || percentToken0.lt(BD_10)) continue
+
+      if (pool.token0 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
+        let token1 = Token.load(pool.token1)
+        if (token1 === null) {
+          continue
         }
-        if (pool.token1 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
-          let token0 = Token.load(pool.token0)
-          if (token0 === null) {
-            continue
-          }
-          let tokenPrice = pool.token0Price.times(token0.derivedETH)
-          totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token0 per our token * ETH per token 0
-          totalPoolNum = totalPoolNum.plus(ONE_BD)
+        let tokenPrice = pool.token1Price.times(token1.derivedETH)
+        totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token1 per our token * Eth per token 1
+        totalPoolNum = totalPoolNum.plus(ONE_BD)
+      }
+      if (pool.token1 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
+        let token0 = Token.load(pool.token0)
+        if (token0 === null) {
+          continue
         }
+        let tokenPrice = pool.token0Price.times(token0.derivedETH)
+        totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token0 per our token * ETH per token 0
+        totalPoolNum = totalPoolNum.plus(ONE_BD)
       }
     }
   }

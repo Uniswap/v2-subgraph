@@ -1,13 +1,12 @@
 /* eslint-disable prefer-const */
 import { BigInt, BigDecimal, store, Address, log } from '@graphprotocol/graph-ts'
 import { FACTORY_ADDRESS, ADDRESS_ZERO, ADDRESS_LOCK } from '../config/constants'
-import { Pool as PoolContract, Transfer, Mint, Burn, Swap, Sync } from '../types/templates/Pool/Pool'
+import { Transfer, Mint, Burn, Swap, Sync } from '../types/templates/Pool/Pool'
 import {
   DmmFactory,
   Pair,
   Pool,
   Token,
-  Transaction,
   Mint as MintEvent,
   Burn as BurnEvent,
   Swap as SwapEvent,
@@ -57,7 +56,6 @@ export function handleTransfer(event: Transfer): void {
   // get pair and load contract
   // const pair = Pair.load(event.address.toHexString())
   let pool = Pool.load(event.address.toHexString())
-  let poolContract = PoolContract.bind(event.address)
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
 
@@ -212,17 +210,19 @@ export function handleTransfer(event: Transfer): void {
   }
   // TODO fix liquidity position !!!!!!!!!!!!!!!
   if (from.toHexString() != ADDRESS_ZERO && from.toHexString() != pool.id) {
-    let fromUserLiquidityPosition = createLiquidityPosition(event.address, pair.id, from)
-    fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(poolContract.balanceOf(from), BI_18)
-    fromUserLiquidityPosition.save()
-    createLiquiditySnapshot(fromUserLiquidityPosition, event)
+    let fromLpPosition = createLiquidityPosition(event.address, pair.id, from)
+    fromLpPosition.liquidityTokenBalanceBI = fromLpPosition.liquidityTokenBalanceBI.minus(event.params.value)
+    fromLpPosition.liquidityTokenBalance = convertTokenToDecimal(fromLpPosition.liquidityTokenBalanceBI, BI_18)
+    fromLpPosition.save()
+    createLiquiditySnapshot(fromLpPosition, event)
   }
 
   if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pool.id) {
-    let toUserLiquidityPosition = createLiquidityPosition(event.address, pair.id, to)
-    toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(poolContract.balanceOf(to), BI_18)
-    toUserLiquidityPosition.save()
-    createLiquiditySnapshot(toUserLiquidityPosition, event)
+    let toLpPosition = createLiquidityPosition(event.address, pair.id, to)
+    toLpPosition.liquidityTokenBalanceBI = toLpPosition.liquidityTokenBalanceBI.plus(event.params.value)
+    toLpPosition.liquidityTokenBalance = convertTokenToDecimal(toLpPosition.liquidityTokenBalanceBI, BI_18)
+    toLpPosition.save()
+    createLiquiditySnapshot(toLpPosition, event)
   }
 
   transaction.save()

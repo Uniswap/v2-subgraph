@@ -14,10 +14,7 @@ import {
   Token,
   Transaction
 } from '../types/schema'
-import { Factory as FactoryContract } from '../types/templates/Pool/Factory'
 import { KNC_ADDRESS, KNC_NAME, KNC_SYMBOL, KNCL_ADDRESS, KNCL_NAME, KNCL_SYMBOL } from '../config/constants'
-
-export let factoryContract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
 
 export let ZERO_BD = BigDecimal.fromString('0')
 export let ONE_BD = BigDecimal.fromString('1')
@@ -189,12 +186,12 @@ export function createLiquidityPosition(poolAddress: Address, pair: string, user
     pool.liquidityProviderCount = pool.liquidityProviderCount.plus(ONE_BI)
     liquidityTokenBalance = new LiquidityPosition(id)
     liquidityTokenBalance.liquidityTokenBalance = ZERO_BD
+    liquidityTokenBalance.liquidityTokenBalanceBI = ZERO_BI
     liquidityTokenBalance.pair = pair
     liquidityTokenBalance.pool = pool.id
     liquidityTokenBalance.user = user.toHexString()
     liquidityTokenBalance.save()
   }
-  if (liquidityTokenBalance === null) log.error('LiquidityTokenBalance is null', [id])
   return liquidityTokenBalance as LiquidityPosition
 }
 

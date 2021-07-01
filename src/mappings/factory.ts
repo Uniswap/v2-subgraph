@@ -33,7 +33,7 @@ export function handlePoolCreated(event: PoolCreated): void {
   factory.poolCount = factory.poolCount + 1
   factory.save()
 
-  log.debug('222------save factory success ------ ', [])
+  log.debug('------save factory success ------', [])
 
   // create the tokens
   let token0 = Token.load(event.params.token0.toHexString())
@@ -54,9 +54,9 @@ export function handlePoolCreated(event: PoolCreated): void {
     // token0.allPairs = []
     token0.txCount = ZERO_BI
     token0.save()
-  }
 
-  log.debug('333------token 000 success ------ ', [])
+    log.debug('------fetch token 0 success ------ ', [token0.id])
+  }
 
   // fetch info if null
   if (token1 === null) {
@@ -73,43 +73,45 @@ export function handlePoolCreated(event: PoolCreated): void {
     // token1.allPairs = []
     token1.txCount = ZERO_BI
     token1.save()
+
+    log.debug('------fetch token 1 success ------ ', [token1.id])
   }
 
+  let pool = new Pool(event.params.pool.toHexString())
   let pairId = token0.id + '_' + token1.id
   let pair = Pair.load(pairId)
 
   if (pair == null) {
     // create new pair
-    let newPair = new Pair(pairId)
-    newPair.token0 = token0.id
-    newPair.token1 = token1.id
-    newPair.liquidityProviderCount = ZERO_BI
-    newPair.createdAtTimestamp = event.block.timestamp
-    newPair.createdAtBlockNumber = event.block.number
-    newPair.txCount = ZERO_BI
-    newPair.reserve0 = ZERO_BD
-    newPair.reserve1 = ZERO_BD
-    newPair.trackedReserveETH = ZERO_BD
-    newPair.reserveETH = ZERO_BD
-    newPair.reserveUSD = ZERO_BD
-    newPair.totalSupply = ZERO_BD
-    newPair.volumeToken0 = ZERO_BD
-    newPair.volumeToken1 = ZERO_BD
-    newPair.volumeUSD = ZERO_BD
-    newPair.feeUSD = ZERO_BD
-    newPair.untrackedFeeUSD = ZERO_BD
-    newPair.untrackedVolumeUSD = ZERO_BD
-    newPair.token0Price = ZERO_BD
-    newPair.token1Price = ZERO_BD
-    newPair.save()
-
-    pair = newPair
+    pair = new Pair(pairId)
+    pair.token0 = token0.id
+    pair.token1 = token1.id
+    pair.liquidityProviderCount = ZERO_BI
+    pair.createdAtTimestamp = event.block.timestamp
+    pair.createdAtBlockNumber = event.block.number
+    pair.txCount = ZERO_BI
+    pair.reserve0 = ZERO_BD
+    pair.reserve1 = ZERO_BD
+    pair.trackedReserveETH = ZERO_BD
+    pair.reserveETH = ZERO_BD
+    pair.reserveUSD = ZERO_BD
+    pair.totalSupply = ZERO_BD
+    pair.volumeToken0 = ZERO_BD
+    pair.volumeToken1 = ZERO_BD
+    pair.volumeUSD = ZERO_BD
+    pair.feeUSD = ZERO_BD
+    pair.untrackedFeeUSD = ZERO_BD
+    pair.untrackedVolumeUSD = ZERO_BD
+    pair.token0Price = ZERO_BD
+    pair.token1Price = ZERO_BD
+    pair.pools = []
 
     factory.pairCount = factory.pairCount + 1
     factory.save()
   }
+  pair.pools = pair.pools.concat([pool.id])
+  pair.save()
 
-  let pool = new Pool(event.params.pool.toHexString()) as Pool
   pool.token0 = token0.id
   pool.token1 = token1.id
   pool.pair = pair.id
