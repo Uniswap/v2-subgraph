@@ -14,12 +14,9 @@ import { ZERO_BD, factoryContract, ONE_BD, BD_100, BD_90, BD_10 } from './utils'
 
 export function getPairReserve(pair: Pair | null, isToken0: boolean): BigDecimal {
   let totalReserve = ZERO_BD
-
-  let arrayPoolAddresses = factoryContract.getPools(Address.fromString(pair.token0), Address.fromString(pair.token1))
-
-  for (let i = 0; i < arrayPoolAddresses.length; ++i) {
-    let poolAddr = arrayPoolAddresses[i]
-    let pool = Pool.load(poolAddr.toHexString())
+  let poolAddresses = pair.pools
+  for (let i = 0; i < poolAddresses.length; ++i) {
+    let pool = Pool.load(poolAddresses[i])
     if (pool !== null) {
       if (isToken0) {
         totalReserve = totalReserve.plus(pool.reserve0)
@@ -148,13 +145,19 @@ export function findEthPerToken(token: Token): BigDecimal {
 
         if (pool.token0 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
           let token1 = Token.load(pool.token1)
-          let tokenPrice = pool.token1Price.times(token1.derivedETH as BigDecimal)
+          if (token1 === null) {
+            continue
+          }
+          let tokenPrice = pool.token1Price.times(token1.derivedETH)
           totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token1 per our token * Eth per token 1
           totalPoolNum = totalPoolNum.plus(ONE_BD)
         }
         if (pool.token1 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
           let token0 = Token.load(pool.token0)
-          let tokenPrice = pool.token0Price.times(token0.derivedETH as BigDecimal)
+          if (token0 === null) {
+            continue
+          }
+          let tokenPrice = pool.token0Price.times(token0.derivedETH)
           totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token0 per our token * ETH per token 0
           totalPoolNum = totalPoolNum.plus(ONE_BD)
         }

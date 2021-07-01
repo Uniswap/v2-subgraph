@@ -274,10 +274,10 @@ export function handleMint(event: Mint): void {
   pool.save()
 
   mint.sender = event.params.sender
-  mint.amount0 = token0Amount as BigDecimal
-  mint.amount1 = token1Amount as BigDecimal
+  mint.amount0 = token0Amount
+  mint.amount1 = token1Amount
   mint.logIndex = event.logIndex
-  mint.amountUSD = amountTotalUSD as BigDecimal
+  mint.amountUSD = amountTotalUSD
   mint.save()
 
   // TODO update the LP position !!!!!!!!!!!
@@ -345,11 +345,11 @@ export function handleBurn(event: Burn): void {
 
   // update burn
   // burn.sender = event.params.sender
-  burn.amount0 = token0Amount as BigDecimal
-  burn.amount1 = token1Amount as BigDecimal
+  burn.amount0 = token0Amount
+  burn.amount1 = token1Amount
   // burn.to = event.params.to
   burn.logIndex = event.logIndex
-  burn.amountUSD = amountTotalUSD as BigDecimal
+  burn.amountUSD = amountTotalUSD
   burn.save()
 
   // //TODO update the LP position !!!!!
@@ -405,10 +405,8 @@ export function handleSwap(event: Swap): void {
 
   log.debug('++++++++ tracked amount usd  {}  ', [trackedAmountUSD.toString()])
 
-  let trackedAmountETH: BigDecimal
-  if (bundle.ethPrice.equals(ZERO_BD)) {
-    trackedAmountETH = ZERO_BD
-  } else {
+  let trackedAmountETH = ZERO_BD
+  if (bundle.ethPrice.notEqual(ZERO_BD)) {
     trackedAmountETH = trackedAmountUSD.div(bundle.ethPrice)
   }
 
@@ -543,17 +541,17 @@ export function handleSwap(event: Swap): void {
 
   // swap specific updating for token0
   token0DayData.dailyVolumeToken = token0DayData.dailyVolumeToken.plus(amount0Total)
-  token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(amount0Total.times(token1.derivedETH as BigDecimal))
+  token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(amount0Total.times(token1.derivedETH))
   token0DayData.dailyVolumeUSD = token0DayData.dailyVolumeUSD.plus(
-    amount0Total.times(token0.derivedETH as BigDecimal).times(bundle.ethPrice)
+    amount0Total.times(token0.derivedETH).times(bundle.ethPrice)
   )
   token0DayData.save()
 
   // swap specific updating
   token1DayData.dailyVolumeToken = token1DayData.dailyVolumeToken.plus(amount1Total)
-  token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(amount1Total.times(token1.derivedETH as BigDecimal))
+  token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(amount1Total.times(token1.derivedETH))
   token1DayData.dailyVolumeUSD = token1DayData.dailyVolumeUSD.plus(
-    amount1Total.times(token1.derivedETH as BigDecimal).times(bundle.ethPrice)
+    amount1Total.times(token1.derivedETH).times(bundle.ethPrice)
   )
   token1DayData.save()
 }
@@ -568,10 +566,8 @@ export function handleSync(event: Sync): void {
   let factory = DmmFactory.load(FACTORY_ADDRESS)
 
   // reset factory liquidity by subtracting onluy tarcked liquidity
-  factory.totalLiquidityETH = factory.totalLiquidityETH.minus(pool.trackedReserveETH as BigDecimal)
-  factory.totalAmplifiedLiquidityETH = factory.totalAmplifiedLiquidityETH.minus(
-    pool.amplifiedTrackedLiquidityEth as BigDecimal
-  )
+  factory.totalLiquidityETH = factory.totalLiquidityETH.minus(pool.trackedReserveETH)
+  factory.totalAmplifiedLiquidityETH = factory.totalAmplifiedLiquidityETH.minus(pool.amplifiedTrackedLiquidityEth)
 
   // reset token total liquidity amounts
   token0.totalLiquidity = token0.totalLiquidity.minus(pool.reserve0)
@@ -667,8 +663,8 @@ export function handleSync(event: Sync): void {
   token1.save()
 
   // get tracked liquidity - will be 0 if neither is in whitelist
-  let trackedLiquidityETH: BigDecimal
-  let amplifiedTrackedLiquidityEth: BigDecimal
+  let trackedLiquidityETH = ZERO_BD
+  let amplifiedTrackedLiquidityEth = ZERO_BD
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
     trackedLiquidityETH = getTrackedLiquidityUSD(pool.reserve0, token0 as Token, pool.reserve1, token1 as Token).div(
       bundle.ethPrice
@@ -679,24 +675,17 @@ export function handleSync(event: Sync): void {
       pool.vReserve1,
       token1 as Token
     ).div(bundle.ethPrice)
-  } else {
-    trackedLiquidityETH = ZERO_BD
-    amplifiedTrackedLiquidityEth = ZERO_BD
   }
 
   pair.trackedReserveETH = trackedLiquidityETH
-  pair.reserveETH = pair.reserve0
-    .times(token0.derivedETH as BigDecimal)
-    .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
+  pair.reserveETH = pair.reserve0.times(token0.derivedETH).plus(pair.reserve1.times(token1.derivedETH))
   pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
 
   // use derived amounts within pool
   pool.trackedReserveETH = trackedLiquidityETH
   pool.amplifiedTrackedLiquidityEth = amplifiedTrackedLiquidityEth
 
-  pool.reserveETH = pool.reserve0
-    .times(token0.derivedETH as BigDecimal)
-    .plus(pool.reserve1.times(token1.derivedETH as BigDecimal))
+  pool.reserveETH = pool.reserve0.times(token0.derivedETH).plus(pool.reserve1.times(token1.derivedETH))
   pool.reserveUSD = pool.reserveETH.times(bundle.ethPrice)
 
   // log.error("++++++++++ calculate pool reserve eth {} - {} {} {} {} {}", [pool.id, pool.reserve0.toString(), token0.derivedETH.toString(), pool.reserve1.toString(), token1.derivedETH.toString(), pool.reserveETH.toString()])
@@ -705,9 +694,7 @@ export function handleSync(event: Sync): void {
   // use tracked amounts globally
   factory.totalLiquidityETH = factory.totalLiquidityETH.plus(trackedLiquidityETH)
   factory.totalLiquidityUSD = factory.totalLiquidityETH.times(bundle.ethPrice)
-  factory.totalAmplifiedLiquidityETH = factory.totalAmplifiedLiquidityETH.plus(
-    pool.amplifiedTrackedLiquidityEth as BigDecimal
-  )
+  factory.totalAmplifiedLiquidityETH = factory.totalAmplifiedLiquidityETH.plus(pool.amplifiedTrackedLiquidityEth)
   factory.totalAmplifiedLiquidityUSD = factory.totalAmplifiedLiquidityETH.times(bundle.ethPrice)
 
   // now correctly set liquidity amounts for each token

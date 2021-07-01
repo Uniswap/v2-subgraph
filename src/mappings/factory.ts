@@ -55,14 +55,7 @@ export function handlePoolCreated(event: PoolCreated): void {
     token0.symbol = fetchTokenSymbol(event.params.token0)
     token0.name = fetchTokenName(event.params.token0)
     token0.totalSupply = fetchTokenTotalSupply(event.params.token0)
-    let decimals = fetchTokenDecimals(event.params.token0)
-    // bail if we couldn't figure out the decimals
-    if (decimals === null) {
-      log.debug('mybug the decimal on token 0 was null', [])
-      return
-    }
-
-    token0.decimals = decimals
+    token0.decimals = fetchTokenDecimals(event.params.token0)
     token0.derivedETH = ZERO_BD
     token0.tradeVolume = ZERO_BD
     token0.tradeVolumeUSD = ZERO_BD
@@ -70,6 +63,7 @@ export function handlePoolCreated(event: PoolCreated): void {
     token0.totalLiquidity = ZERO_BD
     // token0.allPairs = []
     token0.txCount = ZERO_BI
+    token0.save()
   }
 
   log.debug('333------token 000 success ------ ', [])
@@ -80,13 +74,7 @@ export function handlePoolCreated(event: PoolCreated): void {
     token1.symbol = fetchTokenSymbol(event.params.token1)
     token1.name = fetchTokenName(event.params.token1)
     token1.totalSupply = fetchTokenTotalSupply(event.params.token1)
-    let decimals = fetchTokenDecimals(event.params.token1)
-
-    // bail if we couldn't figure out the decimals
-    if (decimals === null) {
-      return
-    }
-    token1.decimals = decimals
+    token1.decimals = fetchTokenDecimals(event.params.token1)
     token1.derivedETH = ZERO_BD
     token1.tradeVolume = ZERO_BD
     token1.tradeVolumeUSD = ZERO_BD
@@ -94,6 +82,7 @@ export function handlePoolCreated(event: PoolCreated): void {
     token1.totalLiquidity = ZERO_BD
     // token1.allPairs = []
     token1.txCount = ZERO_BI
+    token1.save()
   }
 
   let pairId = token0.id + '_' + token1.id
@@ -101,10 +90,9 @@ export function handlePoolCreated(event: PoolCreated): void {
 
   if (pair == null) {
     // create new pair
-    let newPair = new Pair(pairId) as Pair
+    let newPair = new Pair(pairId)
     newPair.token0 = token0.id
     newPair.token1 = token1.id
-    // newPair.pools = []
     newPair.liquidityProviderCount = ZERO_BI
     newPair.createdAtTimestamp = event.block.timestamp
     newPair.createdAtBlockNumber = event.block.number
@@ -130,8 +118,6 @@ export function handlePoolCreated(event: PoolCreated): void {
     factory.pairCount = factory.pairCount + 1
     factory.save()
   }
-
-  // log.debug("555------pair success ------ ", [])
 
   let pool = new Pool(event.params.pool.toHexString()) as Pool
   pool.token0 = token0.id
@@ -168,17 +154,6 @@ export function handlePoolCreated(event: PoolCreated): void {
   pool.amp = event.params.ampBps.toBigDecimal()
   pool.save()
 
-  // let pairPools = pair.pools
-  // pairPools.push(pool.id)
-  // pair.pools = pairPools
-  // pair.save()
-
   // create the tracked contract based on the template
   PoolTemplate.create(event.params.pool)
-
-  // save updated values
-  token0.save()
-  token1.save()
-  // pair.save()
-  // factory.save()
 }
