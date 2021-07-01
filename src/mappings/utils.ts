@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { log, BigDecimal, BigInt, Address, EthereumEvent, EthereumBlock, Bytes } from '@graphprotocol/graph-ts'
+import { log, BigDecimal, BigInt, Address, ethereum, Bytes } from '@graphprotocol/graph-ts'
 import { FACTORY_ADDRESS } from '../config/constants'
 import { ERC20 } from '../types/DmmFactory/ERC20'
 import { ERC20SymbolBytes } from '../types/DmmFactory/ERC20SymbolBytes'
@@ -146,7 +146,7 @@ export function createUser(address: Address): void {
   }
 }
 
-export function createOrLoadTransaction(txHash: Bytes, block: EthereumBlock): Transaction {
+export function createOrLoadTransaction(txHash: Bytes, block: ethereum.Block): Transaction {
   let tx = Transaction.load(txHash.toHexString())
   if (tx === null) {
     tx = new Transaction(txHash.toHexString())
@@ -198,7 +198,7 @@ export function createLiquidityPosition(poolAddress: Address, pair: string, user
   return liquidityTokenBalance as LiquidityPosition
 }
 
-export function createLiquiditySnapshot(position: LiquidityPosition, event: EthereumEvent): void {
+export function createLiquiditySnapshot(position: LiquidityPosition, event: ethereum.Event): void {
   let timestamp = event.block.timestamp.toI32()
   let bundle = Bundle.load('1')
   let pool = Pool.load(position.pool)

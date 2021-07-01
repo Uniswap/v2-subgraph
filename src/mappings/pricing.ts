@@ -132,6 +132,9 @@ export function findEthPerToken(token: Token): BigDecimal {
       let totalPoolNum = ZERO_BD
       for (let j = 0; j < arrayPoolAddresses.length; ++j) {
         let pool = Pool.load(arrayPoolAddresses[j].toHexString())
+        // there is a case when 2 pools are created at the same blocks
+        // so the 2nd pool is not exist in the storage yet
+        if (pool === null) continue
 
         // if pool is just created, skip it
         if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue

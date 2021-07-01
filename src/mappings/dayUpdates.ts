@@ -1,6 +1,6 @@
 import { PairHourData, PoolHourData } from './../types/schema'
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal, EthereumEvent } from '@graphprotocol/graph-ts'
+import { BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { FACTORY_ADDRESS } from '../config/constants'
 import {
   Pair,
@@ -15,7 +15,7 @@ import {
 } from '../types/schema'
 import { ONE_BI, ZERO_BD, ZERO_BI } from './utils'
 
-export function updateDmmDayData(event: EthereumEvent): DmmDayData {
+export function updateDmmDayData(event: ethereum.Event): DmmDayData {
   let factory = DmmFactory.load(FACTORY_ADDRESS)
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
@@ -39,7 +39,7 @@ export function updateDmmDayData(event: EthereumEvent): DmmDayData {
   return dayData as DmmDayData
 }
 
-export function updatePairDayData(event: EthereumEvent, pairId: string): PairDayData {
+export function updatePairDayData(event: ethereum.Event, pairId: string): PairDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
@@ -68,7 +68,7 @@ export function updatePairDayData(event: EthereumEvent, pairId: string): PairDay
   return pairDayData as PairDayData
 }
 
-export function updatePairHourData(event: EthereumEvent, pairId: string): PairHourData {
+export function updatePairHourData(event: ethereum.Event, pairId: string): PairHourData {
   let timestamp = event.block.timestamp.toI32()
   let hourIndex = timestamp / 3600 // get unique hour within unix history
   let hourStartUnix = hourIndex * 3600 // want the rounded effect
@@ -93,7 +93,7 @@ export function updatePairHourData(event: EthereumEvent, pairId: string): PairHo
   return pairHourData as PairHourData
 }
 
-export function updatePoolDayData(event: EthereumEvent): PoolDayData {
+export function updatePoolDayData(event: ethereum.Event): PoolDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
@@ -128,7 +128,7 @@ export function updatePoolDayData(event: EthereumEvent): PoolDayData {
   return poolDayData as PoolDayData
 }
 
-export function updatePoolHourData(event: EthereumEvent): PoolHourData {
+export function updatePoolHourData(event: ethereum.Event): PoolHourData {
   let timestamp = event.block.timestamp.toI32()
   let hourIndex = timestamp / 3600 // get unique hour within unix history
   let hourStartUnix = hourIndex * 3600 // want the rounded effect
@@ -160,7 +160,7 @@ export function updatePoolHourData(event: EthereumEvent): PoolHourData {
   return poolHourData as PoolHourData
 }
 
-export function updateTokenDayData(token: Token, event: EthereumEvent): TokenDayData {
+export function updateTokenDayData(token: Token, event: ethereum.Event): TokenDayData {
   let bundle = Bundle.load('1')
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
@@ -184,7 +184,7 @@ export function updateTokenDayData(token: Token, event: EthereumEvent): TokenDay
   }
   tokenDayData.priceUSD = token.derivedETH.times(bundle.ethPrice)
   tokenDayData.totalLiquidityToken = token.totalLiquidity
-  tokenDayData.totalLiquidityETH = token.totalLiquidity.times(token.derivedETH as BigDecimal)
+  tokenDayData.totalLiquidityETH = token.totalLiquidity.times(token.derivedETH)
   tokenDayData.totalLiquidityUSD = tokenDayData.totalLiquidityETH.times(bundle.ethPrice)
   tokenDayData.dailyTxns = tokenDayData.dailyTxns.plus(ONE_BI)
   tokenDayData.save()

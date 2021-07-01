@@ -4,16 +4,7 @@ import { FACTORY_ADDRESS } from '../config/constants'
 import { DmmFactory, Bundle, Pair, Token, Pool } from '../types/schema'
 import { PoolCreated } from '../types/DmmFactory/DmmFactory'
 import { Pool as PoolTemplate } from '../types/templates'
-import {
-  ZERO_BD,
-  ZERO_BI,
-  BI_18,
-  fetchTokenSymbol,
-  fetchTokenName,
-  fetchTokenTotalSupply,
-  fetchTokenDecimals,
-  convertTokenToDecimal
-} from './utils'
+import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenTotalSupply, fetchTokenDecimals } from './utils'
 
 export function handlePoolCreated(event: PoolCreated): void {
   log.debug('------run to handle pool created ------ ', [])
@@ -43,7 +34,6 @@ export function handlePoolCreated(event: PoolCreated): void {
   factory.save()
 
   log.debug('222------save factory success ------ ', [])
-  ///////  PoolCreated (index_topic_1 address token0, index_topic_2 address token1, address pool, uint32 ampBps, uint256 totalPool)
 
   // create the tokens
   let token0 = Token.load(event.params.token0.toHexString())
