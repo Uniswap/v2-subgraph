@@ -124,12 +124,14 @@ export function findEthPerToken(token: Token): BigDecimal {
   if (token.id == WETH_ADDRESS) {
     return ONE_BD
   }
+
+  let totalPoolPrice = ZERO_BD
+  let totalPoolNum = ZERO_BD
+
   // loop through whitelist and check if paired with any
   for (let i = 0; i < WHITELIST.length; ++i) {
     let arrayPoolAddresses = factoryContract.getPools(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
     if (arrayPoolAddresses) {
-      let totalPoolPrice = ZERO_BD
-      let totalPoolNum = ZERO_BD
       for (let j = 0; j < arrayPoolAddresses.length; ++j) {
         let pool = Pool.load(arrayPoolAddresses[j].toHexString())
         // there is a case when 2 pools are created at the same blocks
@@ -165,11 +167,13 @@ export function findEthPerToken(token: Token): BigDecimal {
           totalPoolNum = totalPoolNum.plus(ONE_BD)
         }
       }
-      if (totalPoolNum.gt(ZERO_BD)) {
-        return totalPoolPrice.div(totalPoolNum)
-      }
     }
   }
+
+  if (totalPoolNum.gt(ZERO_BD)) {
+    return totalPoolPrice.div(totalPoolNum)
+  }
+
   return ZERO_BD // nothing was found return 0
 }
 
