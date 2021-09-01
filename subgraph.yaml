@@ -13,7 +13,7 @@ dataSources:
       startBlock: 12178218  # contract creation block
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/mappings/factory.ts
       entities:   # defines which entities are written to stores
@@ -41,7 +41,7 @@ dataSources:
       startBlock: 12720768  # contract creation block
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/mappings/rewardLocker.ts
       entities:   # defines which entities are written to stores
@@ -64,7 +64,7 @@ templates:
       abi: Pool
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/mappings/core.ts
       entities:
@@ -93,7 +93,7 @@ templates:
       abi: KyberFairLaunch
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/mappings/fairLaunch.ts
       entities:

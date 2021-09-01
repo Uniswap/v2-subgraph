@@ -15,13 +15,15 @@
     "deploy-semi-prod": "graph deploy piavgh/dmm-exchange-prod --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy-prod": "graph deploy dynamic-amm/dynamic-amm --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy-mumbai": "graph deploy piavgh/dmm-exchange-mumbai --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
-    "deploy-matic": "graph deploy piavgh/dmm-exchange-matic --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy-matic": "graph deploy dynamic-amm/dmm-exchange-matic --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy-matic-staging": "graph deploy piavgh/dmm-exchange-matic-staging --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy-bsc": "graph deploy dynamic-amm/dmm-exchange-bsc --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy-avax": "graph deploy dynamic-amm/dmm-exchange-avax --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "watch-local": "graph deploy dynamic-amm/dynamic-amm --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001",
     "prettier": "./node_modules/.bin/prettier --write src/mappings/*"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "0.20.1",
+    "@graphprotocol/graph-cli": "0.21.1",
     "@graphprotocol/graph-ts": "0.20.1",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
