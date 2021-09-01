@@ -4,7 +4,7 @@
     "startBlock": "10475000",
     "factory_address": "0x878dfe971d44e9122048308301f540910bbd934c",
     "eth_pricing_pools": "0xd754bd4dd62d6bb937848cbaa7ca4fe8b9be0096",
-    "weth_address": "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+    "weth_address": "0xec303ce1edbebf7e71fc7b350341bb6a6a7a6381",
     "dai_address": "0xe9e7cea3dedca5984780bafc599bd69add087d56",
     "usdc_address": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
     "usdt_address": "0x55d398326f99059ff775485246999027b3197955",
