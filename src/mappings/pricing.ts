@@ -143,6 +143,9 @@ export function findEthPerToken(token: Token): BigDecimal {
         if (token1 === null) {
           continue
         }
+        if(token1.derivedETH.equals(ZERO_BD)) {
+          continue
+        }
         let tokenPrice = pool.token1Price.times(token1.derivedETH)
         totalPoolPrice = totalPoolPrice.plus(tokenPrice) // return token1 per our token * Eth per token 1
         totalPoolNum = totalPoolNum.plus(ONE_BD)
@@ -150,6 +153,9 @@ export function findEthPerToken(token: Token): BigDecimal {
       if (pool.token1 == token.id && pool.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
         let token0 = Token.load(pool.token0)
         if (token0 === null) {
+          continue
+        }
+        if(token0.derivedETH.equals(ZERO_BD)) {
           continue
         }
         let tokenPrice = pool.token0Price.times(token0.derivedETH)
