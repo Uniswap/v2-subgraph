@@ -45,7 +45,6 @@ export function handleTransfer(event: Transfer): void {
   }
 
   let factory = DmmFactory.load(FACTORY_ADDRESS)
-  let transactionHash = event.transaction.hash.toHexString()
 
   // user stats
   let from = event.params.from
@@ -101,6 +100,10 @@ export function handleTransfer(event: Transfer): void {
       // save entities
       transaction.save()
       factory.save()
+    } else { // the first event is a logical mint
+      let mint = MintEvent.load(mints[mints.length - 1])
+      mint.to = to;
+      mint.save();
     }
   }
 
