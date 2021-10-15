@@ -32,6 +32,8 @@ dataSources:
       eventHandlers:
         - event: PoolCreated(indexed address,indexed address,address,uint32,uint256)
           handler: handlePoolCreated
+        - event: SetFeeConfiguration(address,uint16)
+          handler: handleSetFeeConfiguration
   {{#reward_locker}}
   - kind: ethereum/contract
     name: KyberRewardLocker

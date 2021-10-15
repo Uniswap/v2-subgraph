@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { BigInt, BigDecimal, store, Address, log } from '@graphprotocol/graph-ts'
-import { FACTORY_ADDRESS, ADDRESS_ZERO, ADDRESS_LOCK } from '../config/constants'
+import { FACTORY_ADDRESS, ADDRESS_ZERO, ADDRESS_LOCK, FACTORY_BPS } from '../config/constants'
 import { Transfer, Mint, Burn, Swap, Sync } from '../types/templates/Pool/Pool'
 import {
   DmmFactory,
@@ -100,10 +100,11 @@ export function handleTransfer(event: Transfer): void {
       // save entities
       transaction.save()
       factory.save()
-    } else { // the first event is a logical mint
+    } else {
+      // the first event is a logical mint
       let mint = MintEvent.load(mints[mints.length - 1])
-      mint.to = to;
-      mint.save();
+      mint.to = to
+      mint.save()
     }
   }
 
@@ -455,6 +456,12 @@ export function handleSwap(event: Swap): void {
   factory.untrackedVolumeUSD = factory.untrackedVolumeUSD.plus(derivedAmountUSD)
   factory.untrackedFeeUSD = factory.untrackedFeeUSD.plus(derivedAmountUSD.times(feePercent))
   factory.txCount = factory.txCount.plus(ONE_BI)
+  factory.totalProtocolFeeUSD = factory.totalProtocolFeeUSD.plus(
+    trackedAmountUSD
+      .times(feePercent)
+      .times(BigDecimal.fromString(BigInt.fromI32(factory.governmentFeeBps).toString()))
+      .div(FACTORY_BPS)
+  )
 
   // save entities
   pool.save()

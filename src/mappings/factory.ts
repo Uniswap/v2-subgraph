@@ -2,12 +2,11 @@
 import { log } from '@graphprotocol/graph-ts'
 import { FACTORY_ADDRESS } from '../config/constants'
 import { DmmFactory, Bundle, Pair, Token, Pool } from '../types/schema'
-import { PoolCreated } from '../types/DmmFactory/DmmFactory'
+import { PoolCreated, SetFeeConfiguration } from '../types/DmmFactory/DmmFactory'
 import { Pool as PoolTemplate } from '../types/templates'
 import { ZERO_BD, ZERO_BI, fetchTokenSymbol, fetchTokenName, fetchTokenTotalSupply, fetchTokenDecimals } from './utils'
 
-export function handlePoolCreated(event: PoolCreated): void {
-  log.debug('------run to handle pool created ------ ', [])
+function createOrLoadFactory(): DmmFactory {
   // load factory (create if first exchange)
   let factory = DmmFactory.load(FACTORY_ADDRESS)
   if (factory === null) {
@@ -24,12 +23,22 @@ export function handlePoolCreated(event: PoolCreated): void {
     factory.totalAmplifiedLiquidityETH = ZERO_BD
     factory.totalAmplifiedLiquidityUSD = ZERO_BD
     factory.txCount = ZERO_BI
+    factory.governmentFeeBps = 0
+    factory.totalProtocolFeeUSD = ZERO_BD
 
     // create new bundle
     let bundle = new Bundle('1')
     bundle.ethPrice = ZERO_BD
     bundle.save()
   }
+
+  return factory as DmmFactory
+}
+
+export function handlePoolCreated(event: PoolCreated): void {
+  log.debug('------run to handle PoolCreated event ------ ', [])
+
+  let factory = createOrLoadFactory()
   factory.poolCount = factory.poolCount + 1
   factory.save()
 
@@ -148,4 +157,12 @@ export function handlePoolCreated(event: PoolCreated): void {
 
   // create the tracked contract based on the template
   PoolTemplate.create(event.params.pool)
+}
+
+export function handleSetFeeConfiguration(event: SetFeeConfiguration): void {
+  log.debug('------run to handle SetFeeConfiguration event ------ ', [])
+
+  let factory = createOrLoadFactory()
+  factory.governmentFeeBps = event.params.governmentFeeBps
+  factory.save()
 }

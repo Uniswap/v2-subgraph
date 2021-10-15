@@ -23,6 +23,10 @@ type DmmFactory @entity {
 
   # transactions
   txCount: BigInt!
+
+  # protocol fee
+  governmentFeeBps: Int!
+  totalProtocolFeeUSD: BigDecimal!
 }
 
 type Token @entity {
