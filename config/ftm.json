@@ -8,8 +8,8 @@
     "dai_address": "0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e",
     "usdc_address": "0x04068da6c83afcfa0e13ba15a6696662335d5b75",
     "usdt_address": "0x0e1694483ebb3b74d3054e383840c6cf011e518e",
-    "knc_address": "0xfe56d5892bdffc7bf58f2e84be1b2c32d21c308b",
-    "kncl_address": "0x7b2810576aa1cce68f2b118cef1f36467c648f92",
+    "knc_address": "0x0000000000000000000000000000000000000000",
+    "kncl_address": "0x0000000000000000000000000000000000000000",
     "minimum_usd_threshold_new_pairs": "0",
     "minimum_liquidity_threshold_eth": "0"
 }
