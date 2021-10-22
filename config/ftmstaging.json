@@ -1,15 +1,15 @@
 {
     "network": "fantom",
-    "address": "0x78df70615ffc8066cc0887917f2cd72092c86409",
-    "startBlock": "19668531",
-    "factory_address": "0x78df70615ffc8066cc0887917f2cd72092c86409",
-    "eth_pricing_pools": "0xa4e35c30f2a22ae8e45f1a67e97bd4a868cf68a3",
+    "address": "0x10908c875d865c66f271f5d3949848971c9595c9",
+    "startBlock": "19149849",
+    "factory_address": "0x10908c875d865c66f271f5d3949848971c9595c9",
+    "eth_pricing_pools": "0x706ef64b3842a8a6d31d7dc6669e521cca9f5ce1",
     "weth_address": "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
     "dai_address": "0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e",
     "usdc_address": "0x04068da6c83afcfa0e13ba15a6696662335d5b75",
     "usdt_address": "0x0e1694483ebb3b74d3054e383840c6cf011e518e",
     "knc_address": "0x0000000000000000000000000000000000000000",
     "kncl_address": "0x0000000000000000000000000000000000000000",
-    "minimum_usd_threshold_new_pairs": "4000",
-    "minimum_liquidity_threshold_eth": "1500"
+    "minimum_usd_threshold_new_pairs": "0",
+    "minimum_liquidity_threshold_eth": "0"
 }
