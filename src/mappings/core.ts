@@ -669,8 +669,8 @@ export function handleSync(event: Sync): void {
   log.debug('--------------eth price ----------------- {}', [bundle.ethPrice.toString()])
   bundle.save()
 
-  token0.derivedETH = findEthPerToken(token0 as Token)
-  token1.derivedETH = findEthPerToken(token1 as Token)
+  token0.derivedETH = findEthPerToken(token0 as Token, event)
+  token1.derivedETH = findEthPerToken(token1 as Token, event)
   token0.save()
   token1.save()
 

@@ -28,3 +28,5 @@ export const KNCL_NAME = 'Kyber Network Legacy'
 export const KNCL_SYMBOL = 'KNCL'
 
 export let FACTORY_BPS = BigDecimal.fromString('10000')
+
+export let NETWORK = 'mainnet'
