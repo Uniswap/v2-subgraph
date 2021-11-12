@@ -1,7 +1,9 @@
 /* eslint-disable prefer-const */
 import { Pair, Token, Bundle, Pool } from '../types/schema'
-import { BigDecimal, Address, BigInt, log } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { Sync } from '../types/templates/Pool/Pool'
 import {
+  NETWORK,
   WETH_ADDRESS,
   DAI_ADDRESS,
   USDC_ADDRESS,
@@ -103,7 +105,7 @@ let WHITELIST: string[] = [
  * Search through graph to find derived Eth per token.
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
-export function findEthPerToken(token: Token): BigDecimal {
+export function findEthPerToken(token: Token, event: Sync): BigDecimal {
   if (token.id == WETH_ADDRESS) {
     return ONE_BD
   }
@@ -131,6 +133,16 @@ export function findEthPerToken(token: Token): BigDecimal {
       // if pool is just created, skip it
       if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue
 
+      // Temporary fix for PGX incident that caused USDC price to go crazy
+      if (
+        NETWORK == 'matic' &&
+        pool.id == '0x75b64428086fd78f480b1e05a8ccfd8071994fa9' &&
+        event.block.number.gt(BigInt.fromString('21042007')) &&
+        event.block.number.lt(BigInt.fromString('21042013'))
+      ) {
+        continue
+      }
+
       let percentToken0 = pool.reserve0
         .div(pool.vReserve0)
         .times(BD_100)
@@ -143,7 +155,7 @@ export function findEthPerToken(token: Token): BigDecimal {
         if (token1 === null) {
           continue
         }
-        if(token1.derivedETH.equals(ZERO_BD)) {
+        if (token1.derivedETH.equals(ZERO_BD)) {
           continue
         }
         let tokenPrice = pool.token1Price.times(token1.derivedETH)
@@ -155,7 +167,7 @@ export function findEthPerToken(token: Token): BigDecimal {
         if (token0 === null) {
           continue
         }
-        if(token0.derivedETH.equals(ZERO_BD)) {
+        if (token0.derivedETH.equals(ZERO_BD)) {
           continue
         }
         let tokenPrice = pool.token0Price.times(token0.derivedETH)
