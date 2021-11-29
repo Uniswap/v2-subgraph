@@ -1,0 +1,15 @@
+{
+  "network": "cronos-testnet",
+  "address": "0x7596961744096d12efa3cfa58d1d30edd82bd396",
+  "startBlock": "543294",
+  "factory_address": "0x7596961744096d12efa3cfa58d1d30edd82bd396",
+  "eth_pricing_pools": "0x2b4b833864f75fc23f96b5a0cbde8a4046c710b6",
+  "weth_address": "0x340eefa7154bf23e328f59e936568607841fe027",
+  "dai_address": "0x8662a8111daec7570a1bdf3dbd3e163d41563904",
+  "usdc_address": "0x25f0965f285f03d6f6b3b21c8ec3367412fd0ef6",
+  "usdt_address": "0xa144617afd9205af1cede3cc671da1a409a82c5a",
+  "knc_address": "0x8b4ddf9f13f382aff76d262f6c8c50e6d7961b94",
+  "kncl_address": "0x7b2810576aa1cce68f2b118cef1f36467c648f92",
+  "minimum_usd_threshold_new_pairs": "1",
+  "minimum_liquidity_threshold_eth": "0"
+}
