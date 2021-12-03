@@ -1,9 +1,9 @@
 {
   "network": "cronos-testnet",
-  "address": "0x0a07d9088fb71e1ca327be352c1555486c64c26e",
-  "startBlock": "744010",
-  "factory_address": "0x0a07d9088fb71e1ca327be352c1555486c64c26e",
-  "eth_pricing_pools": "0x9e2a5a7e4e4bcb6ea65f2dcabefb5c13a6a50e64",
+  "address": "0x9fe747aea6173dd2c72e9d9bf4e2bcbbc0f8ad9e",
+  "startBlock": "745367",
+  "factory_address": "0x9fe747aea6173dd2c72e9d9bf4e2bcbbc0f8ad9e",
+  "eth_pricing_pools": "0x50f054dcc974ec1de01707028c41628eb969a9a5",
   "weth_address": "0x1a46dcac1d91f1731574befaedac4e0392726e35",
   "dai_address": "0xfec9c3fecb5f17a2c7b01492498d00966e623454",
   "usdc_address": "0x136ae5cc3150c4e53af8b1dc886464cb9af1ab61",
