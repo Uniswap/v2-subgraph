@@ -14,10 +14,11 @@ export let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('{{ minimum_u
 // minimum liquidity for price to get tracked
 export let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('{{ minimum_liquidity_threshold_eth }}') // default is 2
 
-export const WETH_ADDRESS = '{{ weth_address }}'
+export const WRAPPED_NATIVE_ADDRESS = '{{ wrapped_native_address }}'
 export const DAI_ADDRESS = '{{ dai_address }}'
 export const USDC_ADDRESS = '{{ usdc_address }}'
 export const USDT_ADDRESS = '{{ usdt_address }}'
+export const WETH_ADDRESS = '{{ weth_address }}'
 
 export const KNC_ADDRESS = '{{ knc_address }}'
 export const KNC_NAME = 'Kyber Network'
