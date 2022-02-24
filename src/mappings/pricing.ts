@@ -4,11 +4,12 @@ import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { Sync } from '../types/templates/Pool/Pool'
 import {
   NETWORK,
-  WETH_ADDRESS,
+  WRAPPED_NATIVE_ADDRESS,
   DAI_ADDRESS,
   USDC_ADDRESS,
   USDT_ADDRESS,
   KNC_ADDRESS,
+  WETH_ADDRESS,
   ETH_PRICING_POOLS,
   MINIMUM_USD_THRESHOLD_NEW_PAIRS,
   MINIMUM_LIQUIDITY_THRESHOLD_ETH
@@ -19,10 +20,10 @@ function getAvgPrice(pools: Pool[], totalLiquidityETH: BigDecimal): BigDecimal {
   let price = ZERO_BD
   for (let i = 0; i < pools.length; ++i) {
     let pool = pools[i]
-    let vReserveEth = pool.token0 == WETH_ADDRESS ? pool.vReserve0 : pool.vReserve1
-    let vReserveUSD = pool.token0 == WETH_ADDRESS ? pool.vReserve1 : pool.vReserve0
-    let poolPrice = vReserveUSD.div(vReserveEth)
-    price = price.plus(poolPrice.times(vReserveEth).div(totalLiquidityETH))
+    let vReserveNative = pool.token0 == WRAPPED_NATIVE_ADDRESS ? pool.vReserve0 : pool.vReserve1
+    let vReserveUSD = pool.token0 == WRAPPED_NATIVE_ADDRESS ? pool.vReserve1 : pool.vReserve0
+    let poolPrice = vReserveUSD.div(vReserveNative)
+    price = price.plus(poolPrice.times(vReserveNative).div(totalLiquidityETH))
   }
   log.debug('---------------- getAvgPrice {} {} ------------', [price.toString(), totalLiquidityETH.toString()])
   return price
@@ -46,11 +47,11 @@ export function getEthPriceInUSD(): BigDecimal {
       .div(pool.reserve0.div(pool.vReserve0).plus(pool.reserve1.div(pool.vReserve1)))
     if (percentToken0.gt(BD_90) || percentToken0.lt(BD_10)) continue // pool depleted in 1 side
 
-    let vReserveEth = pool.token0 == WETH_ADDRESS ? pool.vReserve0 : pool.vReserve1
-    let reserveEth = pool.token0 == WETH_ADDRESS ? pool.reserve0 : pool.reserve1
+    let vReserveNative = pool.token0 == WRAPPED_NATIVE_ADDRESS ? pool.vReserve0 : pool.vReserve1
+    let reserveEth = pool.token0 == WRAPPED_NATIVE_ADDRESS ? pool.reserve0 : pool.reserve1
     if (reserveEth.le(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) continue
 
-    totalLiquidityETH = totalLiquidityETH.plus(vReserveEth)
+    totalLiquidityETH = totalLiquidityETH.plus(vReserveNative)
     pools.push(pool!)
   }
   // has at least 1 pool meet all criteria
@@ -65,8 +66,8 @@ export function getEthPriceInUSD(): BigDecimal {
     if (pool === null) continue
     if (pool.vReserve0.equals(ZERO_BD) && pool.vReserve1.equals(ZERO_BD)) continue // pool is not initialized yet
 
-    let vReserveEth = pool.token0 == WETH_ADDRESS ? pool.vReserve0 : pool.vReserve1
-    totalLiquidityETH = totalLiquidityETH.plus(vReserveEth)
+    let vReserveNative = pool.token0 == WRAPPED_NATIVE_ADDRESS ? pool.vReserve0 : pool.vReserve1
+    totalLiquidityETH = totalLiquidityETH.plus(vReserveNative)
     pools.push(pool!)
   }
   if (pools.length != 0) {
@@ -79,7 +80,7 @@ export function getEthPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  WETH_ADDRESS, // WETH
+  WRAPPED_NATIVE_ADDRESS, // WETH
   // '0x85cc44e3b1a035dbdcaeb3aac0e3d2017264c6dc', // DAI - ropsten
   // '0x342452418bf808bfedcb8ae88a7792852777646e', // USDC - ropsten
   // '0x2a555b1cb74025c3decccedaa9b469ff7efe60d3', // USDT
@@ -87,7 +88,8 @@ let WHITELIST: string[] = [
   USDT_ADDRESS, // new USDT
   USDC_ADDRESS, // new USDC
   DAI_ADDRESS, // new DAI
-  KNC_ADDRESS
+  KNC_ADDRESS,
+  WETH_ADDRESS
 
   // '0x0000000000085d4780b73119b644ae5ecd22b376', // TUSD
   // '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643', // cDAI
@@ -108,7 +110,7 @@ let WHITELIST: string[] = [
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
 export function findEthPerToken(token: Token, event: Sync): BigDecimal {
-  if (token.id == WETH_ADDRESS) {
+  if (token.id == WRAPPED_NATIVE_ADDRESS) {
     return ONE_BD
   }
 
