@@ -12,9 +12,13 @@
   "kncl_address": "0x7b2810576aa1cce68f2b118cef1f36467c648f92",
   "weth_address": "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab",
   "minimum_usd_threshold_new_pairs": "4000",
-  "minimum_liquidity_threshold_eth": "150",
+  "minimum_liquidity_threshold_eth": "80",
   "reward_locker": {
     "address": "0xf530a090ef6481cfb33f98c63532e7745abab58a",
     "startBlock": "4451712"
+  },
+  "reward_locker_v2": {
+    "address": "0xe79bfc312328ab75272785dbf5bd871b253709a5",
+    "startBlock": "12176492"
   }
 }

@@ -16,5 +16,9 @@
   "reward_locker": {
     "address": "0xfab5186a194588f5ad5074bd52659302906b4522",
     "startBlock": "10533792"
+  },
+  "reward_locker_v2": {
+    "address": "0xd93f7a2cbf4912158d6ccda585c9d234a0d70652",
+    "startBlock": "10533792"
   }
 }

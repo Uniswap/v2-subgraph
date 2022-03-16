@@ -60,6 +60,32 @@ dataSources:
         - event: Vested(indexed address,indexed address,uint256,uint256)
           handler: handleVestd
   {{/reward_locker}}
+  {{#reward_locker_v2}}
+  - kind: ethereum/contract
+    name: KyberRewardLockerV2
+    network: {{network}}
+    source:
+      address: '{{address}}'
+      abi: KyberRewardLocker
+      startBlock: {{startBlock}}  # contract creation block
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/rewardLocker.ts
+      entities:   # defines which entities are written to stores
+        - RewardLockers
+      abis:
+        - name: KyberRewardLocker
+          file: ./abis/KyberRewardLocker.json
+        - name: KyberFairLaunch
+          file: ./abis/KyberFairLaunch.json
+      eventHandlers:
+        - event: RewardContractAdded(indexed address,indexed address,bool)
+          handler: handleRewardContractAdded
+        - event: Vested(indexed address,indexed address,uint256,uint256)
+          handler: handleVestd
+  {{/reward_locker_v2}}
 templates:
   - kind: ethereum/contract
     name: Pool
@@ -117,3 +143,30 @@ templates:
         - event: AddNewPool(indexed address,indexed uint32,indexed uint32,uint256[])
           handler: handleAddNewPool
   {{/reward_locker}}
+  {{#reward_locker_v2}}
+  - kind: ethereum/contract
+    name: KyberFairLaunchV2
+    network: {{network}}
+    source:
+      abi: KyberFairLaunch
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/fairLaunch.ts
+      entities:
+        - Pool
+        - Token
+      abis:
+        - name: KyberFairLaunch
+          file: ./abis/KyberFairLaunch.json
+      eventHandlers:
+        - event: Deposit(indexed address,indexed uint256,indexed uint256,uint256)
+          handler: handleDeposit
+        - event: Harvest(indexed address,indexed uint256,indexed address,uint256,uint256)
+          handler: handleHarvest
+        - event: Withdraw(indexed address,indexed uint256,indexed uint256,uint256)
+          handler: handleWithdraw
+        - event: AddNewPool(indexed address,indexed uint32,indexed uint32,uint256[])
+          handler: handleAddNewPool
+  {{/reward_locker_v2}}
