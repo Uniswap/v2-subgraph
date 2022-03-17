@@ -139,7 +139,7 @@ export function findEthPerToken(token: Token, event: Sync): BigDecimal {
 
       // Temporary fix for PGX incident that caused USDC price to go crazy
       if (
-        NETWORK == 'matic' &&
+        NETWORK == 'polygon' &&
         pool.id == '0x75b64428086fd78f480b1e05a8ccfd8071994fa9' &&
         event.block.number.gt(BigInt.fromString('21042007')) &&
         event.block.number.lt(BigInt.fromString('21042013'))

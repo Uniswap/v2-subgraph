@@ -4,9 +4,11 @@
   "repository": "https://github.com/dynamic-amm/dmm-subgraph",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "prepare": "mustache config/${NETWORK:-production}.json subgraph.template.yaml > subgraph.yaml && mustache config/${NETWORK:-production}.json src/config/constants/index.template.ts > src/config/constants/index.ts",
+    "prepare": "mustache config/${NETWORK:-ethereum}.json subgraph.template.yaml > subgraph.yaml && mustache config/${NETWORK:-ethereum}.json src/config/constants/index.template.ts > src/config/constants/index.ts",
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
+    "create-subgraph": "graph create kybernetwork/kyberswap-exchange-${NETWORK:-ethereum} --node https://${NETWORK:-ethereum}-graph.kyberengineering.io/admin",
+    "deploy-subgraph": "graph deploy kybernetwork/kyberswap-exchange-${NETWORK:-ethereum} --debug --ipfs https://${NETWORK:-ethereum}-graph.kyberengineering.io/ipfs --node https://${NETWORK:-ethereum}-graph.kyberengineering.io/admin",
     "create-local": "graph create dynamic-amm/dynamic-amm --node http://127.0.0.1:8020",
     "deploy-local": "graph deploy dynamic-amm/dynamic-amm --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "deploy": "graph deploy piavgh/dmm-exchange-ropsten --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",

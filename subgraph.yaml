@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: DmmFactory
-    network: mainnet
+    network: ethereum
     source:
       address: '0x833e4083b7ae46cea85695c4f7ed25cdad8886de'
       abi: DmmFactory
@@ -36,7 +36,7 @@ dataSources:
           handler: handleSetFeeConfiguration
   - kind: ethereum/contract
     name: KyberRewardLocker
-    network: mainnet
+    network: ethereum
     source:
       address: '0xfab5186a194588f5ad5074bd52659302906b4522'
       abi: KyberRewardLocker
@@ -61,7 +61,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Pool
-    network: mainnet
+    network: ethereum
     source:
       abi: Pool
     mapping:
@@ -90,7 +90,7 @@ templates:
           handler: handleSync
   - kind: ethereum/contract
     name: KyberFairLaunch
-    network: mainnet
+    network: ethereum
     source:
       abi: KyberFairLaunch
     mapping:

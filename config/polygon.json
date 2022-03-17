@@ -1,5 +1,5 @@
 {
-  "network": "matic",
+  "network": "polygon",
   "address": "0x5f1fe642060b5b9658c15721ea22e982643c095c",
   "startBlock": "15968294",
   "factory_address": "0x5f1fe642060b5b9658c15721ea22e982643c095c",

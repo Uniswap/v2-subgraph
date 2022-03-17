@@ -30,4 +30,4 @@ export const KNCL_SYMBOL = 'KNCL'
 
 export let FACTORY_BPS = BigDecimal.fromString('10000')
 
-export let NETWORK = 'mainnet'
+export let NETWORK = 'ethereum'

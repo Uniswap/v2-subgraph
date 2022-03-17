@@ -1,5 +1,5 @@
 {
-  "network": "mainnet",
+  "network": "ethereum",
   "address": "0x833e4083b7ae46cea85695c4f7ed25cdad8886de",
   "startBlock": "12178218",
   "factory_address": "0x833e4083b7ae46cea85695c4f7ed25cdad8886de",
