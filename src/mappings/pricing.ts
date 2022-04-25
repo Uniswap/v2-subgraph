@@ -89,7 +89,13 @@ let WHITELIST: string[] = [
   USDC_ADDRESS, // new USDC
   DAI_ADDRESS, // new DAI
   KNC_ADDRESS,
-  WETH_ADDRESS
+  WETH_ADDRESS,
+  // hardcode for bttc
+  '0xca424b845497f7204d9301bd13ff87c0e2e86fcf', // USDC_b
+  '0x9B5F27f6ea9bBD753ce3793a07CbA3C74644330d', // USDT_b
+  '0xe887512ab8bc60bcc9224e1c3b5be68e26048b8b', // USDT_e
+  '0xcbb9edf6775e39748ea6483a7fa6a385cd7e9a4e', // BTT_b
+  '0xdb28719f7f938507dbfe4f0eae55668903d34a15' // USDT_t
 
   // '0x0000000000085d4780b73119b644ae5ecd22b376', // TUSD
   // '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643', // cDAI

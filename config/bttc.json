@@ -1,0 +1,16 @@
+{
+  "network": "bttc",
+  "address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
+  "startBlock": "2852345",
+  "factory_address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
+  "eth_pricing_pools": "0xef07828031970c6bb67d52624396e416aef7a95c",
+  "wrapped_native_address": "0x8d193c6efa90bcff940a98785d1ce9d093d3dc8a",
+  "dai_address": "0xe7dc549ae8db61bde71f22097becc8db542ca100",
+  "usdc_address": "0xca424b845497f7204d9301bd13ff87c0e2e86fcf",
+  "usdt_address": "0x9b5f27f6ea9bbd753ce3793a07cba3c74644330d",
+  "weth_address": "0x1249c65afb11d179ffb3ce7d4eedd1d9b98ad006",
+  "knc_address": "",
+  "kncl_address": "",
+  "minimum_usd_threshold_new_pairs": "1000",
+  "minimum_liquidity_threshold_eth": "2000000000"
+}
