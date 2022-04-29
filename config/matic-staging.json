@@ -5,14 +5,18 @@
   "factory_address": "0x10908c875d865c66f271f5d3949848971c9595c9",
   "eth_pricing_pools": "0x706ef64b3842a8a6d31d7dc6669e521cca9f5ce1|0xe1dad9e06380bc8962e259ddd6a5257a4f56d525|0x0f0fc5a5029e3d155708356b422d22cc29f8b3d4",
   "wrapped_native_address": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
-  "dai_address": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
-  "usdc_address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
-  "usdt_address": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
   "knc_address": "0x51e8d106c646ca58caf32a47812e95887c071a62",
   "kncl_address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
-  "weth_address": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
   "minimum_usd_threshold_new_pairs": "1",
   "minimum_liquidity_threshold_eth": "0",
+  "whitelistedTokens": [
+    "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+    "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+    "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+    "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+    "0x51e8d106c646ca58caf32a47812e95887c071a62",
+    "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619"
+  ],
   "reward_locker": {
     "address": "0xc3e2aed41ecdfb1ad41ed20d45377da98d5489dd",
     "startBlock": "15808049"

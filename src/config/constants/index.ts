@@ -15,10 +15,6 @@ export let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('4000')
 export let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('2') // default is 2
 
 export const WRAPPED_NATIVE_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-export const DAI_ADDRESS = '0x6b175474e89094c44da98b954eedeac495271d0f'
-export const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
-export const USDT_ADDRESS = '0xdac17f958d2ee523a2206206994597c13d831ec7'
-export const WETH_ADDRESS = ''
 
 export const KNC_ADDRESS = '0xdefa4e8a7bcba345f687a2f1456f5edd9ce97202'
 export const KNC_NAME = 'Kyber Network'
@@ -31,3 +27,5 @@ export const KNCL_SYMBOL = 'KNCL'
 export let FACTORY_BPS = BigDecimal.fromString('10000')
 
 export let NETWORK = 'ethereum'
+
+export let WHITELISTED_TOKENS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2,0x6b175474e89094c44da98b954eedeac495271d0f,0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48,0xdac17f958d2ee523a2206206994597c13d831ec7,0xdefa4e8a7bcba345f687a2f1456f5edd9ce97202'
