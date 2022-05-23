@@ -222,6 +222,8 @@ type Mint @entity {
 
   # populated from the Mint event
   sender: Bytes
+  token0: Bytes
+  token1: Bytes
   amount0: BigDecimal
   amount1: BigDecimal
   logIndex: BigInt
@@ -246,6 +248,8 @@ type Burn @entity {
 
   # populated from the Burn event
   sender: Bytes
+  token0: Bytes
+  token1: Bytes
   amount0: BigDecimal
   amount1: BigDecimal
   to: Bytes
@@ -272,6 +276,8 @@ type Swap @entity {
   # populated from the Swap event
   sender: Bytes!
   from: Bytes! # the EOA that initiated the txn
+  tokenIn: Bytes!
+  tokenOut: Bytes!
   amount0In: BigDecimal!
   amount1In: BigDecimal!
   amount0Out: BigDecimal!

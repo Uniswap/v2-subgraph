@@ -278,6 +278,8 @@ export function handleMint(event: Mint): void {
   pool.save()
 
   mint.sender = event.params.sender
+  mint.token0 = Address.fromString(pool.token0)
+  mint.token1 = Address.fromString(pool.token1)
   mint.amount0 = token0Amount
   mint.amount1 = token1Amount
   mint.logIndex = event.logIndex
@@ -349,6 +351,8 @@ export function handleBurn(event: Burn): void {
 
   // update burn
   // burn.sender = event.params.sender
+  burn.token0 = Address.fromString(pool.token0)
+  burn.token1 = Address.fromString(pool.token1)
   burn.amount0 = token0Amount
   burn.amount1 = token1Amount
   // burn.to = event.params.to
@@ -481,9 +485,13 @@ export function handleSwap(event: Swap): void {
   )
 
   // update swap event
+  let tokenIn = amount1Out > BigDecimal.fromString('0') ? pair.token0 : pair.token1
+  let tokenOut = amount1Out > BigDecimal.fromString('0') ? pair.token1 : pair.token0
   swap.transaction = transaction.id
   swap.pool = pool.id
   swap.pair = pair.id
+  swap.tokenIn = Address.fromString(tokenIn);
+  swap.tokenOut = Address.fromString(tokenOut);
   swap.timestamp = transaction.timestamp
   swap.transaction = transaction.id
   swap.origin = event.transaction.from
