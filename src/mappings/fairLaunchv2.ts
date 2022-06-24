@@ -6,11 +6,11 @@ import {
   Harvest as HarvestEvent
 } from '../types/schema'
 
-import { AddNewPool, Deposit, Harvest, Withdraw } from '../types/templates/KyberFairLaunch/KyberFairLaunch'
+import { AddNewPool, Deposit, Harvest, Withdraw } from '../types/templates/KyberFairLaunchV2/KyberFairLaunchV2'
 import { createOrLoadTransaction } from './utils'
 
 export function handleDeposit(event: Deposit): void {
-  log.debug("handleDeposit v1", [])
+  log.debug("handleDeposit v2", [])
   let transaction = createOrLoadTransaction(event.transaction.hash, event.block)
   let fairLaunch = KyberFairLaunch.load(event.address.toHex())
 
@@ -37,7 +37,7 @@ export function handleDeposit(event: Deposit): void {
 }
 
 export function handleWithdraw(event: Withdraw): void {
-  log.debug("handleWithdraw v1", [])
+  log.debug("handleWithdraw v2", [])
   let transaction = createOrLoadTransaction(event.transaction.hash, event.block)
   let fairLaunch = KyberFairLaunch.load(event.address.toHex())
 
@@ -65,14 +65,14 @@ export function handleWithdraw(event: Withdraw): void {
 }
 
 export function handleAddNewPool(event: AddNewPool): void {
-  log.debug("handleAddNewPool v1", [])
+  log.debug("handleAddNewPool v2", [])
   let fairLaunch = KyberFairLaunch.load(event.address.toHex())
   fairLaunch.stakeTokens = fairLaunch.stakeTokens.concat([event.params.stakeToken])
   fairLaunch.save()
 }
 
 export function handleHarvest(event: Harvest): void {
-  log.debug("handleHarvest v1 {}", [event.address.toHexString()])
+  log.debug("handleHarvest v2 {}", [event.address.toHexString()])
   let transaction = createOrLoadTransaction(event.transaction.hash, event.block)
   let fairLaunch = KyberFairLaunch.load(event.address.toHex())
 
@@ -85,7 +85,7 @@ export function handleHarvest(event: Harvest): void {
   )
 
   harvest.transaction = transaction.id
-  harvest.timestamp = event.block.timestamp
+  harvest.timestamp = event.params.timestamp
   harvest.user = event.params.user
   harvest.amount = event.params.lockedAmount
   harvest.poolID = event.params.pid.toI32()

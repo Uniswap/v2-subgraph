@@ -48,7 +48,7 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/rewardLocker.ts
       entities:   # defines which entities are written to stores
-        - RewardLockers
+        - RewardLocker
       abis:
         - name: KyberRewardLocker
           file: ./abis/KyberRewardLocker.json
@@ -66,20 +66,20 @@ dataSources:
     network: {{network}}
     source:
       address: '{{address}}'
-      abi: KyberRewardLocker
+      abi: KyberRewardLockerV2
       startBlock: {{startBlock}}  # contract creation block
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
-      file: ./src/mappings/rewardLocker.ts
-      entities:   # defines which entities are written to stores
-        - RewardLockers
+      file: ./src/mappings/rewardLockerV2.ts
+      entities: # defines which entities are written to stores
+        - RewardLocker
       abis:
-        - name: KyberRewardLocker
-          file: ./abis/KyberRewardLocker.json
-        - name: KyberFairLaunch
-          file: ./abis/KyberFairLaunch.json
+        - name: KyberRewardLockerV2
+          file: ./abis/KyberRewardLockerV2.json
+        - name: KyberFairLaunchV2
+          file: ./abis/KyberFairLaunchV2.json
       eventHandlers:
         - event: RewardContractAdded(indexed address,indexed address,bool)
           handler: handleRewardContractAdded
@@ -148,18 +148,18 @@ templates:
     name: KyberFairLaunchV2
     network: {{network}}
     source:
-      abi: KyberFairLaunch
+      abi: KyberFairLaunchV2
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
-      file: ./src/mappings/fairLaunch.ts
+      file: ./src/mappings/fairLaunchV2.ts
       entities:
         - Pool
         - Token
       abis:
-        - name: KyberFairLaunch
-          file: ./abis/KyberFairLaunch.json
+        - name: KyberFairLaunchV2
+          file: ./abis/KyberFairLaunchV2.json
       eventHandlers:
         - event: Deposit(indexed address,indexed uint256,indexed uint256,uint256)
           handler: handleDeposit
@@ -167,6 +167,6 @@ templates:
           handler: handleHarvest
         - event: Withdraw(indexed address,indexed uint256,indexed uint256,uint256)
           handler: handleWithdraw
-        - event: AddNewPool(indexed address,indexed uint32,indexed uint32,uint256[])
+        - event: AddNewPool(indexed address,indexed address,uint32,uint32,uint32)
           handler: handleAddNewPool
   {{/reward_locker_v2}}
