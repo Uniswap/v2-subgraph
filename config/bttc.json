@@ -33,5 +33,9 @@
     "0x18fa72e0ee4c580a129b0ce5bd0694d716c7443e",
     "0xae17940943ba9440540940db0f1877f101d39e8b",
     "0x17f235fd5974318e4e2a5e37919a209f7c37a6d1"
-  ]
+  ],
+  "reward_locker_v2": {
+    "address": "0xE79bfc312328Ab75272785DBf5Bd871b253709A5",
+    "startBlock": "5450119"
+  }
 }
