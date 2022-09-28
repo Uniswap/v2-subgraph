@@ -4,13 +4,14 @@ repository: https://github.com/dynamic-amm/dmm-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
+  {{#dmm_dynamic_fee_factory}}
   - kind: ethereum/contract
-    name: DmmFactory
+    name: DmmDynamicFeeFactory
     network: {{network}}
     source:
-      address: '{{address}}'
-      abi: DmmFactory
-      startBlock: {{startBlock}}  # contract creation block
+      address: '{{dmm_dynamic_fee_factory.address}}'
+      abi: DmmDynamicFeeFactory
+      startBlock: {{dmm_dynamic_fee_factory.startBlock}}  # contract creation block
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -21,8 +22,8 @@ dataSources:
         - Pools
         - Tokens
       abis:
-        - name: DmmFactory
-          file: ./abis/DmmFactory.json
+        - name: DmmDynamicFeeFactory
+          file: ./abis/DmmDynamicFeeFactory.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: ERC20SymbolBytes
@@ -34,6 +35,74 @@ dataSources:
           handler: handlePoolCreated
         - event: SetFeeConfiguration(address,uint16)
           handler: handleSetFeeConfiguration
+  {{/dmm_dynamic_fee_factory}}
+
+  {{#dmm_static_fee_factory}}
+  - kind: ethereum/contract
+    name: DmmStaticFeeFactory
+    network: {{network}}
+    source:
+      address: '{{dmm_static_fee_factory.address}}'
+      abi: DmmStaticFeeFactory
+      startBlock: {{dmm_static_fee_factory.startBlock}}  # contract creation block
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/factory.ts
+      entities:   # defines which entities are written to stores
+        - Pairs
+        - Pools
+        - Tokens
+      abis:
+        - name: DmmStaticFeeFactory
+          file: ./abis/DmmStaticFeeFactory.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+      eventHandlers:
+        - event: PoolCreated(indexed address,indexed address,address,uint32,uint24,uint256)
+          handler: handlePoolCreated
+        - event: SetFeeConfiguration(address,uint24)
+          handler: handleSetFeeConfiguration
+  {{/dmm_static_fee_factory}}
+
+  {{#dmm_static_fee_factory_legacy}}
+  - kind: ethereum/contract
+    name: DmmStaticFeeFactoryLegacy
+    network: {{network}}
+    source:
+      address: '{{dmm_static_fee_factory_legacy.address}}'
+      abi: DmmStaticFeeFactoryLegacy
+      startBlock: {{dmm_static_fee_factory_legacy.startBlock}}  # contract creation block
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/factory-legacy.ts
+      entities:   # defines which entities are written to stores
+        - Pairs
+        - Pools
+        - Tokens
+      abis:
+        - name: DmmStaticFeeFactoryLegacy
+          file: ./abis/DmmStaticFeeFactoryLegacy.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+      eventHandlers:
+        - event: PoolCreated(indexed address,indexed address,address,uint32,uint16,uint256)
+          handler: handlePoolCreatedLegacy
+        - event: SetFeeConfiguration(address,uint16)
+          handler: handleSetFeeConfiguration
+  {{/dmm_static_fee_factory_legacy}}
+
   {{#reward_locker}}
   - kind: ethereum/contract
     name: KyberRewardLocker
@@ -86,6 +155,7 @@ dataSources:
         - event: Vested(indexed address,indexed address,uint256,uint256)
           handler: handleVestd
   {{/reward_locker_v2}}
+
 templates:
   - kind: ethereum/contract
     name: Pool
@@ -103,8 +173,10 @@ templates:
       abis:
         - name: Pool
           file: ./abis/DmmPool.json
-        - name: Factory
-          file: ./abis/DmmFactory.json
+        - name: DynamicFeeFactory
+          file: ./abis/DmmDynamicFeeFactory.json
+        - name: StaticFeeFactory
+          file: ./abis/DmmStaticFeeFactory.json
       eventHandlers:
         - event: Mint(indexed address,uint256,uint256)
           handler: handleMint
@@ -116,6 +188,7 @@ templates:
           handler: handleTransfer
         - event: Sync(uint256,uint256,uint256,uint256)
           handler: handleSync
+
   {{#reward_locker}}
   - kind: ethereum/contract
     name: KyberFairLaunch

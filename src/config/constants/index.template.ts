@@ -4,7 +4,9 @@ export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 
 export const ADDRESS_LOCK = '0xffffffffffffffffffffffffffffffffffffffff'
 
-export const FACTORY_ADDRESS = '{{ factory_address }}'
+export const DMM_DYNAMIC_FEE_FACTORY_ADDRESS = '{{ dmm_dynamic_fee_factory.address }}'
+export const DMM_STATIC_FEE_FACTORY_ADDRESS = '{{ dmm_static_fee_factory.address }}'
+export const DMM_STATIC_FEE_FACTORY_LEGACY_ADDRESS = '{{ dmm_static_fee_factory_legacy.address }}'
 
 export const ETH_PRICING_POOLS = '{{ eth_pricing_pools }}'
 

@@ -2,11 +2,10 @@
 import { log } from '@graphprotocol/graph-ts'
 import { DmmFactory, Bundle, Pair, Token, Pool } from '../types/schema'
 import {
-  PoolCreated as DynamicFeePoolCreated,
-  SetFeeConfiguration
-} from '../types/DmmDynamicFeeFactory/DmmDynamicFeeFactory'
-import { PoolCreated as StaticFeePoolCreated } from '../types/DmmStaticFeeFactory/DmmStaticFeeFactory'
-import { DMM_STATIC_FEE_FACTORY_ADDRESS } from '../config/constants'
+  SetFeeConfiguration,
+  PoolCreated as StaticFeePoolCreatedLegacy
+} from '../types/DmmStaticFeeFactoryLegacy/DmmStaticFeeFactoryLegacy'
+import { DMM_STATIC_FEE_FACTORY_LEGACY_ADDRESS } from '../config/constants'
 
 import { Pool as PoolTemplate } from '../types/templates'
 
@@ -41,7 +40,7 @@ function createOrLoadFactory(address: string): DmmFactory {
   return factory as DmmFactory
 }
 
-export function handlePoolCreated(event: StaticFeePoolCreated): void {
+export function handlePoolCreatedLegacy(event: StaticFeePoolCreatedLegacy): void {
   log.debug('------run to handle PoolCreated event ------ ', [])
 
   let factory = createOrLoadFactory(event.address.toHexString())
@@ -161,16 +160,10 @@ export function handlePoolCreated(event: StaticFeePoolCreated): void {
   pool.liquidityPerRisk = ZERO_BD
   pool.amp = event.params.ampBps.toBigDecimal()
 
-  let isStaticFee = event.address.toHexString() == DMM_STATIC_FEE_FACTORY_ADDRESS
-  if (isStaticFee) {
-    pool.fee = event.params.feeUnits
+  let isStaticFeeLegacy = event.address.toHexString() == DMM_STATIC_FEE_FACTORY_LEGACY_ADDRESS
+  if (isStaticFeeLegacy) {
+    pool.fee = event.params.feeBps
   }
-
-  // TODO: Add uint16 fee
-  // let isStaticFeeLegacy = event.address.toHexString() == DMM_STATIC_FEE_FACTORY_LEGACY_ADDRESS
-  // if (isStaticFeeLegacy) {
-  //   pool.fee = (event as StaticFeePoolCreatedLegacy).params.feeBps
-  // }
 
   pool.save()
 

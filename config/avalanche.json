@@ -1,8 +1,13 @@
 {
   "network": "avalanche",
-  "address": "0x10908c875d865c66f271f5d3949848971c9595c9",
-  "startBlock": "3662467",
-  "factory_address": "0x10908c875d865c66f271f5d3949848971c9595c9",
+  "dmm_dynamic_fee_factory": {
+    "address": "0x10908c875d865c66f271f5d3949848971c9595c9",
+    "startBlock": "3662467"
+  },
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "16093890"
+  },
   "eth_pricing_pools": "0x475d13a015d478aa8271655584348f3268007cbd",
   "wrapped_native_address": "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7",
   "knc_address": "0x39fc9e94caeacb435842fadedecb783589f50f5f",

@@ -1,0 +1,22 @@
+{
+  "network": "velas",
+  "dmm_static_fee_factory_legacy": {
+    "startBlock": "24202504",
+    "address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974"
+  },
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "41939505"
+  },
+  "eth_pricing_pools": "0xef07828031970c6bb67d52624396e416aef7a95c",
+  "wrapped_native_address": "0xc579d1f3cf86749e05cd06f7ade17856c2ce3126",
+  "whitelistedTokens": [
+    "0xc579d1f3cf86749e05cd06f7ade17856c2ce3126",
+    "0xe2c120f188ebd5389f71cf4d9c16d05b62a58993",
+    "0x01445c31581c354b7338ac35693ab2001b50b9ae"
+  ],
+  "knc_address": "",
+  "kncl_address": "",
+  "minimum_usd_threshold_new_pairs": "1",
+  "minimum_liquidity_threshold_eth": "1"
+}

@@ -129,6 +129,7 @@ type Pool @entity {
   feeUSD: BigDecimal!
 
   amp: BigDecimal!
+  fee: Int
   liquidityPerRisk: BigDecimal!
   # apy: BigDecimal!
 

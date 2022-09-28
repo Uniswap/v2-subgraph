@@ -1,8 +1,13 @@
 {
   "network": "ropsten",
-  "address": "0x0639542a5cd99bd5f4e85f58cb1f61d8fbe32de9",
-  "startBlock": "9729095",
-  "factory_address": "0x0639542a5cd99bd5f4e85f58cb1f61d8fbe32de9",
+  "dmm_dynamic_fee_factory": {
+    "address": "0x0639542a5cd99bd5f4e85f58cb1f61d8fbe32de9",
+    "startBlock": "9729095"
+  },
+  "dmm_static_fee_factory": {
+    "address": "0xb332f6145a5b064f58ff9793ba3523245f8fafac",
+    "startBlock": "12316637"
+  },
   "eth_pricing_pools": "0x568618004062e83fc286fb322f80a4f2814e80a7|0x26b8d1680b8450dda51fa7d4753cdca9766717bd|0xb26a8395ba1997a4c9a47d1589234bcd3ff468f3",
   "wrapped_native_address": "0xc778417e063141139fce010982780140aa0cd5ab",
   "knc_address": "0x8b4ddf9f13f382aff76d262f6c8c50e6d7961b94",

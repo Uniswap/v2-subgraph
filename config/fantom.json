@@ -1,8 +1,13 @@
 {
   "network": "fantom",
-  "address": "0x78df70615ffc8066cc0887917f2cd72092c86409",
-  "startBlock": "19668531",
-  "factory_address": "0x78df70615ffc8066cc0887917f2cd72092c86409",
+  "dmm_dynamic_fee_factory": {
+    "address": "0x78df70615ffc8066cc0887917f2cd72092c86409",
+    "startBlock": "19668531"
+  },
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "40621262"
+  },
   "eth_pricing_pools": "0xd4ecc4b71d70159f9cdaa9960453da5558639c51",
   "wrapped_native_address": "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
   "knc_address": "0x0000000000000000000000000000000000000000",

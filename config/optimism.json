@@ -1,0 +1,21 @@
+{
+  "network": "optimism",
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "12876459"
+  },
+  "eth_pricing_pools": "0x5cd7c1efec89f0a6bcec73ec72b69e7376ed6349",
+  "wrapped_native_address": "0x4200000000000000000000000000000000000006",
+  "knc_address": "",
+  "kncl_address": "",
+  "minimum_usd_threshold_new_pairs": "0",
+  "minimum_liquidity_threshold_eth": "0.01",
+  "whitelistedTokens": [
+    "0x4200000000000000000000000000000000000006",
+    "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+    "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+    "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58",
+    "0x4200000000000000000000000000000000000042"
+  ],
+  "_whitelisted_comment": ["DAI", "USDC", "USDT", "OP"]
+}

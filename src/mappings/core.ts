@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { BigInt, BigDecimal, store, Address, log } from '@graphprotocol/graph-ts'
-import { FACTORY_ADDRESS, ADDRESS_ZERO, ADDRESS_LOCK, FACTORY_BPS } from '../config/constants'
-import { Transfer, Mint, Burn, Swap, Sync } from '../types/templates/Pool/Pool'
+import { ADDRESS_ZERO, ADDRESS_LOCK, FACTORY_BPS } from '../config/constants'
+import { Pool as PoolABI, Transfer, Mint, Burn, Swap, Sync } from '../types/templates/Pool/Pool'
 import {
   DmmFactory,
   Pair,
@@ -44,7 +44,10 @@ export function handleTransfer(event: Transfer): void {
     return
   }
 
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
+  let poolContract = PoolABI.bind(event.address)
+  let factoryAddress = poolContract.factory()
+
+  let factory = DmmFactory.load(factoryAddress.toHexString())
 
   // user stats
   let from = event.params.from
@@ -242,7 +245,10 @@ export function handleMint(event: Mint): void {
   // const pair = Pair.load(event.address.toHex())
   log.debug('!!_______ pool address _____ {} ', [event.address.toHex()])
   let pool = Pool.load(event.address.toHex())
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
+  let poolContract = PoolABI.bind(event.address)
+  let factoryAddress = poolContract.factory()
+
+  let factory = DmmFactory.load(factoryAddress.toHexString())
 
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
@@ -312,7 +318,9 @@ export function handleBurn(event: Burn): void {
 
   // const pair = Pair.load(event.address.toHex())
   let pool = Pool.load(event.address.toHex())
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
+  let poolContract = PoolABI.bind(event.address)
+  let factoryAddress = poolContract.factory()
+  let factory = DmmFactory.load(factoryAddress.toHexString())
 
   //update token info
   let token0 = Token.load(pool.token0)
@@ -449,7 +457,10 @@ export function handleSwap(event: Swap): void {
   pool.save()
 
   // update global values, only used tracked amounts for volume
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
+  let poolContract = PoolABI.bind(event.address)
+  let factoryAddress = poolContract.factory()
+
+  let factory = DmmFactory.load(factoryAddress.toHexString())
   factory.totalVolumeUSD = factory.totalVolumeUSD.plus(trackedAmountUSD)
   factory.totalFeeUSD = factory.totalFeeUSD.plus(trackedAmountUSD.times(feePercent))
   factory.totalVolumeETH = factory.totalVolumeETH.plus(trackedAmountETH)
@@ -573,7 +584,10 @@ export function handleSync(event: Sync): void {
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
   let pair = Pair.load(token0.id + '_' + token1.id)
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
+  let poolContract = PoolABI.bind(event.address)
+  let factoryAddress = poolContract.factory()
+
+  let factory = DmmFactory.load(factoryAddress.toHexString())
 
   // reset factory liquidity by subtracting onluy tarcked liquidity
   factory.totalLiquidityETH = factory.totalLiquidityETH.minus(pool.trackedReserveETH)

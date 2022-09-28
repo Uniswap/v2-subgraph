@@ -1,8 +1,8 @@
 /* eslint-disable prefer-const */
 import { log, BigDecimal, BigInt, Address, ethereum, Bytes } from '@graphprotocol/graph-ts'
-import { ERC20 } from '../types/DmmFactory/ERC20'
-import { ERC20SymbolBytes } from '../types/DmmFactory/ERC20SymbolBytes'
-import { ERC20NameBytes } from '../types/DmmFactory/ERC20NameBytes'
+import { ERC20 } from '../types/DmmDynamicFeeFactory/ERC20'
+import { ERC20SymbolBytes } from '../types/DmmDynamicFeeFactory/ERC20SymbolBytes'
+import { ERC20NameBytes } from '../types/DmmDynamicFeeFactory/ERC20NameBytes'
 import { LiquidityPosition, User, Pool, LiquidityPositionSnapshot, Bundle, Token, Transaction } from '../types/schema'
 import { KNC_ADDRESS, KNC_NAME, KNC_SYMBOL, KNCL_ADDRESS, KNCL_NAME, KNCL_SYMBOL } from '../config/constants'
 

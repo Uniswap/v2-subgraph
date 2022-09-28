@@ -1,8 +1,13 @@
 {
-  "network": "polygon",
-  "address": "0x5f1fe642060b5b9658c15721ea22e982643c095c",
-  "startBlock": "15968294",
-  "factory_address": "0x5f1fe642060b5b9658c15721ea22e982643c095c",
+  "network": "matic",
+  "dmm_dynamic_fee_factory": {
+    "address": "0x5f1fe642060b5b9658c15721ea22e982643c095c",
+    "startBlock": "15968294"
+  },
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "29624348"
+  },
   "eth_pricing_pools": "0x45963db838a070cf7be8e7046fd63e23d376c665",
   "wrapped_native_address": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
   "knc_address": "0x1c954e8fe737f99f68fa1ccda3e51ebdb291948c",

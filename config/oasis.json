@@ -1,0 +1,24 @@
+{
+  "network": "oasis",
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "1721035"
+  },
+  "dmm_static_fee_factory_legacy": {
+    "address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
+    "startBlock": "784337"
+  },
+  "eth_pricing_pools": "0x9de8e8c5658262cf2dd79646ac96b383d027bb8c",
+  "wrapped_native_address": "0x21c718c22d52d0f3a789b752d4c2fd5908a8a733",
+  "whitelistedTokens": [
+    "0x21c718c22d52d0f3a789b752d4c2fd5908a8a733",
+    "0x5a4ba16c2aeb295822a95280a7c7149e87769e6a",
+    "0x94fbffe5698db6f54d6ca524dbe673a7729014be",
+    "0x6cb9750a92643382e020ea9a170abb83df05f30b",
+    "0x3223f17957ba502cbe71401d55a0db26e5f7c68f"
+  ],
+  "knc_address": "",
+  "kncl_address": "",
+  "minimum_usd_threshold_new_pairs": "1",
+  "minimum_liquidity_threshold_eth": "1"
+}

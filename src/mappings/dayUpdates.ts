@@ -1,7 +1,6 @@
 import { PairHourData, PoolHourData } from './../types/schema'
 /* eslint-disable prefer-const */
 import { BigInt, ethereum } from '@graphprotocol/graph-ts'
-import { FACTORY_ADDRESS } from '../config/constants'
 import {
   Pair,
   Pool,
@@ -14,9 +13,12 @@ import {
   PoolDayData
 } from '../types/schema'
 import { ONE_BI, ZERO_BD, ZERO_BI } from './utils'
+import { DMM_STATIC_FEE_FACTORY_ADDRESS, DMM_DYNAMIC_FEE_FACTORY_ADDRESS } from '../config/constants'
 
 export function updateDmmDayData(event: ethereum.Event): DmmDayData {
-  let factory = DmmFactory.load(FACTORY_ADDRESS)
+  let dynamicFeeFactory = DmmFactory.load(DMM_DYNAMIC_FEE_FACTORY_ADDRESS)
+  let staticFeeFactory = DmmFactory.load(DMM_STATIC_FEE_FACTORY_ADDRESS)
+
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
@@ -31,9 +33,30 @@ export function updateDmmDayData(event: ethereum.Event): DmmDayData {
     dayData.dailyVolumeUntracked = ZERO_BD
   }
 
-  dayData.totalLiquidityUSD = factory.totalLiquidityUSD
-  dayData.totalLiquidityETH = factory.totalLiquidityETH
-  dayData.txCount = factory.txCount
+  let totalLiquidityUSD1 = ZERO_BD
+  let totalLiquidityUSD2 = ZERO_BD
+
+  let totalLiquidityETH1 = ZERO_BD
+  let totalLiquidityETH2 = ZERO_BD
+
+  let txCount1 = ZERO_BI
+  let txCount2 = ZERO_BI
+
+  if (dynamicFeeFactory != null) {
+    totalLiquidityUSD1 = dynamicFeeFactory.totalLiquidityUSD
+    totalLiquidityETH1 = dynamicFeeFactory.totalLiquidityETH
+    txCount1 = dynamicFeeFactory.txCount
+  }
+
+  if (staticFeeFactory != null) {
+    totalLiquidityUSD2 = staticFeeFactory.totalLiquidityUSD
+    totalLiquidityETH2 = staticFeeFactory.totalLiquidityETH
+    txCount2 = staticFeeFactory.txCount
+  }
+
+  dayData.totalLiquidityUSD = totalLiquidityUSD1.plus(totalLiquidityUSD2)
+  dayData.totalLiquidityETH = totalLiquidityETH1.plus(totalLiquidityETH2)
+  dayData.txCount = txCount1.plus(txCount2)
   dayData.save()
 
   return dayData as DmmDayData

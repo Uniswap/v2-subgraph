@@ -4,16 +4,17 @@
   "repository": "https://github.com/dynamic-amm/dmm-subgraph",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "prepare": "mustache config/${NETWORK:-ethereum}.json subgraph.template.yaml > subgraph.yaml && mustache config/${NETWORK:-ethereum}.json src/config/constants/index.template.ts > src/config/constants/index.ts",
+    "prepare": "mustache config/${NETWORK}.json subgraph.template.yaml > subgraph.yaml && mustache config/${NETWORK:-ethereum}.json src/config/constants/index.template.ts > src/config/constants/index.ts",
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
-    "deploy": "graph deploy kybernetwork/kyberswap-exchange-${NETWORK:-ethereum} --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
-    "create-subgraph": "graph create kybernetwork/kyberswap-exchange-${NETWORK:-ethereum} --node https://${NETWORK:-ethereum}-graph.kyberengineering.io/admin",
-    "deploy-subgraph": "graph deploy kybernetwork/kyberswap-exchange-${NETWORK:-ethereum} --debug --ipfs https://${NETWORK:-ethereum}-graph.kyberengineering.io/ipfs --node https://${NETWORK:-ethereum}-graph.kyberengineering.io/admin",
+    "deploy": "graph deploy kybernetwork/kyberswap-exchange-${NETWORK} --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "create-subgraph": "graph create kybernetwork/kyberswap-exchange-${NETWORK} --node https://${NETWORK}-graph.kyberengineering.io/admin",
+    "deploy-subgraph": "graph deploy kybernetwork/kyberswap-exchange-${NETWORK} --debug --ipfs https://${NETWORK}-graph.kyberengineering.io/ipfs --node https://${NETWORK}-graph.kyberengineering.io/admin",
     "create-local": "graph create dynamic-amm/dynamic-amm --node http://127.0.0.1:8020",
     "deploy-local": "graph deploy dynamic-amm/dynamic-amm --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "watch-local": "graph deploy dynamic-amm/dynamic-amm --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001",
-    "prettier": "./node_modules/.bin/prettier --write src/mappings/*"
+    "prettier": "./node_modules/.bin/prettier --write src/mappings/*",
+    "deploy-ropsten": "graph deploy viet-nv/kyberswap-classic-ropsten --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.21.1",

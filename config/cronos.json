@@ -1,8 +1,13 @@
 {
   "network": "cronos",
-  "address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
-  "startBlock": "447230",
-  "factory_address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
+  "dmm_dynamic_fee_factory": {
+    "address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
+    "startBlock": "447230"
+  },
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "3255109"
+  },
   "eth_pricing_pools": "0x7de4a7958e45bf5f7507c179eaa795249d9a9f14|0xbae2ccf298f26ab1dc8718f97493029487efa326",
   "wrapped_native_address": "0x5c7f8a570d578ed84e63fdfa7b1ee72deae1ae23",
   "knc_address": "0x868fc5cb3367c4a43c350b85d5001acaf58a857e",

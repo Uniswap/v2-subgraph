@@ -1,8 +1,13 @@
 {
   "network": "bsc",
-  "address": "0x878dfe971d44e9122048308301f540910bbd934c",
-  "startBlock": "10475000",
-  "factory_address": "0x878dfe971d44e9122048308301f540910bbd934c",
+  "dmm_dynamic_fee_factory": {
+    "address": "0x878dfe971d44e9122048308301f540910bbd934c",
+    "startBlock": "10475000"
+  },
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "18728872"
+  },
   "eth_pricing_pools": "0xec303ce1edbebf7e71fc7b350341bb6a6a7a6381",
   "wrapped_native_address": "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
   "knc_address": "0xfe56d5892bdffc7bf58f2e84be1b2c32d21c308b",
@@ -23,6 +28,6 @@
   },
   "reward_locker_v2": {
     "address": "0xd93f7a2cbf4912158d6ccda585c9d234a0d70652",
-    "startBlock": "15094200"
+    "startBlock": "15094253"
   }
 }

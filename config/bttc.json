@@ -1,8 +1,13 @@
 {
   "network": "bttc",
-  "address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
-  "startBlock": "2845855",
-  "factory_address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
+  "dmm_dynamic_fee_factory": {
+    "address": "0xd9bfe9979e9ca4b2fe84ba5d4cf963bbcb376974",
+    "startBlock": "2845855"
+  },
+  "dmm_static_fee_factory": {
+    "address": "0x1c758af0688502e49140230f6b0ebd376d429be5",
+    "startBlock": "7855046"
+  },
   "eth_pricing_pools": "0xaa70a5b819b4ee01f7e521a6e465a9b84303543d",
   "wrapped_native_address": "0x8d193c6efa90bcff940a98785d1ce9d093d3dc8a",
   "knc_address": "",
