@@ -8,9 +8,9 @@ dataSources:
     name: Factory
     network: mainnet
     source:
-      address: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
+      address: '0xE387067f12561e579C5f7d4294f51867E0c1cFba'
       abi: Factory
-      startBlock: 10000834
+      startBlock: 85427
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -21,7 +21,7 @@ dataSources:
         - Token
       abis:
         - name: Factory
-          file: ./abis/factory.json
+          file: ./abis/BaseV1Factory.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: ERC20SymbolBytes
@@ -29,7 +29,7 @@ dataSources:
         - name: ERC20NameBytes
           file: ./abis/ERC20NameBytes.json
       eventHandlers:
-        - event: PairCreated(indexed address,indexed address,address,uint256)
+        - event: PairCreated(indexed address,indexed address,bool,address,uint256)
           handler: handleNewPair
 templates:
   - kind: ethereum/contract
@@ -47,9 +47,9 @@ templates:
         - Token
       abis:
         - name: Pair
-          file: ./abis/pair.json
+          file: ./abis/BaseV1Pair.json
         - name: Factory
-          file: ./abis/factory.json
+          file: ./abis/BaseV1Factory.json
       eventHandlers:
         - event: Mint(indexed address,uint256,uint256)
           handler: handleMint
@@ -59,5 +59,5 @@ templates:
           handler: handleSwap
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
-        - event: Sync(uint112,uint112)
+        - event: Sync(uint256,uint256)
           handler: handleSync

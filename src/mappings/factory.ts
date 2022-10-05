@@ -13,7 +13,26 @@ import {
   ZERO_BI,
 } from './helpers'
 
+const TOKEN_BLACKLIST: string[] = [
+  '0xf353ea7bada68c4c5aad444872ef53aaae7a0d1b', // Tate Coin Duplicate
+  '0x30495442a80a46f2e55049a6bd7e17f8481ff76d',  // Canto Inu Duplicate
+]
+
+const TOKEN_STABLE: string[] = [
+  '0x80b5a32e4f032b2a058b4f29ec95eefeeb87adcd', // USDC
+  '0xd567b3d7b8fe3c79a1ad8da978812cfc4fa05e75'  // USDT
+]
 export function handleNewPair(event: PairCreated): void {
+  // ignore if either token in blacklist
+  if(TOKEN_BLACKLIST.includes(event.params.token0.toHexString()) || TOKEN_BLACKLIST.includes(event.params.token1.toHexString())) {
+    return
+  }
+
+  // use pair only if stable = true for stablecoins (USDT and USDC)
+  if(TOKEN_STABLE.includes(event.params.token0.toHexString()) || TOKEN_STABLE.includes(event.params.token1.toHexString())) {
+    if(event.params.stable == false) { return }
+  }
+
   // load factory (create if first exchange)
   let factory = UniswapFactory.load(FACTORY_ADDRESS)
   if (factory === null) {
