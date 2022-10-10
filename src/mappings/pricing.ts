@@ -3,25 +3,16 @@ import { Pair, Token, Bundle } from '../types/schema'
 import { BigDecimal, Address, BigInt } from '@graphprotocol/graph-ts/index'
 import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, UNTRACKED_PAIRS } from './helpers'
 
-// for canto, ETH ~ NOTE
-const WETH_ADDRESS = '0x4e71a2e537b7f9d9413d3991d37958c0b5e1e503' // NOTE
-const USDC_WETH_PAIR = '0x9571997a66d63958e1b3de9647c22bd6b9e7228c' // USDC_NOTE_PAIR block 224999
-const USDT_WETH_PAIR = '0x35db1f3a6a6f07f82c76fcc415db6cfb1a7df833' // USDT_NOTE_PAIR block 225000
+// for canto, ETH ~ CANTO, USDC ~ NOTE
+const WETH_ADDRESS = '0x4e71a2e537b7f9d9413d3991d37958c0b5e1e503'
+const USDC_WETH_PAIR = '0x1d20635535307208919f0b67c3b2065965a85aa9' // created at 224998
 
 export function getEthPriceInUSD(): BigDecimal {
   // fetch eth prices for each stablecoin
-  let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token1
-  let usdtPair = Pair.load(USDT_WETH_PAIR) // usdt is token1
+  let usdcPair = Pair.load(USDC_WETH_PAIR) // note is token0
 
-  // all 2 have been created
-  if (usdcPair !== null && usdtPair !== null) {
-    let totalLiquidityETH = usdtPair.reserve0.plus(usdcPair.reserve0)
-    let usdtweight = usdtPair.reserve0.div(totalLiquidityETH)
-    let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
-    return usdtPair.token1Price.times(usdtweight).plus(usdcPair.token1Price.times(usdcWeight))
-    // USDC is the only pair so far
-  } else if (usdcPair !== null) {
-    return usdcPair.token1Price
+  if (usdcPair !== null) {
+    return usdcPair.token0Price
   } else {
     return ZERO_BD
   }
@@ -37,29 +28,19 @@ let WHITELIST: string[] = [
   "0x826551890dc65655a0aceca109ab11abdbd7a07b", // wCANTO
 ]
 
-const TOKEN_STABLE: string[] = [
-  '0x80b5a32e4f032b2a058b4f29ec95eefeeb87adcd', // USDC
-  '0xd567b3d7b8fe3c79a1ad8da978812cfc4fa05e75'  // USDT
-]
-
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
-let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('400000')
+let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('1')
 
 // minimum liquidity for price to get tracked
-let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('1000')
+let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('1')
 
 /**
  * Search through graph to find derived Eth per token.
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
-export function findEthPerToken(token: Token): BigDecimal {
+export function findEthPerToken(token: Token, stable: Boolean): BigDecimal {
   if (token.id == WETH_ADDRESS) {
     return ONE_BD
-  }
-
-  let stable = false
-  if(TOKEN_STABLE.includes(token.id)){
-    stable = true
   }
 
   // loop through whitelist and check if paired with any
