@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Factory
-    network: mainnet
+    network: Edgeware 
     source:
       address: '0xF3386DcEede31E17eE41997A2E2896aB43F07385'
       abi: Factory
@@ -34,7 +34,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Pair
-    network: mainnet
+    network: Edgeware
     source:
       abi: Pair
     mapping:
