@@ -10,7 +10,7 @@ import {
   fetchTokenSymbol,
   fetchTokenTotalSupply,
   ZERO_BD,
-  ZERO_BI,
+  ZERO_BI
 } from './helpers'
 
 export function handleNewPair(event: PairCreated): void {

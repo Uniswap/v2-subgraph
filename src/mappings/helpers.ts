@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { log, BigInt, BigDecimal, Address, EthereumEvent } from '@graphprotocol/graph-ts'
+import { log, BigInt, BigDecimal, Address, ethereum } from '@graphprotocol/graph-ts'
 import { ERC20 } from '../types/Factory/ERC20'
 import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
@@ -60,7 +60,7 @@ export function isNullEthValue(value: string): boolean {
 export function fetchTokenSymbol(tokenAddress: Address): string {
   // static definitions overrides
   let staticDefinition = TokenDefinition.fromAddress(tokenAddress)
-  if(staticDefinition != null) {
+  if (staticDefinition != null) {
     return (staticDefinition as TokenDefinition).symbol
   }
 
@@ -88,7 +88,7 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
 export function fetchTokenName(tokenAddress: Address): string {
   // static definitions overrides
   let staticDefinition = TokenDefinition.fromAddress(tokenAddress)
-  if(staticDefinition != null) {
+  if (staticDefinition != null) {
     return (staticDefinition as TokenDefinition).name
   }
 
@@ -113,7 +113,17 @@ export function fetchTokenName(tokenAddress: Address): string {
   return nameValue
 }
 
+// HOT FIX: we cant implement try catch for overflow catching so skip total supply parsing on these tokens that overflow 
+// TODO: find better way to handle overflow 
+let SKIP_TOTAL_SUPPLY: string[] = [
+  "0x0000000000bf2686748e1c0255036e7617e7e8a5"
+]
+
 export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
+  if (SKIP_TOTAL_SUPPLY.includes(tokenAddress.toHexString())) {
+    return BigInt.fromI32(0)
+  }
+
   let contract = ERC20.bind(tokenAddress)
   let totalSupplyValue = null
   let totalSupplyResult = contract.try_totalSupply()
@@ -126,7 +136,7 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   // static definitions overrides
   let staticDefinition = TokenDefinition.fromAddress(tokenAddress)
-  if(staticDefinition != null) {
+  if (staticDefinition != null) {
     return (staticDefinition as TokenDefinition).decimals
   }
 
@@ -169,7 +179,7 @@ export function createUser(address: Address): void {
   }
 }
 
-export function createLiquiditySnapshot(position: LiquidityPosition, event: EthereumEvent): void {
+export function createLiquiditySnapshot(position: LiquidityPosition, event: ethereum.Event): void {
   let timestamp = event.block.timestamp.toI32()
   let bundle = Bundle.load('1')
   let pair = Pair.load(position.pair)
