@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { log } from '@graphprotocol/graph-ts'
+import { BigInt, log } from '@graphprotocol/graph-ts'
 import { PairCreated } from '../types/Factory/Factory'
 import { Bundle, Pair, Token, UniswapFactory } from '../types/schema'
 import { Pair as PairTemplate } from '../types/templates'
@@ -12,6 +12,8 @@ import {
   ZERO_BD,
   ZERO_BI
 } from './helpers'
+
+const CRASHING_BLOCK = 17308596
 
 export function handleNewPair(event: PairCreated): void {
   // load factory (create if first exchange)
@@ -37,6 +39,11 @@ export function handleNewPair(event: PairCreated): void {
   // create the tokens
   let token0 = Token.load(event.params.token0.toHexString())
   let token1 = Token.load(event.params.token1.toHexString())
+
+  // hot fix for overflow error - need better solution for this but urgent as subgraph is down 
+  if ( event.block.number == BigInt.fromI32(CRASHING_BLOCK)) {
+    return 
+  }
 
   // fetch info if null
   if (token0 === null) {

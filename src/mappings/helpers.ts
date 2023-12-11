@@ -134,6 +134,12 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
 }
 
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
+
+  if (SKIP_TOTAL_SUPPLY.includes(tokenAddress.toHexString())) {
+    return BigInt.fromI32(0)
+  }
+  
+
   // static definitions overrides
   let staticDefinition = TokenDefinition.fromAddress(tokenAddress)
   if (staticDefinition != null) {
