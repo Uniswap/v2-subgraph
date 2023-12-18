@@ -5,7 +5,7 @@ schema:
   file: ./schema.graphql
 graft:
   base: QmXYAmabbEmnSDNR5GWJhmm2NQKXnPkSJEBC3EsMwjXr4e
-  block: 18746370
+  block: 18746198
 dataSources:
   - kind: ethereum/contract
     name: Factory
