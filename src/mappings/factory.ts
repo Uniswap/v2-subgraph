@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { log } from '@graphprotocol/graph-ts'
+import { BigInt, log } from '@graphprotocol/graph-ts'
 import { PairCreated } from '../types/Factory/Factory'
 import { Bundle, Pair, Token, UniswapFactory } from '../types/schema'
 import { Pair as PairTemplate } from '../types/templates'
@@ -12,6 +12,9 @@ import {
   ZERO_BD,
   ZERO_BI
 } from './helpers'
+
+
+let SKIP_BLOCKS: string[] = ["17308596", "18746374"]
 
 export function handleNewPair(event: PairCreated): void {
   // load factory (create if first exchange)
@@ -37,6 +40,14 @@ export function handleNewPair(event: PairCreated): void {
   // create the tokens
   let token0 = Token.load(event.params.token0.toHexString())
   let token1 = Token.load(event.params.token1.toHexString())
+
+  // hot fix for overflow error - need better solution for this but urgent as subgraph is down 
+  for (let i = 0; i < SKIP_BLOCKS.length; ++i) {
+    let skipBlock = BigInt.fromI32(parseInt(SKIP_BLOCKS[i]) as i32)  
+    if (event.block.number == skipBlock) {
+      return
+    }
+  }
 
   // fetch info if null
   if (token0 === null) {

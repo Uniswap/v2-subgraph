@@ -116,7 +116,9 @@ export function fetchTokenName(tokenAddress: Address): string {
 // HOT FIX: we cant implement try catch for overflow catching so skip total supply parsing on these tokens that overflow 
 // TODO: find better way to handle overflow 
 let SKIP_TOTAL_SUPPLY: string[] = [
-  "0x0000000000bf2686748e1c0255036e7617e7e8a5"
+  "0x0000000000bf2686748e1c0255036e7617e7e8a5", 
+  "0x000000000000b91b6956fead1dda24c66aa6b972",
+  "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 ]
 
 export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
@@ -134,6 +136,12 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
 }
 
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
+
+  if (SKIP_TOTAL_SUPPLY.includes(tokenAddress.toHexString())) {
+    return BigInt.fromI32(0)
+  }
+  
+
   // static definitions overrides
   let staticDefinition = TokenDefinition.fromAddress(tokenAddress)
   if (staticDefinition != null) {
