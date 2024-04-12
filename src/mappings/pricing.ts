@@ -5,12 +5,12 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
 const WETH_ADDRESS = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1'
-const USDC_WETH_PAIR = '0xf64dfe17c8b87f012fcf50fbda1d62bfa148366a' // created at block 150778518
+const USDC_WETH_PAIR = '0xf64dfe17c8b87f012fcf50fbda1d62bfa148366a'
 
 export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token1
   if (usdcPair !== null) {
-    return usdcPair.token0Price
+    return usdcPair.token1Price
   } else {
     return ZERO_BD
   }
@@ -22,11 +22,24 @@ let WHITELIST: string[] = [
   '0xaf88d065e77c8cc2239327c5edb3a432268e5831', // USDC
 ]
 
+const STABLECOINS: string[] = [
+  '0xaf88d065e77c8cc2239327c5edb3a432268e5831', // USDC
+]
+
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('10000')
 
 // minimum liquidity for price to get tracked
 let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('1')
+
+// return 0 if denominator is 0 in division
+export function safeDiv(amount0: BigDecimal, amount1: BigDecimal): BigDecimal {
+  if (amount1.equals(ZERO_BD)) {
+    return ZERO_BD
+  } else {
+    return amount0.div(amount1)
+  }
+}
 
 /**
  * Search through graph to find derived Eth per token.
@@ -36,6 +49,12 @@ export function findEthPerToken(token: Token): BigDecimal {
   if (token.id == WETH_ADDRESS) {
     return ONE_BD
   }
+
+  if (STABLECOINS.includes(token.id)) {
+    const bundle = Bundle.load('1')!
+    return safeDiv(ONE_BD, bundle.ethPrice)
+  }
+
   // loop through whitelist and check if paired with any
   for (let i = 0; i < WHITELIST.length; ++i) {
     let pairAddress = factoryContract.getPair(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
