@@ -4,8 +4,11 @@
   "repository": "https://github.com/graphprotocol/uniswap-v2-subgraph",
   "license": "GPL-3.0-or-later",
   "scripts": {
+    "lint": "eslint . --ext .ts --fix",
+    "build": "run-s codegen && graph build",
+    "buildonly": "graph build",
+    "deploy:alchemy": "graph deploy --node https://subgraphs.alchemy.com/api/subgraphs/deploy --ipfs https://ipfs.satsuma.xyz",
     "codegen": "graph codegen --output-dir src/types/",
-    "build": "graph build",
     "create-local": "graph create davekaj/uniswap --node http://127.0.0.1:8020",
     "deploy-local": "graph deploy davekaj/uniswap --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "deploy": "graph deploy ianlapham/uniswap-v2-dev --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
@@ -17,8 +20,10 @@
     "@graphprotocol/graph-ts": "^0.32.0",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
-    "eslint": "^6.2.2",
+    "@uniswap/eslint-config": "^1.2.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^6.1.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "^1.18.2",
     "typescript": "^3.5.2"
   }
