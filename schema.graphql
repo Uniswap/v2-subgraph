@@ -52,6 +52,9 @@ type Token @entity {
   pairDayDataQuote: [PairDayData!]! @derivedFrom(field: "token1")
   pairBase: [Pair!]! @derivedFrom(field: "token0")
   pairQuote: [Pair!]! @derivedFrom(field: "token1")
+
+  # pairs used for USD pricing
+  priceTrackingPairs: [Pair!]!
 }
 
 type Pair @entity {
