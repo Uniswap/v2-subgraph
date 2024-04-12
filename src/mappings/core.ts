@@ -8,22 +8,12 @@ import {
   Mint as MintEvent,
   Burn as BurnEvent,
   Swap as SwapEvent,
-  Bundle
+  Bundle,
 } from '../types/schema'
 import { Pair as PairContract, Mint, Burn, Swap, Transfer, Sync } from '../types/templates/Pair/Pair'
 import { updatePairDayData, updateTokenDayData, updateUniswapDayData, updatePairHourData } from './dayUpdates'
 import { getEthPriceInUSD, findEthPerToken, getTrackedVolumeUSD, getTrackedLiquidityUSD } from './pricing'
-import {
-  convertTokenToDecimal,
-  ADDRESS_ZERO,
-  FACTORY_ADDRESS,
-  ONE_BI,
-  createUser,
-  createLiquidityPosition,
-  ZERO_BD,
-  BI_18,
-  createLiquiditySnapshot
-} from './helpers'
+import { convertTokenToDecimal, ADDRESS_ZERO, FACTORY_ADDRESS, ONE_BI, createUser, ZERO_BD, BI_18 } from './helpers'
 
 function isCompleteMint(mintId: string): boolean {
   return MintEvent.load(mintId)!.sender !== null // sufficient checks
@@ -79,7 +69,7 @@ export function handleTransfer(event: Transfer): void {
         event.transaction.hash
           .toHexString()
           .concat('-')
-          .concat(BigInt.fromI32(mints.length).toString())
+          .concat(BigInt.fromI32(mints.length).toString()),
       )
       mint.transaction = transaction.id
       mint.pair = pair.id
@@ -108,7 +98,7 @@ export function handleTransfer(event: Transfer): void {
       event.transaction.hash
         .toHexString()
         .concat('-')
-        .concat(BigInt.fromI32(burns.length).toString())
+        .concat(BigInt.fromI32(burns.length).toString()),
     )
     burn.transaction = transaction.id
     burn.pair = pair.id
@@ -147,7 +137,7 @@ export function handleTransfer(event: Transfer): void {
           event.transaction.hash
             .toHexString()
             .concat('-')
-            .concat(BigInt.fromI32(burns.length).toString())
+            .concat(BigInt.fromI32(burns.length).toString()),
         )
         burn.transaction = transaction.id
         burn.needsComplete = false
@@ -161,7 +151,7 @@ export function handleTransfer(event: Transfer): void {
         event.transaction.hash
           .toHexString()
           .concat('-')
-          .concat(BigInt.fromI32(burns.length).toString())
+          .concat(BigInt.fromI32(burns.length).toString()),
       )
       burn.transaction = transaction.id
       burn.needsComplete = false
@@ -209,20 +199,6 @@ export function handleTransfer(event: Transfer): void {
     transaction.save()
   }
 
-  if (from.toHexString() != ADDRESS_ZERO && from.toHexString() != pair.id) {
-    let fromUserLiquidityPosition = createLiquidityPosition(event.address, from)
-    fromUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(from), BI_18)
-    fromUserLiquidityPosition.save()
-    createLiquiditySnapshot(fromUserLiquidityPosition, event)
-  }
-
-  if (event.params.to.toHexString() != ADDRESS_ZERO && to.toHexString() != pair.id) {
-    let toUserLiquidityPosition = createLiquidityPosition(event.address, to)
-    toUserLiquidityPosition.liquidityTokenBalance = convertTokenToDecimal(pairContract.balanceOf(to), BI_18)
-    toUserLiquidityPosition.save()
-    createLiquiditySnapshot(toUserLiquidityPosition, event)
-  }
-
   transaction.save()
 }
 
@@ -266,7 +242,7 @@ export function handleSync(event: Sync): void {
   let trackedLiquidityETH: BigDecimal
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
     trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token).div(
-      bundle.ethPrice
+      bundle.ethPrice,
     )
   } else {
     trackedLiquidityETH = ZERO_BD
@@ -350,10 +326,6 @@ export function handleMint(event: Mint): void {
   mint.amountUSD = amountTotalUSD as BigDecimal
   mint.save()
 
-  // update the LP position
-  let liquidityPosition = createLiquidityPosition(event.address, Address.fromBytes(mint.to))
-  createLiquiditySnapshot(liquidityPosition, event)
-
   // update day entities
   updatePairDayData(event)
   updatePairHourData(event)
@@ -419,10 +391,6 @@ export function handleBurn(event: Burn): void {
   burn.logIndex = event.logIndex
   burn.amountUSD = amountTotalUSD as BigDecimal
   burn.save()
-
-  // update the LP position
-  let liquidityPosition = createLiquidityPosition(event.address, event.params.sender)
-  createLiquiditySnapshot(liquidityPosition, event)
 
   // update day entities
   updatePairDayData(event)
@@ -517,7 +485,7 @@ export function handleSwap(event: Swap): void {
     event.transaction.hash
       .toHexString()
       .concat('-')
-      .concat(BigInt.fromI32(swaps.length).toString())
+      .concat(BigInt.fromI32(swaps.length).toString()),
   )
 
   // update swap event
@@ -574,7 +542,7 @@ export function handleSwap(event: Swap): void {
   token0DayData.dailyVolumeToken = token0DayData.dailyVolumeToken.plus(amount0Total)
   token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(amount0Total.times(token0.derivedETH as BigDecimal))
   token0DayData.dailyVolumeUSD = token0DayData.dailyVolumeUSD.plus(
-    amount0Total.times(token0.derivedETH as BigDecimal).times(bundle.ethPrice)
+    amount0Total.times(token0.derivedETH as BigDecimal).times(bundle.ethPrice),
   )
   token0DayData.save()
 
@@ -582,7 +550,7 @@ export function handleSwap(event: Swap): void {
   token1DayData.dailyVolumeToken = token1DayData.dailyVolumeToken.plus(amount1Total)
   token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(amount1Total.times(token1.derivedETH as BigDecimal))
   token1DayData.dailyVolumeUSD = token1DayData.dailyVolumeUSD.plus(
-    amount1Total.times(token1.derivedETH as BigDecimal).times(bundle.ethPrice)
+    amount1Total.times(token1.derivedETH as BigDecimal).times(bundle.ethPrice),
   )
   token1DayData.save()
 }
