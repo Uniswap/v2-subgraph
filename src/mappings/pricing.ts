@@ -1,7 +1,8 @@
 /* eslint-disable prefer-const */
-import { Pair, Token, Bundle } from '../types/schema'
-import { BigDecimal, Address, BigInt } from '@graphprotocol/graph-ts/index'
-import { ZERO_BD, factoryContract, ADDRESS_ZERO, ONE_BD, UNTRACKED_PAIRS } from './helpers'
+import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts/index'
+
+import { Bundle, Pair, Token } from '../types/schema'
+import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 const USDC_WETH_PAIR = '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc' // created 10008355
@@ -60,7 +61,7 @@ let WHITELIST: string[] = [
   '0xa47c8bf37f92abed4a126bda807a7b7498661acd', // WUST
   '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', // UNI
   '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
-  '0x956f47f50a910163d8bf957cf5846d573e7f87ca' // FEI
+  '0x956f47f50a910163d8bf957cf5846d573e7f87ca', // FEI
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
@@ -115,7 +116,7 @@ export function getTrackedVolumeUSD(
   token0: Token,
   tokenAmount1: BigDecimal,
   token1: Token,
-  pair: Pair
+  pair: Pair,
 ): BigDecimal {
   let bundle = Bundle.load('1')!
   let price0 = token0.derivedETH.times(bundle.ethPrice)
@@ -149,10 +150,7 @@ export function getTrackedVolumeUSD(
 
   // both are whitelist tokens, take average of both amounts
   if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
-    return tokenAmount0
-      .times(price0)
-      .plus(tokenAmount1.times(price1))
-      .div(BigDecimal.fromString('2'))
+    return tokenAmount0.times(price0).plus(tokenAmount1.times(price1)).div(BigDecimal.fromString('2'))
   }
 
   // take full value of the whitelisted token amount
@@ -179,7 +177,7 @@ export function getTrackedLiquidityUSD(
   tokenAmount0: BigDecimal,
   token0: Token,
   tokenAmount1: BigDecimal,
-  token1: Token
+  token1: Token,
 ): BigDecimal {
   let bundle = Bundle.load('1')!
   let price0 = token0.derivedETH.times(bundle.ethPrice)
