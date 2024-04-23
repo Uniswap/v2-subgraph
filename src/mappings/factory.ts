@@ -1,5 +1,6 @@
 /* eslint-disable prefer-const */
 import { log } from '@graphprotocol/graph-ts'
+
 import { PairCreated } from '../types/Factory/Factory'
 import { Bundle, Pair, Token, UniswapFactory } from '../types/schema'
 import { Pair as PairTemplate } from '../types/templates'
@@ -10,7 +11,7 @@ import {
   fetchTokenSymbol,
   fetchTokenTotalSupply,
   ZERO_BD,
-  ZERO_BI
+  ZERO_BI,
 } from './helpers'
 
 export function handleNewPair(event: PairCreated): void {
