@@ -4,23 +4,24 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts/index'
 import { Bundle, Pair, Token } from '../types/schema'
 import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
-const WRAPPED_NATIVE_ADDRESS = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'
-const USDC_ADDRESS = '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359'
-const USDC_WRAPPED_NATIVE_PAIR = '0x1f0c5400a3c7e357cc7c9a3d2f7fe6ddf629d868'
+const WRAPPED_NATIVE_ADDRESS = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
+const BSC_USD_ADDRESS = '0x55d398326f99059ff775485246999027b3197955'
+const USDC_ADDRESS = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d'
+const USDC_WRAPPED_NATIVE_PAIR = '0x8a1ed8e124fdfbd534bf48baf732e26db9cc0cf4'
 
 export function getEthPriceInUSD(): BigDecimal {
-  let usdcPair = Pair.load(USDC_WRAPPED_NATIVE_PAIR) // usdc is token1
+  let usdcPair = Pair.load(USDC_WRAPPED_NATIVE_PAIR) // binance usdc is token0
   if (usdcPair !== null) {
-    return usdcPair.token1Price
+    return usdcPair.token0Price
   } else {
     return ZERO_BD
   }
 }
 
 // token where amounts should contribute to tracked volume and liquidity
-let WHITELIST: string[] = [WRAPPED_NATIVE_ADDRESS, USDC_ADDRESS]
+let WHITELIST: string[] = [WRAPPED_NATIVE_ADDRESS, BSC_USD_ADDRESS]
 
-const STABLECOINS: string[] = [USDC_ADDRESS]
+const STABLECOINS: string[] = [BSC_USD_ADDRESS, USDC_ADDRESS]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('10000')
