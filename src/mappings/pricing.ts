@@ -150,10 +150,7 @@ export function getTrackedVolumeUSD(
 
   // both are price tracking tokens, take average of both amounts
   if (PRICE_TRACKING_TOKENS.includes(token0.id) && PRICE_TRACKING_TOKENS.includes(token1.id)) {
-    return tokenAmount0
-      .times(price0)
-      .plus(tokenAmount1.times(price1))
-      .div(BigDecimal.fromString('2'))
+    return tokenAmount0.times(price0).plus(tokenAmount1.times(price1)).div(BigDecimal.fromString('2'))
   }
 
   // take full value of the price tracking token amount
