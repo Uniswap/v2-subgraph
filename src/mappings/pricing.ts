@@ -4,8 +4,8 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts/index'
 import { Bundle, Pair, Token } from '../types/schema'
 import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
-const WETH_ADDRESS = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1'
-const USDC_WETH_PAIR = '0xf64dfe17c8b87f012fcf50fbda1d62bfa148366a'
+const WETH_ADDRESS = '0x4200000000000000000000000000000000000006'
+const USDC_WETH_PAIR = '0x88a43bbdf9d098eec7bceda4e2494615dfd9bb9c'
 
 export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token1
@@ -18,12 +18,14 @@ export function getEthPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
-  '0xaf88d065e77c8cc2239327c5edb3a432268e5831', // USDC
+  '0x4200000000000000000000000000000000000006', // WETH
+  '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
+  '0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca', // USDbC
 ]
 
 const STABLECOINS: string[] = [
-  '0xaf88d065e77c8cc2239327c5edb3a432268e5831', // USDC
+  '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
+  '0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca', // USDbC
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
