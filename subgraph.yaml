@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Factory
-    network: arbitrum-one
+    network: optimism
     source:
-      address: '0xf1D7CC64Fb4452F05c498126312eBE29f30Fbcf9'
+      address: '0x0c3c1c532F1e39EdF36BE9Fe0bE1410313E074Bf'
       abi: Factory
-      startBlock: 150442611
+      startBlock: 112197986
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -34,7 +34,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Pair
-    network: arbitrum-one
+    network: optimism
     source:
       abi: Pair
     mapping:
