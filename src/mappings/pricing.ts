@@ -4,11 +4,12 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts/index'
 import { Bundle, Pair, Token } from '../types/schema'
 import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
-const WETH_ADDRESS = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1'
-const USDC_WETH_PAIR = '0xf64dfe17c8b87f012fcf50fbda1d62bfa148366a'
+const WRAPPED_NATIVE_ADDRESS = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'
+const USDC_ADDRESS = '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359'
+const USDC_WRAPPED_NATIVE_PAIR = '0x1f0c5400a3c7e357cc7c9a3d2f7fe6ddf629d868'
 
 export function getEthPriceInUSD(): BigDecimal {
-  let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token1
+  let usdcPair = Pair.load(USDC_WRAPPED_NATIVE_PAIR) // usdc is token1
   if (usdcPair !== null) {
     return usdcPair.token1Price
   } else {
@@ -17,14 +18,9 @@ export function getEthPriceInUSD(): BigDecimal {
 }
 
 // token where amounts should contribute to tracked volume and liquidity
-let WHITELIST: string[] = [
-  '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
-  '0xaf88d065e77c8cc2239327c5edb3a432268e5831', // USDC
-]
+let WHITELIST: string[] = [WRAPPED_NATIVE_ADDRESS, USDC_ADDRESS]
 
-const STABLECOINS: string[] = [
-  '0xaf88d065e77c8cc2239327c5edb3a432268e5831', // USDC
-]
+const STABLECOINS: string[] = [USDC_ADDRESS]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('10000')
@@ -46,7 +42,7 @@ export function safeDiv(amount0: BigDecimal, amount1: BigDecimal): BigDecimal {
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
 export function findEthPerToken(token: Token): BigDecimal {
-  if (token.id == WETH_ADDRESS) {
+  if (token.id == WRAPPED_NATIVE_ADDRESS) {
     return ONE_BD
   }
 

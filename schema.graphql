@@ -44,6 +44,7 @@ type Token @entity {
   totalLiquidity: BigDecimal!
 
   # derived prices
+  # TODO: update this to derivedNative
   derivedETH: BigDecimal!
 
   # derived fields
@@ -186,6 +187,7 @@ type Swap @entity {
 # stores for USD calculations
 type Bundle @entity {
   id: ID!
+  # update this to nativePriceUSD
   ethPrice: BigDecimal! # price of ETH usd
 }
 
