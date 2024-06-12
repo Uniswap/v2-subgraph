@@ -62,6 +62,7 @@ export const PRICE_TRACKING_TOKENS: string[] = [
   '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', // UNI
   '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
   '0x956f47f50a910163d8bf957cf5846d573e7f87ca', // FEI
+  '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', // wstETH
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
@@ -150,7 +151,10 @@ export function getTrackedVolumeUSD(
 
   // both are price tracking tokens, take average of both amounts
   if (PRICE_TRACKING_TOKENS.includes(token0.id) && PRICE_TRACKING_TOKENS.includes(token1.id)) {
-    return tokenAmount0.times(price0).plus(tokenAmount1.times(price1)).div(BigDecimal.fromString('2'))
+    return tokenAmount0
+      .times(price0)
+      .plus(tokenAmount1.times(price1))
+      .div(BigDecimal.fromString('2'))
   }
 
   // take full value of the price tracking token amount
