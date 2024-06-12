@@ -31,6 +31,11 @@ dataSources:
       eventHandlers:
         - event: PairCreated(indexed address,indexed address,address,uint256)
           handler: handleNewPair
+features:
+  - grafting
+graft:
+  base: QmSrkZ83RQ2vA4GyqjbE6vHT6ai1RgQbJUrTBiPSrTgXsq
+  block: 20077738
 templates:
   - kind: ethereum/contract
     name: Pair
