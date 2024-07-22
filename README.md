@@ -1,4 +1,6 @@
-# Uniswap V2 Subgraph
+# Common AMM EVM Subgraph
+
+Forked from [UniswapV2 subgraph](https://github.com/Uniswap/v2-subgraph).
 
 [Uniswap](https://uniswap.org/) is a decentralized protocol for automated token exchange on Ethereum.
 
