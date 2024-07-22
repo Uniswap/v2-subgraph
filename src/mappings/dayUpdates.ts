@@ -1,32 +1,32 @@
 /* eslint-disable prefer-const */
 import { BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
 
-import { Bundle, Pair, PairDayData, Token, TokenDayData, UniswapDayData, UniswapFactory } from '../types/schema'
+import { Bundle, Pair, PairDayData, Token, TokenDayData, DayData, Factory } from '../types/schema'
 import { PairHourData } from './../types/schema'
 import { FACTORY_ADDRESS, ONE_BI, ZERO_BD, ZERO_BI } from './helpers'
 
-export function updateUniswapDayData(event: ethereum.Event): UniswapDayData {
-  let uniswap = UniswapFactory.load(FACTORY_ADDRESS)!
+export function updateDayData(event: ethereum.Event): DayData {
+  let factory = Factory.load(FACTORY_ADDRESS)!
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
-  let uniswapDayData = UniswapDayData.load(dayID.toString())
-  if (uniswapDayData === null) {
-    uniswapDayData = new UniswapDayData(dayID.toString())
-    uniswapDayData.date = dayStartTimestamp
-    uniswapDayData.dailyVolumeUSD = ZERO_BD
-    uniswapDayData.dailyVolumeETH = ZERO_BD
-    uniswapDayData.totalVolumeUSD = ZERO_BD
-    uniswapDayData.totalVolumeETH = ZERO_BD
-    uniswapDayData.dailyVolumeUntracked = ZERO_BD
+  let dayData = DayData.load(dayID.toString())
+  if (dayData === null) {
+    dayData = new DayData(dayID.toString())
+    dayData.date = dayStartTimestamp
+    dayData.dailyVolumeUSD = ZERO_BD
+    dayData.dailyVolumeETH = ZERO_BD
+    dayData.totalVolumeUSD = ZERO_BD
+    dayData.totalVolumeETH = ZERO_BD
+    dayData.dailyVolumeUntracked = ZERO_BD
   }
 
-  uniswapDayData.totalLiquidityUSD = uniswap.totalLiquidityUSD
-  uniswapDayData.totalLiquidityETH = uniswap.totalLiquidityETH
-  uniswapDayData.txCount = uniswap.txCount
-  uniswapDayData.save()
+  dayData.totalLiquidityUSD = factory.totalLiquidityUSD
+  dayData.totalLiquidityETH = factory.totalLiquidityETH
+  dayData.txCount = factory.txCount
+  dayData.save()
 
-  return uniswapDayData as UniswapDayData
+  return dayData as DayData
 }
 
 export function updatePairDayData(event: ethereum.Event): PairDayData {

@@ -1,4 +1,4 @@
-type UniswapFactory @entity {
+type Factory @entity {
   # factory address
   id: ID!
 
@@ -189,8 +189,8 @@ type Bundle @entity {
   ethPrice: BigDecimal! # price of ETH usd
 }
 
-# Data accumulated and condensed into day stats for all of Uniswap
-type UniswapDayData @entity {
+# Data accumulated and condensed into day stats for all of Common
+type DayData @entity {
   id: ID! # timestamp rounded to current day by dividing by 86400
   date: Int!
 

@@ -2,7 +2,7 @@
 import { log } from '@graphprotocol/graph-ts'
 
 import { PairCreated } from '../types/Factory/Factory'
-import { Bundle, Pair, Token, UniswapFactory } from '../types/schema'
+import { Bundle, Pair, Token, Factory } from '../types/schema'
 import { Pair as PairTemplate } from '../types/templates'
 import {
   FACTORY_ADDRESS,
@@ -16,9 +16,9 @@ import {
 
 export function handleNewPair(event: PairCreated): void {
   // load factory (create if first exchange)
-  let factory = UniswapFactory.load(FACTORY_ADDRESS)
+  let factory = Factory.load(FACTORY_ADDRESS)
   if (factory === null) {
-    factory = new UniswapFactory(FACTORY_ADDRESS)
+    factory = new Factory(FACTORY_ADDRESS)
     factory.pairCount = 0
     factory.totalVolumeETH = ZERO_BD
     factory.totalLiquidityETH = ZERO_BD
