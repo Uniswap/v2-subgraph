@@ -4,13 +4,13 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts/index'
 import { Bundle, Pair, Token } from '../types/schema'
 import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
-const WETH_ADDRESS = '0xfff9976782d46cc05630d1f6ebab18b2324d6b14'
-const USDC_WETH_PAIR = '0xaeb565e15f7d60aec32e4fa1af386fd9b7dedbc2'
+const WETH_ADDRESS = '0x4200000000000000000000000000000000000006'
+const USDC_WETH_PAIR = '0x7bdA50eDFFddB9C8b020Bfc1ed1ce5E37d56ba71'
 
 export function getEthPriceInUSD(): BigDecimal {
-  let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token0
+  let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token1
   if (usdcPair !== null) {
-    return usdcPair.token0Price
+    return usdcPair.token1Price
   } else {
     return ZERO_BD
   }
