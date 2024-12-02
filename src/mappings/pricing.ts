@@ -6,6 +6,7 @@ import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from 
 
 const WRAPPED_NATIVE_ADDRESS = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
 const BSC_USD_ADDRESS = '0x55d398326f99059ff775485246999027b3197955'
+const VIRTUAL_ADDRESS = '0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b'
 const USDC_ADDRESS = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d'
 const USDC_WRAPPED_NATIVE_PAIR = '0x8a1ed8e124fdfbd534bf48baf732e26db9cc0cf4'
 
@@ -19,7 +20,7 @@ export function getEthPriceInUSD(): BigDecimal {
 }
 
 // token where amounts should contribute to tracked volume and liquidity
-let WHITELIST: string[] = [WRAPPED_NATIVE_ADDRESS, BSC_USD_ADDRESS]
+let WHITELIST: string[] = [WRAPPED_NATIVE_ADDRESS, BSC_USD_ADDRESS, VIRTUAL_ADDRESS]
 
 const STABLECOINS: string[] = [BSC_USD_ADDRESS, USDC_ADDRESS]
 
