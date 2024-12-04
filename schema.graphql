@@ -1,33 +1,41 @@
 type UniswapFactory @entity {
-  # factory address
-  id: ID!
+  id: ID! # factory address, checksummed
   pairCount: Int!
+  txCount: BigInt!
 }
 
 type Token @entity {
-  # token address
-  id: ID!
-
+  id: ID! # token address, lowercased
   decimals: BigInt!
+  txCount: BigInt!
+  
+  pairsAsToken0: [Pair!]! @derivedFrom(field: "token0")
+  pairsAsToken1: [Pair!]! @derivedFrom(field: "token1")
+  mintsAsToken0: [Mint!]! @derivedFrom(field: "token0")
+  mintsAsToken1: [Mint!]! @derivedFrom(field: "token1")
 }
 
 type Pair @entity {
-  # pair address
-  id: ID!
-
-  # mirrored from the smart contract
+  id: ID! # pair address, lowercased 
   token0: Token!
   token1: Token!
-
-  # creation stats
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
+  txCount: BigInt!
+  
+  mints: [Mint!]! @derivedFrom(field: "pair")
 }
 
-# stores for USD calculations
-type Bundle @entity {
-  # always 1
-  id: ID!
-  ethPrice: BigDecimal! # price of ETH usd
+type Mint @entity {
+  id: ID! # transactionhash#logIndex
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  to: Bytes!
+  pair: Pair!
+  token0: Token!
+  token1: Token!
+  sender: Bytes!
+  amount0: BigDecimal!
+  amount1: BigDecimal!
 }
 

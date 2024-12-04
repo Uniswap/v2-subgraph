@@ -5,7 +5,10 @@ import { ERC20 } from '../types/Factory/ERC20'
 
 export const FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
 
-export let ZERO_BD = BigDecimal.fromString('0')
+export const ZERO_BD = BigDecimal.fromString('0')
+export const ZERO_BI = BigInt.fromI32(0)
+export const ONE_BD = BigDecimal.fromString('1')
+export const ONE_BI = BigInt.fromI32(1)
 
 export function fetchTokenDecimals(tokenAddress: Address): BigInt | null {
   let contract = ERC20.bind(tokenAddress)
@@ -16,4 +19,19 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt | null {
     }
   }
   return null
+}
+
+export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
+  let bd = ONE_BD
+  for (let i = ZERO_BI; i.lt(decimals as BigInt); i = i.plus(ONE_BI)) {
+    bd = bd.times(BigDecimal.fromString('10'))
+  }
+  return bd
+}
+
+export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {
+  if (exchangeDecimals == ZERO_BI) {
+    return tokenAmount.toBigDecimal()
+  }
+  return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals))
 }
