@@ -4,8 +4,8 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts/index'
 import { Bundle, Pair, Token } from '../types/schema'
 import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
-const WETH_ADDRESS = '0x4200000000000000000000000000000000000006'
-const USDC_WETH_PAIR = '0x88a43bbdf9d098eec7bceda4e2494615dfd9bb9c'
+const WETH_ADDRESS = '0xab88c8cf70a3bbb2ca3b2aed808963ab4c916b83'
+const USDC_WETH_PAIR = '0xffa2bc7b4c601576994af70d08a176917b06fb04'
 
 export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token1
@@ -18,22 +18,19 @@ export function getEthPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0x4200000000000000000000000000000000000006', // WETH
-  '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
-  '0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca', // USDbC
-  '0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b', // VIRTUAL
+  '0xab88c8cf70a3bbb2ca3b2aed808963ab4c916b83', // WETH
+  '0xa72367eec37b8a45c6c850eaa9cc577016e21457', // USDC
 ]
 
 const STABLECOINS: string[] = [
-  '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
-  '0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca', // USDbC
+  '0xa72367eec37b8a45c6c850eaa9cc577016e21457', // USDC
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
-let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('10000')
+let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('0') //setting 0 since testnet
 
 // minimum liquidity for price to get tracked
-let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('1')
+let MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('0') //setting 0 since testnet
 
 // return 0 if denominator is 0 in division
 export function safeDiv(amount0: BigDecimal, amount1: BigDecimal): BigDecimal {
@@ -130,7 +127,10 @@ export function getTrackedVolumeUSD(
 
   // both are whitelist tokens, take average of both amounts
   if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
-    return tokenAmount0.times(price0).plus(tokenAmount1.times(price1)).div(BigDecimal.fromString('2'))
+    return tokenAmount0
+      .times(price0)
+      .plus(tokenAmount1.times(price1))
+      .div(BigDecimal.fromString('2'))
   }
 
   // take full value of the whitelisted token amount
