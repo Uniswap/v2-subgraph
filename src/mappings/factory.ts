@@ -1,116 +1,62 @@
 /* eslint-disable prefer-const */
-import { log } from '@graphprotocol/graph-ts'
+import { Address, log } from '@graphprotocol/graph-ts'
 
 import { PairCreated } from '../types/Factory/Factory'
 import { Bundle, Pair, Token, UniswapFactory } from '../types/schema'
-import { Pair as PairTemplate } from '../types/templates'
-import {
-  FACTORY_ADDRESS,
-  fetchTokenDecimals,
-  fetchTokenName,
-  fetchTokenSymbol,
-  fetchTokenTotalSupply,
-  ZERO_BD,
-  ZERO_BI,
-} from './helpers'
+import { FACTORY_ADDRESS, fetchTokenDecimals, ZERO_BD } from './helpers'
 
 export function handleNewPair(event: PairCreated): void {
-  // load factory (create if first exchange)
   let factory = UniswapFactory.load(FACTORY_ADDRESS)
+  // if it's the first pair, create the factory and the bundle
   if (factory === null) {
     factory = new UniswapFactory(FACTORY_ADDRESS)
     factory.pairCount = 0
-    factory.totalVolumeETH = ZERO_BD
-    factory.totalLiquidityETH = ZERO_BD
-    factory.totalVolumeUSD = ZERO_BD
-    factory.untrackedVolumeUSD = ZERO_BD
-    factory.totalLiquidityUSD = ZERO_BD
-    factory.txCount = ZERO_BI
+    factory.save()
 
     // create new bundle
     let bundle = new Bundle('1')
     bundle.ethPrice = ZERO_BD
     bundle.save()
   }
-  factory.pairCount = factory.pairCount + 1
+  factory.pairCount += 1
   factory.save()
 
-  // create the tokens
-  let token0 = Token.load(event.params.token0.toHexString())
-  let token1 = Token.load(event.params.token1.toHexString())
+  const pairAddress = event.params.pair.toHexString()
 
-  // fetch info if null
+  const token0Address = event.params.token0.toHexString()
+  let token0 = Token.load(token0Address)
   if (token0 === null) {
-    token0 = new Token(event.params.token0.toHexString())
-    token0.symbol = fetchTokenSymbol(event.params.token0)
-    token0.name = fetchTokenName(event.params.token0)
-    token0.totalSupply = fetchTokenTotalSupply(event.params.token0)
-    let decimals = fetchTokenDecimals(event.params.token0)
+    token0 = new Token(token0Address)
 
-    // bail if we couldn't figure out the decimals
+    const decimals = fetchTokenDecimals(event.params.token0)
     if (decimals === null) {
-      log.debug('mybug the decimal on token 0 was null', [])
+      log.warning('Could not fetch decimals for token {}, skipping creation of pair {}.', [token0Address, pairAddress])
       return
     }
 
     token0.decimals = decimals
-    token0.derivedETH = ZERO_BD
-    token0.tradeVolume = ZERO_BD
-    token0.tradeVolumeUSD = ZERO_BD
-    token0.untrackedVolumeUSD = ZERO_BD
-    token0.totalLiquidity = ZERO_BD
-    // token0.allPairs = []
-    token0.txCount = ZERO_BI
+    token0.save()
   }
 
-  // fetch info if null
+  const token1Address = event.params.token1.toHexString()
+  let token1 = Token.load(token1Address)
   if (token1 === null) {
-    token1 = new Token(event.params.token1.toHexString())
-    token1.symbol = fetchTokenSymbol(event.params.token1)
-    token1.name = fetchTokenName(event.params.token1)
-    token1.totalSupply = fetchTokenTotalSupply(event.params.token1)
-    let decimals = fetchTokenDecimals(event.params.token1)
+    token1 = new Token(token1Address)
 
-    // bail if we couldn't figure out the decimals
+    const decimals = fetchTokenDecimals(event.params.token1)
     if (decimals === null) {
+      log.warning('Could not fetch decimals for token {}, skipping creation of pair {}.', [token1Address, pairAddress])
       return
     }
+
     token1.decimals = decimals
-    token1.derivedETH = ZERO_BD
-    token1.tradeVolume = ZERO_BD
-    token1.tradeVolumeUSD = ZERO_BD
-    token1.untrackedVolumeUSD = ZERO_BD
-    token1.totalLiquidity = ZERO_BD
-    // token1.allPairs = []
-    token1.txCount = ZERO_BI
+    token1.save()
   }
 
-  let pair = new Pair(event.params.pair.toHexString()) as Pair
+  let pair = new Pair(pairAddress)
   pair.token0 = token0.id
   pair.token1 = token1.id
-  pair.liquidityProviderCount = ZERO_BI
   pair.createdAtTimestamp = event.block.timestamp
   pair.createdAtBlockNumber = event.block.number
-  pair.txCount = ZERO_BI
-  pair.reserve0 = ZERO_BD
-  pair.reserve1 = ZERO_BD
-  pair.trackedReserveETH = ZERO_BD
-  pair.reserveETH = ZERO_BD
-  pair.reserveUSD = ZERO_BD
-  pair.totalSupply = ZERO_BD
-  pair.volumeToken0 = ZERO_BD
-  pair.volumeToken1 = ZERO_BD
-  pair.volumeUSD = ZERO_BD
-  pair.untrackedVolumeUSD = ZERO_BD
-  pair.token0Price = ZERO_BD
-  pair.token1Price = ZERO_BD
-
-  // create the tracked contract based on the template
-  PairTemplate.create(event.params.pair)
-
-  // save updated values
-  token0.save()
-  token1.save()
   pair.save()
-  factory.save()
 }
