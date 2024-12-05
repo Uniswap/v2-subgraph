@@ -1,9 +1,9 @@
 import { BigDecimal } from '@graphprotocol/graph-ts'
 import { log } from '@graphprotocol/graph-ts'
 
-import { Mint as MintEntity, Pair, Token, UniswapFactory } from '../types/schema'
+import { Mint as MintEntity, Pair, Token } from '../types/schema'
 import { Burn, Mint, Swap, Sync } from '../types/templates/Pair/Pair'
-import { convertTokenToDecimal, FACTORY_ADDRESS, ONE_BI } from './helpers'
+import { convertTokenToDecimal } from './helpers'
 
 export function handleMint(event: Mint): void {
   const block = event.block
@@ -17,23 +17,12 @@ export function handleMint(event: Mint): void {
     return
   }
 
-  const uniswap = UniswapFactory.load(FACTORY_ADDRESS)!
   const pair = Pair.load(event.address.toHex())!
   const token0 = Token.load(pair.token0)!
   const token1 = Token.load(pair.token1)!
 
   const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
   const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
-
-  token0.txCount = token0.txCount.plus(ONE_BI)
-  token1.txCount = token1.txCount.plus(ONE_BI)
-  pair.txCount = pair.txCount.plus(ONE_BI)
-  uniswap.txCount = uniswap.txCount.plus(ONE_BI)
-
-  token0.save()
-  token1.save()
-  pair.save()
-  uniswap.save()
 
   const mint = new MintEntity(mintId)
   mint.timestamp = block.timestamp

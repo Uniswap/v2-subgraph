@@ -1,13 +1,11 @@
 type UniswapFactory @entity {
   id: ID! # factory address, checksummed
   pairCount: Int!
-  txCount: BigInt!
 }
 
 type Token @entity {
   id: ID! # token address, lowercased
   decimals: BigInt!
-  txCount: BigInt!
   
   pairsAsToken0: [Pair!]! @derivedFrom(field: "token0")
   pairsAsToken1: [Pair!]! @derivedFrom(field: "token1")
@@ -21,7 +19,6 @@ type Pair @entity {
   token1: Token!
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
-  txCount: BigInt!
   
   mints: [Mint!]! @derivedFrom(field: "pair")
 }
@@ -38,4 +35,5 @@ type Mint @entity {
   amount0: BigDecimal!
   amount1: BigDecimal!
 }
+
 

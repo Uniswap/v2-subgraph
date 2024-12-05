@@ -12,7 +12,6 @@ export function handleNewPair(event: PairCreated): void {
   if (factory === null) {
     factory = new UniswapFactory(FACTORY_ADDRESS)
     factory.pairCount = 0
-    factory.txCount = ZERO_BI
     factory.save()
   }
   factory.pairCount += 1
@@ -32,7 +31,6 @@ export function handleNewPair(event: PairCreated): void {
     }
 
     token0.decimals = decimals
-    token0.txCount = ZERO_BI
     token0.save()
   }
 
@@ -48,7 +46,6 @@ export function handleNewPair(event: PairCreated): void {
     }
 
     token1.decimals = decimals
-    token1.txCount = ZERO_BI
     token1.save()
   }
 
@@ -57,7 +54,6 @@ export function handleNewPair(event: PairCreated): void {
   pair.token1 = token1.id
   pair.createdAtTimestamp = event.block.timestamp
   pair.createdAtBlockNumber = event.block.number
-  pair.txCount = ZERO_BI
   pair.save()
 
   PairTemplate.create(event.params.pair)
