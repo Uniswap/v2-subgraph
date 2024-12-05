@@ -36,4 +36,16 @@ type Mint @entity {
   amount1: BigDecimal!
 }
 
+type Burn @entity {
+  id: ID! # transactionhash#logIndex
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  pair: Pair!
+  token0: Token!
+  token1: Token!
+  sender: Bytes!
+  amount0: BigDecimal!
+  amount1: BigDecimal!
+  to: Bytes!
+}
 

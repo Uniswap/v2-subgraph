@@ -43,6 +43,7 @@ templates:
         - Pair
         - Token
         - Mint
+        - Burn
       abis:
         - name: Pair
           file: ./abis/pair.json

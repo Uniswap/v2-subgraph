@@ -1,7 +1,7 @@
 import { BigDecimal } from '@graphprotocol/graph-ts'
 import { log } from '@graphprotocol/graph-ts'
 
-import { Mint as MintEntity, Pair, Token } from '../types/schema'
+import { Burn as BurnEntity, Mint as MintEntity, Pair, Token } from '../types/schema'
 import { Burn, Mint, Swap, Sync } from '../types/templates/Pair/Pair'
 import { convertTokenToDecimal } from './helpers'
 
@@ -38,7 +38,28 @@ export function handleMint(event: Mint): void {
 }
 
 export function handleBurn(event: Burn): void {
-  log.info('Burn event received for pair {}.', [event.address.toHex()])
+  const block = event.block
+  const transaction = event.transaction
+  const burnId = transaction.hash.toHex() + '#' + event.logIndex.toString()
+
+  const pair = Pair.load(event.address.toHex())!
+  const token0 = Token.load(pair.token0)!
+  const token1 = Token.load(pair.token1)!
+
+  const token0Amount = convertTokenToDecimal(event.params.amount0, token0.decimals)
+  const token1Amount = convertTokenToDecimal(event.params.amount1, token1.decimals)
+
+  const burn = new BurnEntity(burnId)
+  burn.timestamp = block.timestamp
+  burn.blockNumber = block.number
+  burn.pair = pair.id
+  burn.token0 = token0.id
+  burn.token1 = token1.id
+  burn.sender = event.params.sender
+  burn.amount0 = token0Amount as BigDecimal
+  burn.amount1 = token1Amount as BigDecimal
+  burn.to = event.params.to
+  burn.save()
 }
 
 export function handleSwap(event: Swap): void {
