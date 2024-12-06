@@ -2,7 +2,7 @@ import { BigDecimal } from '@graphprotocol/graph-ts'
 import { log } from '@graphprotocol/graph-ts'
 
 import { Burn as BurnEntity, Mint as MintEntity, Pair, Swap as SwapEntity, Token } from '../types/schema'
-import { Burn, Mint, Swap, Sync } from '../types/templates/Pair/Pair'
+import { Burn, Mint, Swap } from '../types/templates/Pair/Pair'
 import { convertTokenToDecimal } from './helpers'
 
 export function handleMint(event: Mint): void {
@@ -35,6 +35,11 @@ export function handleMint(event: Mint): void {
   mint.amount0 = token0Amount as BigDecimal
   mint.amount1 = token1Amount as BigDecimal
   mint.save()
+
+  token0.totalLiquidity = token0.totalLiquidity.plus(token0Amount)
+  token1.totalLiquidity = token1.totalLiquidity.plus(token1Amount)
+  token0.save()
+  token1.save()
 }
 
 export function handleBurn(event: Burn): void {
@@ -60,6 +65,11 @@ export function handleBurn(event: Burn): void {
   burn.amount1 = token1Amount as BigDecimal
   burn.to = event.params.to
   burn.save()
+
+  token0.totalLiquidity = token0.totalLiquidity.minus(token0Amount)
+  token1.totalLiquidity = token1.totalLiquidity.minus(token1Amount)
+  token0.save()
+  token1.save()
 }
 
 export function handleSwap(event: Swap): void {
@@ -89,25 +99,9 @@ export function handleSwap(event: Swap): void {
   swap.amount1Out = token1AmountOut
   swap.to = event.params.to
   swap.save()
-}
 
-export function handleSync(event: Sync): void {
-  const pair = Pair.load(event.address.toHex())!
-  const token0 = Token.load(pair.token0)!
-  const token1 = Token.load(pair.token1)!
-
-  const reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
-  const reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
-
-  const oldReserve0 = pair.reserve0
-  const oldReserve1 = pair.reserve1
-
-  pair.reserve0 = reserve0
-  pair.reserve1 = reserve1
-  pair.save()
-
-  token0.totalLiquidity = token0.totalLiquidity.plus(reserve0.minus(oldReserve0))
-  token1.totalLiquidity = token1.totalLiquidity.plus(reserve1.minus(oldReserve1))
+  token0.totalLiquidity = token0.totalLiquidity.minus(token0AmountOut).plus(token0AmountIn)
+  token1.totalLiquidity = token1.totalLiquidity.minus(token1AmountOut).plus(token1AmountIn)
   token0.save()
   token1.save()
 }
