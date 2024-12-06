@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, json } from '@graphprotocol/graph-ts'
 
 import { ERC20 } from '../types/Factory/ERC20'
 
@@ -22,11 +22,9 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt | null {
 }
 
 export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
-  let bd = ONE_BD
-  for (let i = ZERO_BI; i.lt(decimals as BigInt); i = i.plus(ONE_BI)) {
-    bd = bd.times(BigDecimal.fromString('10'))
-  }
-  return bd
+  const zeros = '0'.repeat(decimals.toI32())
+  const bigDecimalString = `1${zeros}`
+  return BigDecimal.fromString(bigDecimalString)
 }
 
 export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {

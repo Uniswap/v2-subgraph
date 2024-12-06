@@ -1,16 +1,21 @@
 type UniswapFactory @entity {
   id: ID! # factory address, checksummed
-  pairCount: Int!
 }
 
 type Token @entity {
   id: ID! # token address, lowercased
   decimals: BigInt!
   
+  totalLiquidity: BigDecimal!
+  
   pairsAsToken0: [Pair!]! @derivedFrom(field: "token0")
   pairsAsToken1: [Pair!]! @derivedFrom(field: "token1")
   mintsAsToken0: [Mint!]! @derivedFrom(field: "token0")
   mintsAsToken1: [Mint!]! @derivedFrom(field: "token1")
+  burnsAsToken0: [Burn!]! @derivedFrom(field: "token0")
+  burnsAsToken1: [Burn!]! @derivedFrom(field: "token1")
+  swapsAsToken0: [Swap!]! @derivedFrom(field: "token0")
+  swapsAsToken1: [Swap!]! @derivedFrom(field: "token1")
 }
 
 type Pair @entity {
@@ -20,7 +25,12 @@ type Pair @entity {
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
   
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
+  
   mints: [Mint!]! @derivedFrom(field: "pair")
+  burns: [Burn!]! @derivedFrom(field: "pair")
+  swaps: [Swap!]! @derivedFrom(field: "pair")
 }
 
 type Mint @entity {
@@ -49,3 +59,17 @@ type Burn @entity {
   to: Bytes!
 }
 
+type Swap @entity {
+  id: ID! # transactionhash#logIndex
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  pair: Pair!
+  token0: Token!
+  token1: Token!
+  sender: Bytes!
+  amount0In: BigDecimal!
+  amount1In: BigDecimal!
+  amount0Out: BigDecimal!
+  amount1Out: BigDecimal!
+  to: Bytes!
+}
