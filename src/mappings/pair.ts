@@ -1,9 +1,37 @@
 import { BigDecimal } from '@graphprotocol/graph-ts'
 import { log } from '@graphprotocol/graph-ts'
 
-import { Burn as BurnEntity, Mint as MintEntity, Pair, Swap as SwapEntity, Token } from '../types/schema'
-import { Burn, Mint, Swap, Sync } from '../types/templates/Pair/Pair'
+import {
+  Burn as BurnEntity,
+  Mint as MintEntity,
+  Pair,
+  Swap as SwapEntity,
+  Token,
+  Transfer as TransferEntity,
+} from '../types/schema'
+import { Burn, Mint, Swap, Transfer } from '../types/templates/Pair/Pair'
 import { convertTokenToDecimal } from './helpers'
+
+export function handleTransfer(event: Transfer): void {
+  const block = event.block
+  const transaction = event.transaction
+  const transferId = transaction.hash.toHex() + '#' + event.logIndex.toString()
+
+  const pair = Pair.load(event.address.toHex())!
+  const token0 = Token.load(pair.token0)!
+  const token1 = Token.load(pair.token1)!
+
+  const transfer = new TransferEntity(transferId)
+  transfer.timestamp = block.timestamp
+  transfer.blockNumber = block.number
+  transfer.pair = pair.id
+  transfer.token0 = token0.id
+  transfer.token1 = token1.id
+  transfer.from = event.params.from
+  transfer.to = event.params.to
+  transfer.value = event.params.value
+  transfer.save()
+}
 
 export function handleMint(event: Mint): void {
   const block = event.block
@@ -89,25 +117,4 @@ export function handleSwap(event: Swap): void {
   swap.amount1Out = token1AmountOut
   swap.to = event.params.to
   swap.save()
-}
-
-export function handleSync(event: Sync): void {
-  const pair = Pair.load(event.address.toHex())!
-  const token0 = Token.load(pair.token0)!
-  const token1 = Token.load(pair.token1)!
-
-  const reserve0 = convertTokenToDecimal(event.params.reserve0, token0.decimals)
-  const reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
-
-  const oldReserve0 = pair.reserve0
-  const oldReserve1 = pair.reserve1
-
-  pair.reserve0 = reserve0
-  pair.reserve1 = reserve1
-  pair.save()
-
-  token0.totalLiquidity = token0.totalLiquidity.plus(reserve0.minus(oldReserve0))
-  token1.totalLiquidity = token1.totalLiquidity.plus(reserve1.minus(oldReserve1))
-  token0.save()
-  token1.save()
 }

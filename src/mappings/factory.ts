@@ -24,7 +24,6 @@ export function handleNewPair(event: PairCreated): void {
 
     const token0 = new Token(event.params.token0.toHexString())
     token0.decimals = decimals
-    token0.totalLiquidity = ZERO_BD
     token0.save()
   }
 
@@ -40,7 +39,6 @@ export function handleNewPair(event: PairCreated): void {
 
     const token1 = new Token(event.params.token1.toHexString())
     token1.decimals = decimals
-    token1.totalLiquidity = ZERO_BD
     token1.save()
   }
 
@@ -49,8 +47,6 @@ export function handleNewPair(event: PairCreated): void {
   pair.token1 = event.params.token1.toHexString()
   pair.createdAtTimestamp = event.block.timestamp
   pair.createdAtBlockNumber = event.block.number
-  pair.reserve0 = ZERO_BD
-  pair.reserve1 = ZERO_BD
   pair.save()
 
   PairTemplate.create(event.params.pair)

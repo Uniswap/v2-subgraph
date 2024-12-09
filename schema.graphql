@@ -6,8 +6,6 @@ type Token @entity {
   id: ID! # token address, lowercased
   decimals: BigInt!
   
-  totalLiquidity: BigDecimal!
-  
   pairsAsToken0: [Pair!]! @derivedFrom(field: "token0")
   pairsAsToken1: [Pair!]! @derivedFrom(field: "token1")
   mintsAsToken0: [Mint!]! @derivedFrom(field: "token0")
@@ -25,15 +23,12 @@ type Pair @entity {
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
   
-  reserve0: BigDecimal!
-  reserve1: BigDecimal!
-  
   mints: [Mint!]! @derivedFrom(field: "pair")
   burns: [Burn!]! @derivedFrom(field: "pair")
   swaps: [Swap!]! @derivedFrom(field: "pair")
 }
 
-type Mint @entity {
+type Mint @entity(immutable: true) {
   id: ID! # transactionhash#logIndex
   timestamp: BigInt!
   blockNumber: BigInt!
@@ -46,7 +41,7 @@ type Mint @entity {
   amount1: BigDecimal!
 }
 
-type Burn @entity {
+type Burn @entity(immutable: true) {
   id: ID! # transactionhash#logIndex
   timestamp: BigInt!
   blockNumber: BigInt!
@@ -59,7 +54,7 @@ type Burn @entity {
   to: Bytes!
 }
 
-type Swap @entity {
+type Swap @entity(immutable: true) {
   id: ID! # transactionhash#logIndex
   timestamp: BigInt!
   blockNumber: BigInt!
@@ -72,4 +67,16 @@ type Swap @entity {
   amount0Out: BigDecimal!
   amount1Out: BigDecimal!
   to: Bytes!
+}
+
+type Transfer @entity(immutable: true) {
+  id: ID! # transactionhash#logIndex
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  pair: Pair!
+  token0: Token!
+  token1: Token!
+  from: Bytes!
+  to: Bytes!
+  value: BigInt!
 }
