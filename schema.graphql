@@ -7,6 +7,9 @@ type Token @entity {
   decimals: BigInt!
   
   totalLiquidity: BigDecimal!
+  stablecoinPairs: [Pair!]!
+  primaryUsdPrice: BigDecimal!
+  primaryUsdLiquidity: BigDecimal!
   
   pairsAsToken0: [Pair!]! @derivedFrom(field: "token0")
   pairsAsToken1: [Pair!]! @derivedFrom(field: "token1")
@@ -27,6 +30,8 @@ type Pair @entity {
   
   reserve0: BigDecimal!
   reserve1: BigDecimal!
+  
+  primaryUsdLiquidity: BigDecimal!
   
   mints: [Mint!]! @derivedFrom(field: "pair")
   burns: [Burn!]! @derivedFrom(field: "pair")

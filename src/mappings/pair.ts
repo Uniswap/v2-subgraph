@@ -4,6 +4,7 @@ import { log } from '@graphprotocol/graph-ts'
 import { Burn as BurnEntity, Mint as MintEntity, Pair, Swap as SwapEntity, Token } from '../types/schema'
 import { Burn, Mint, Swap } from '../types/templates/Pair/Pair'
 import { convertTokenToDecimal } from './helpers'
+import { getBestPrimaryUsdPrice } from './pricing'
 
 export function handleMint(event: Mint): void {
   const block = event.block
@@ -36,10 +37,21 @@ export function handleMint(event: Mint): void {
   mint.amount1 = token1Amount as BigDecimal
   mint.save()
 
+  token0.primaryUsdPrice = getBestPrimaryUsdPrice(token0.stablecoinPairs, token0.id)
+  token1.primaryUsdPrice = getBestPrimaryUsdPrice(token1.stablecoinPairs, token1.id)
   token0.totalLiquidity = token0.totalLiquidity.plus(token0Amount)
   token1.totalLiquidity = token1.totalLiquidity.plus(token1Amount)
+  token0.primaryUsdLiquidity = token0.primaryUsdPrice.times(token0.totalLiquidity)
+  token1.primaryUsdLiquidity = token1.primaryUsdPrice.times(token1.totalLiquidity)
   token0.save()
   token1.save()
+
+  pair.reserve0 = pair.reserve0.plus(token0Amount)
+  pair.reserve1 = pair.reserve1.plus(token1Amount)
+  pair.primaryUsdLiquidity = pair.reserve0
+    .times(token0.primaryUsdPrice)
+    .plus(pair.reserve1.times(token1.primaryUsdPrice))
+  pair.save()
 }
 
 export function handleBurn(event: Burn): void {
@@ -66,10 +78,22 @@ export function handleBurn(event: Burn): void {
   burn.to = event.params.to
   burn.save()
 
+
+  token0.primaryUsdPrice = getBestPrimaryUsdPrice(token0.stablecoinPairs, token0.id)
+  token1.primaryUsdPrice = getBestPrimaryUsdPrice(token1.stablecoinPairs, token1.id)
   token0.totalLiquidity = token0.totalLiquidity.minus(token0Amount)
   token1.totalLiquidity = token1.totalLiquidity.minus(token1Amount)
+  token0.primaryUsdLiquidity = token0.primaryUsdPrice.times(token0.totalLiquidity)
+  token1.primaryUsdLiquidity = token1.primaryUsdPrice.times(token1.totalLiquidity)
   token0.save()
   token1.save()
+
+  pair.reserve0 = pair.reserve0.minus(token0Amount)
+  pair.reserve1 = pair.reserve1.minus(token1Amount)
+  pair.primaryUsdLiquidity = pair.reserve0
+    .times(token0.primaryUsdPrice)
+    .plus(pair.reserve1.times(token1.primaryUsdPrice))
+  pair.save()
 }
 
 export function handleSwap(event: Swap): void {
@@ -100,8 +124,19 @@ export function handleSwap(event: Swap): void {
   swap.to = event.params.to
   swap.save()
 
+  token0.primaryUsdPrice = getBestPrimaryUsdPrice(token0.stablecoinPairs, token0.id)
+  token1.primaryUsdPrice = getBestPrimaryUsdPrice(token1.stablecoinPairs, token1.id)
   token0.totalLiquidity = token0.totalLiquidity.minus(token0AmountOut).plus(token0AmountIn)
   token1.totalLiquidity = token1.totalLiquidity.minus(token1AmountOut).plus(token1AmountIn)
+  token0.primaryUsdLiquidity = token0.primaryUsdPrice.times(token0.totalLiquidity)
+  token1.primaryUsdLiquidity = token1.primaryUsdPrice.times(token1.totalLiquidity)
   token0.save()
   token1.save()
+
+  pair.reserve0 = pair.reserve0.minus(token0AmountOut).plus(token0AmountIn)
+  pair.reserve1 = pair.reserve1.minus(token1AmountOut).plus(token1AmountIn)
+  pair.primaryUsdLiquidity = pair.reserve0
+    .times(token0.primaryUsdPrice)
+    .plus(pair.reserve1.times(token1.primaryUsdPrice))
+  pair.save()
 }
