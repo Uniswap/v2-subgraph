@@ -8,7 +8,7 @@ dataSources:
     name: Factory
     network: sonic-mainnet
     source:
-      address: '0x01D6747dD2d65dDD90FAEC2C84727c2706ee28E2'
+      address: "0x01D6747dD2d65dDD90FAEC2C84727c2706ee28E2"
       abi: Factory
       startBlock: 270030
     mapping:
