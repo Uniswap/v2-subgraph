@@ -22,17 +22,17 @@ function isCompleteMint(mintId: string): boolean {
   return MintEvent.load(mintId)!.sender !== null // sufficient checks
 }
 
-function updateLpUserPosition(pair: string, user: Bytes, liquidityDelta: BigInt): void {
+function updateLpUserPosition(pair: Bytes, user: Bytes, liquidityDelta: BigInt): void {
   if (user.toHexString() == ADDRESS_ZERO || liquidityDelta.equals(BigInt.fromI32(0))) {
     return
   }
 
-  let id = pair.concat('-').concat(user.toHexString())
+  let id = pair.toHexString().concat('-').concat(user.toHexString())
   let lpUser = LpUser.load(id)
 
   if (lpUser === null) {
     lpUser = new LpUser(id)
-    lpUser.pair = pair
+    lpUser.pair = pair.toHexString()
     lpUser.user = user
     lpUser.liquidity = BigInt.fromI32(0)
   }
@@ -214,8 +214,8 @@ export function handleTransfer(event: Transfer): void {
     transaction.save()
   }
 
-  updateLpUserPosition(event.address.toHexString(), from, event.params.value.neg())
-  updateLpUserPosition(event.address.toHexString(), to, event.params.value)
+  updateLpUserPosition(event.address, from, event.params.value.neg())
+  updateLpUserPosition(event.address, to, event.params.value)
 
   transaction.save()
 }
