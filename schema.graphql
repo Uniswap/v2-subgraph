@@ -272,3 +272,11 @@ type TokenDayData @entity {
     # price stats
     priceUSD: BigDecimal!
 }
+
+type LpUser @entity {
+    # pair address + user address
+    id: ID!
+    pair: Pair!
+    user: Bytes!
+    liquidity: BigInt!
+}
