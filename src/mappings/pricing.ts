@@ -5,7 +5,7 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
 // TODO(SONIC): update here if needed
-const WETH_ADDRESS = '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38'
+const WETH_ADDRESS = '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38'
 const USDC_WETH_PAIR = '0x0000000000000000000000000000000000000000' // created 10008355
 const DAI_WETH_PAIR = '0x0000000000000000000000000000000000000000' // created block 10042267
 const USDT_WETH_PAIR = '0x0000000000000000000000000000000000000000' // created block 10093341
@@ -43,9 +43,9 @@ export function getEthPriceInUSD(): BigDecimal {
 // TODO(SONIC): update here if needed
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38', // wS
-  '0x309C92261178fA0CF748A855e90Ae73FDb79EBc7', // wETH
-  '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', // USDC
+  '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // wS
+  '0x309c92261178fa0cf748a855e90ae73fdb79ebc7', // wETH
+  '0x29219dd400f2bf60e5a23d13be72b486d4038894', // USDC
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
