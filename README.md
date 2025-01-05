@@ -38,7 +38,7 @@ Every transaction on Uniswap is stored. Each transaction contains an array of mi
 
 #### Mint, Burn, Swap
 
-These contain specifc information about a transaction. Things like which pair triggered the transaction, amounts, sender, recipient, and more. Each is linked to a parent Transaction entity.
+These contain specific information about a transaction. Things like which pair triggered the transaction, amounts, sender, recipient, and more. Each is linked to a parent Transaction entity.
 
 ## Example Queries
 
