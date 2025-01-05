@@ -34,7 +34,7 @@ Contains data on a specific pair.
 
 #### Transaction
 
-Every transaction on Uniswap is stored. Each transaction contains an array of mints, burns, and swaps that occured within it.
+Every transaction on Uniswap is stored. Each transaction contains an array of mints, burns, and swaps that occurred within it.
 
 #### Mint, Burn, Swap
 
