@@ -1,0 +1,8 @@
+{
+  "unichain-mainnet": {
+    "Factory": {
+      "address": "0x1f98400000000000000000000000000000000002",
+      "startBlock": 23487
+    }
+  }
+}
