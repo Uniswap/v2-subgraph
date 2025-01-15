@@ -5,7 +5,7 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { ADDRESS_ZERO, factoryContract, ONE_BD, UNTRACKED_PAIRS, ZERO_BD } from './helpers'
 
 const WETH_ADDRESS = '0x760afe86e5de5fa0ee542fc7b7b713e1c5425701'
-const USDC_WETH_PAIR = '0x0000000000000000000000000000000000000000' // STILL NEED TO FIND stablecoin/WETH V2 pair address
+const USDC_WETH_PAIR = '0x35b74531e11bdf8f8dbdce2bfccee186ca55c6d8'
 
 export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token1
