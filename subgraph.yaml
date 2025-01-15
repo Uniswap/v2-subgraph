@@ -8,9 +8,9 @@ dataSources:
     name: Factory
     network: monad-testnet
     source:
-      address: '0x385A5cf5F83e99f7BB2852b6A19C3538b9FA7658'
+      address: '0x733E88f248b742db6C14C0b1713Af5AD7fDd59D0'
       abi: Factory
-      startBlock: 2155586
+      startBlock: 361578
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
