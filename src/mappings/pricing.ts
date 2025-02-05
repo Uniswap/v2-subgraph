@@ -8,7 +8,7 @@ const WETH_ADDRESS = '0x4200000000000000000000000000000000000006'
 const USDC_WETH_PAIR = '0x8cbf356ecf5ae7035583543479996250178527f4'
 
 export function getEthPriceInUSD(): BigDecimal {
-  let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token 0  
+  let usdcPair = Pair.load(USDC_WETH_PAIR) // usdc is token 0
   if (usdcPair !== null) {
     return usdcPair.token0Price
   } else {
@@ -18,13 +18,13 @@ export function getEthPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0x20cab320a855b39f724131c69424240519573f81',// dai
-  '0x4200000000000000000000000000000000000006',// weth
+  '0x20cab320a855b39f724131c69424240519573f81', // dai
+  '0x4200000000000000000000000000000000000006', // weth
   '0x8f187aa05619a017077f5308904739877ce9ea21', // uniswap
 ]
 
 let STABLECOINS: string[] = [
-  '0x20cab320a855b39f724131c69424240519573f81',// dai
+  '0x20cab320a855b39f724131c69424240519573f81', // dai
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
