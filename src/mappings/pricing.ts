@@ -18,12 +18,16 @@ export function getEthPriceInUSD(): BigDecimal {
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0x760afe86e5de5fa0ee542fc7b7b713e1c5425701', // WETH
+  '0x760afe86e5de5fa0ee542fc7b7b713e1c5425701', // WMON
   '0xfbc2d240a5ed44231aca3a9e9066bc4b33f01149', // USDT
+  '0xf817257fed379853cde0fa4f97ab987181b1e5ea', // USDC
+  '0xb5a30b0fdc5ea94a52fdc42e3e9760cb8449fb37', // WETH
 ]
 
 const STABLECOINS: string[] = [
   '0xfbc2d240a5ed44231aca3a9e9066bc4b33f01149', // USDT
+  '0x88b8e2161dedc77ef4ab7585569d2415a1c1055d', // USDT
+  '0xf817257fed379853cde0fa4f97ab987181b1e5ea', // USDC
 ]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
@@ -55,31 +59,33 @@ export function findEthPerToken(token: Token): BigDecimal {
     return safeDiv(ONE_BD, bundle.ethPrice)
   }
 
-  // loop through whitelist and check if paired with any
-  for (let i = 0; i < WHITELIST.length; ++i) {
-    let pairAddress = factoryContract.getPair(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
-    if (pairAddress.toHexString() != ADDRESS_ZERO) {
-      let pair = Pair.load(pairAddress.toHexString())
-      if (pair === null) {
-        continue
-      }
-      if (pair.token0 == token.id && pair.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
-        let token1 = Token.load(pair.token1)
-        if (token1 === null) {
-          continue
-        }
-        return pair.token1Price.times(token1.derivedETH as BigDecimal) // return token1 per our token * Eth per token 1
-      }
-      if (pair.token1 == token.id && pair.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
-        let token0 = Token.load(pair.token0)
-        if (token0 === null) {
-          continue
-        }
-        return pair.token0Price.times(token0.derivedETH as BigDecimal) // return token0 per our token * ETH per token 0
-      }
-    }
-  }
-  return ZERO_BD // nothing was found return 0
+  return ZERO_BD
+
+  // // loop through whitelist and check if paired with any
+  // for (let i = 0; i < WHITELIST.length; ++i) {
+  //   let pairAddress = factoryContract.try_getPair(Address.fromString(token.id), Address.fromString(WHITELIST[i]))
+  //   if (!pairAddress.reverted && pairAddress.value.toHexString() != ADDRESS_ZERO) {
+  //     let pair = Pair.load(pairAddress.value.toHexString())
+  //     if (pair === null) {
+  //       continue
+  //     }
+  //     if (pair.token0 == token.id && pair.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
+  //       let token1 = Token.load(pair.token1)
+  //       if (token1 === null) {
+  //         continue
+  //       }
+  //       return pair.token1Price.times(token1.derivedETH as BigDecimal) // return token1 per our token * Eth per token 1
+  //     }
+  //     if (pair.token1 == token.id && pair.reserveETH.gt(MINIMUM_LIQUIDITY_THRESHOLD_ETH)) {
+  //       let token0 = Token.load(pair.token0)
+  //       if (token0 === null) {
+  //         continue
+  //       }
+  //       return pair.token0Price.times(token0.derivedETH as BigDecimal) // return token0 per our token * ETH per token 0
+  //     }
+  //   }
+  // }
+  // return ZERO_BD // nothing was found return 0
 }
 
 /**
