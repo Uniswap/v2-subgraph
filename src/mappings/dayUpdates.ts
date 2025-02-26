@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts'
 
 import { Bundle, Pair, PairDayData, Token, TokenDayData, UniswapDayData, UniswapFactory } from '../types/schema'
 import { PairHourData } from './../types/schema'
@@ -10,9 +10,9 @@ export function updateUniswapDayData(event: ethereum.Event): UniswapDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
-  let uniswapDayData = UniswapDayData.load(dayID.toString())
-  if (uniswapDayData === null) {
-    uniswapDayData = new UniswapDayData(dayID.toString())
+  let uniswapDayData = UniswapDayData.load(Bytes.fromI32(dayID))
+  if (!uniswapDayData) {
+    uniswapDayData = new UniswapDayData(Bytes.fromI32(dayID))
     uniswapDayData.date = dayStartTimestamp
     uniswapDayData.dailyVolumeUSD = ZERO_BD
     uniswapDayData.dailyVolumeETH = ZERO_BD
@@ -33,10 +33,10 @@ export function updatePairDayData(event: ethereum.Event): PairDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
-  let dayPairID = event.address.toHexString().concat('-').concat(BigInt.fromI32(dayID).toString())
-  let pair = Pair.load(event.address.toHexString())!
+  let dayPairID = event.address.concatI32(dayID)
+  let pair = Pair.load(event.address)!
   let pairDayData = PairDayData.load(dayPairID)
-  if (pairDayData === null) {
+  if (!pairDayData) {
     pairDayData = new PairDayData(dayPairID)
     pairDayData.date = dayStartTimestamp
     pairDayData.token0 = pair.token0
@@ -62,13 +62,13 @@ export function updatePairHourData(event: ethereum.Event): PairHourData {
   let timestamp = event.block.timestamp.toI32()
   let hourIndex = timestamp / 3600 // get unique hour within unix history
   let hourStartUnix = hourIndex * 3600 // want the rounded effect
-  let hourPairID = event.address.toHexString().concat('-').concat(BigInt.fromI32(hourIndex).toString())
-  let pair = Pair.load(event.address.toHexString())!
+  let hourPairID = event.address.concatI32(hourIndex)
+  let pair = Pair.load(event.address)!
   let pairHourData = PairHourData.load(hourPairID)
-  if (pairHourData === null) {
+  if (!pairHourData) {
     pairHourData = new PairHourData(hourPairID)
     pairHourData.hourStartUnix = hourStartUnix
-    pairHourData.pair = event.address.toHexString()
+    pairHourData.pair = event.address
     pairHourData.hourlyVolumeToken0 = ZERO_BD
     pairHourData.hourlyVolumeToken1 = ZERO_BD
     pairHourData.hourlyVolumeUSD = ZERO_BD
@@ -86,14 +86,14 @@ export function updatePairHourData(event: ethereum.Event): PairHourData {
 }
 
 export function updateTokenDayData(token: Token, event: ethereum.Event): TokenDayData {
-  let bundle = Bundle.load('1')!
+  let bundle = Bundle.load(Bytes.fromI32(1))!
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
-  let tokenDayID = token.id.toString().concat('-').concat(BigInt.fromI32(dayID).toString())
+  let tokenDayID = token.id.concatI32(dayID)
 
   let tokenDayData = TokenDayData.load(tokenDayID)
-  if (tokenDayData === null) {
+  if (!tokenDayData) {
     tokenDayData = new TokenDayData(tokenDayID)
     tokenDayData.date = dayStartTimestamp
     tokenDayData.token = token.id
