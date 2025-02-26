@@ -1,4 +1,4 @@
-specVersion: 0.0.4
+specVersion: 1.2.0
 description: Uniswap is a decentralized protocol for automated token exchange on Ethereum.
 repository: https://github.com/Uniswap/uniswap-v2-subgraph
 schema:
@@ -8,12 +8,13 @@ dataSources:
     name: Factory
     network: mainnet
     source:
-      address: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
+      address: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
       abi: Factory
       startBlock: 10000834
+      endBlock: 10100000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.7
+      apiVersion: 0.0.9
       language: wasm/assemblyscript
       file: ./src/mappings/factory.ts
       entities:
@@ -31,6 +32,15 @@ dataSources:
       eventHandlers:
         - event: PairCreated(indexed address,indexed address,address,uint256)
           handler: handleNewPair
+          calls:
+            name0: ERC20[event.params.token0].name()
+            symbol0: ERC20[event.params.token0].symbol()
+            totalSupply0: ERC20[event.params.token1].totalSupply()
+            decimals0: ERC20[event.params.token0].decimals()
+            name1: ERC20[event.params.token1].name()
+            symbol1: ERC20[event.params.token1].symbol()
+            totalSupply1: ERC20[event.params.token1].totalSupply()
+            decimals1: ERC20[event.params.token1].decimals()
 templates:
   - kind: ethereum/contract
     name: Pair
@@ -39,7 +49,7 @@ templates:
       abi: Pair
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.7
+      apiVersion: 0.0.9
       language: wasm/assemblyscript
       file: ./src/mappings/core.ts
       entities:
