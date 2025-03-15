@@ -1,7 +1,7 @@
 {
   "name": "beanswap-v2-subgraph",
   "version": "1.0.0",
-  "repository": "https://github.com/graphprotocol/beanswap-v2-subgraph",
+  "repository": "https://github.com/BeanExchange/v2-subgraph",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts --fix",
@@ -11,7 +11,7 @@
     "codegen": "graph codegen --output-dir src/types/",
     "create-local": "graph create bean-swap --node http://127.0.0.1:8020",
     "deploy-local": "graph deploy bean-swap --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
-    "deploy": "graph deploy ianlapham/uniswap-v2-dev --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy": "graph deploy beanswap-v2-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy:local": "graph deploy bean-swap  --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020",
     "watch:local": "graph deploy  bean-swap --watch --debug  --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "create:aws": "graph create bean-swap --node http://18.143.86.6:8020",
