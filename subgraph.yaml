@@ -1,12 +1,12 @@
 specVersion: 0.0.4
-description: Uniswap is a decentralized protocol for automated token exchange on Ethereum.
-repository: https://github.com/Uniswap/uniswap-v2-subgraph
+description: Bean is a decentralized protocol for automated token exchange on Ethereum.
+repository: https://github.com/BeanExchange/v2-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: Factory
-    network: mainnet
+    network: monad
     source:
       address: '0x0085388Da29e74b66ac6b6fF690973bE05403f67'
       abi: Factory
@@ -34,7 +34,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Pair
-    network: mainnet
+    network: monad
     source:
       abi: Pair
     mapping:

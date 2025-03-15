@@ -1,7 +1,7 @@
 {
-  "name": "uniswap-v2-subgraph",
+  "name": "beanswap-v2-subgraph",
   "version": "1.0.0",
-  "repository": "https://github.com/graphprotocol/uniswap-v2-subgraph",
+  "repository": "https://github.com/graphprotocol/beanswap-v2-subgraph",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts --fix",
@@ -9,9 +9,13 @@
     "buildonly": "graph build",
     "deploy:alchemy": "graph deploy --node https://subgraphs.alchemy.com/api/subgraphs/deploy --ipfs https://ipfs.satsuma.xyz",
     "codegen": "graph codegen --output-dir src/types/",
-    "create-local": "graph create davekaj/uniswap --node http://127.0.0.1:8020",
-    "deploy-local": "graph deploy davekaj/uniswap --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "create-local": "graph create bean-swap --node http://127.0.0.1:8020",
+    "deploy-local": "graph deploy bean-swap --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "deploy": "graph deploy ianlapham/uniswap-v2-dev --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy:local": "graph deploy bean-swap  --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020",
+    "watch:local": "graph deploy  bean-swap --watch --debug  --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "create:aws": "graph create bean-swap --node http://18.143.86.6:8020",
+    "deploy:aws": "graph deploy bean-swap --ipfs http://18.143.86.6:5001/ --node http://18.143.86.6:8020/ --deploy-key $(cat .subgraph_testnet_token)",
     "deploy-staging": "graph deploy $THE_GRAPH_GITHUB_USER/$THE_GRAPH_SUBGRAPH_NAME /Uniswap --ipfs https://api.staging.thegraph.com/ipfs/ --node https://api.staging.thegraph.com/deploy/",
     "watch-local": "graph deploy graphprotocol/Uniswap2 --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
   },
