@@ -35,6 +35,8 @@ export function handleNewPair(event: PairCreated): void {
   factory.pairCount = factory.pairCount + 1
   factory.save()
 
+  log.debug('mybug the ', [JSON.stringify(event.params)])
+
   // create the tokens
   let token0 = Token.load(event.params.token0.toHexString())
   let token1 = Token.load(event.params.token1.toHexString())
