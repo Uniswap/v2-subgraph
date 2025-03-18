@@ -3,3 +3,13 @@ node_modules/
 src/types/
 .DS_STORE
 yarn-error.log
+myDeploy.md
+generated
+yarn.lock
+package-lock.json
+.vscode
+.env
+/.subgraph-env
+subgraph.yaml
+/src/common/chain.ts
+/*subgraph.yaml

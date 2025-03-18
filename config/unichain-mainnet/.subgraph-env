@@ -1,0 +1,4 @@
+V2_TOKEN_SUBGRAPH_NAME="v2-tokens-unichain-mainnet"
+V2_TOKEN_SUBGRAPH_VERSION="v0.0.2"
+V2_SUBGRAPH_NAME="uniswap-v2-unichain-mainnet"
+V2_SUBGRAPH_VERSION="v0.0.5"

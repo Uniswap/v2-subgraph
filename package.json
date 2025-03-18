@@ -5,26 +5,25 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts --fix",
-    "build": "run-s codegen && graph build",
-    "buildonly": "graph build",
-    "deploy:alchemy": "graph deploy --node https://subgraphs.alchemy.com/api/subgraphs/deploy --ipfs https://ipfs.satsuma.xyz",
-    "codegen": "graph codegen --output-dir src/types/",
-    "create-local": "graph create davekaj/uniswap --node http://127.0.0.1:8020",
-    "deploy-local": "graph deploy davekaj/uniswap --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
-    "deploy": "graph deploy ianlapham/uniswap-v2-dev --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
-    "deploy-staging": "graph deploy $THE_GRAPH_GITHUB_USER/$THE_GRAPH_SUBGRAPH_NAME /Uniswap --ipfs https://api.staging.thegraph.com/ipfs/ --node https://api.staging.thegraph.com/deploy/",
-    "watch-local": "graph deploy graphprotocol/Uniswap2 --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
+    "build": "cross-env ts-node ./script/build"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.64.1",
     "@graphprotocol/graph-ts": "^0.32.0",
+    "@types/fs-extra": "^11.0.1",
+    "@types/node": "^18.11.18",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
     "@uniswap/eslint-config": "^1.2.0",
-    "eslint": "^8.57.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.0.3",
     "eslint-config-prettier": "^6.1.0",
-    "npm-run-all": "^4.1.5",
+    "eslint": "^8.57.0",
+    "fs-extra": "^11.1.0",
+    "mustache": "^3.1.0",
     "prettier": "^1.18.2",
-    "typescript": "^3.5.2"
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4",
+    "yargs": "17.7.2"
   }
 }

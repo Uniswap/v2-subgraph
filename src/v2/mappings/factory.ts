@@ -1,18 +1,12 @@
 /* eslint-disable prefer-const */
 import { log } from '@graphprotocol/graph-ts'
 
-import { PairCreated } from '../types/Factory/Factory'
-import { Bundle, Pair, Token, UniswapFactory } from '../types/schema'
-import { Pair as PairTemplate } from '../types/templates'
-import {
-  FACTORY_ADDRESS,
-  fetchTokenDecimals,
-  fetchTokenName,
-  fetchTokenSymbol,
-  fetchTokenTotalSupply,
-  ZERO_BD,
-  ZERO_BI,
-} from './helpers'
+import { PairCreated } from '../../../generated/Factory/Factory'
+import { Bundle, Pair, PairTokenLookup, Token, UniswapFactory } from '../../../generated/schema'
+import { Pair as PairTemplate } from '../../../generated/templates'
+import { FACTORY_ADDRESS } from '../../common/chain'
+import { ZERO_BD, ZERO_BI } from '../../common/constants'
+import { fetchTokenDecimals, fetchTokenName, fetchTokenSymbol, fetchTokenTotalSupply } from '../../common/helpers'
 
 export function handleNewPair(event: PairCreated): void {
   // load factory (create if first exchange)
@@ -113,4 +107,16 @@ export function handleNewPair(event: PairCreated): void {
   token1.save()
   pair.save()
   factory.save()
+
+  let pairLookup0 = new PairTokenLookup(
+    event.params.token0.toHexString().concat('-').concat(event.params.token1.toHexString())
+  )
+  pairLookup0.pair = pair.id
+  pairLookup0.save()
+
+  let pairLookup1 = new PairTokenLookup(
+    event.params.token1.toHexString().concat('-').concat(event.params.token0.toHexString())
+  )
+  pairLookup1.pair = pair.id
+  pairLookup1.save()
 }
