@@ -10,11 +10,18 @@ import {
   Token,
   Transaction,
   UniswapFactory,
-} from '../types/schema'
-import { Burn, Mint, Swap, Sync, Transfer } from '../types/templates/Pair/Pair'
-import { updatePairDayData, updatePairHourData, updateTokenDayData, updateUniswapDayData } from './dayUpdates'
-import { ADDRESS_ZERO, BI_18, convertTokenToDecimal, createUser, FACTORY_ADDRESS, ONE_BI, ZERO_BD } from './helpers'
-import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedVolumeUSD } from './pricing'
+} from '../../../generated/schema'
+import { Burn, Mint, Swap, Sync, Transfer } from '../../../generated/templates/Pair/Pair'
+import { FACTORY_ADDRESS } from '../../common/chain'
+import { ADDRESS_ZERO, BI_18, ONE_BI, ZERO_BD } from '../../common/constants'
+import { convertTokenToDecimal, createUser } from '../../common/helpers'
+import {
+  updatePairDayData,
+  updatePairHourData,
+  updateTokenDayData,
+  updateUniswapDayData,
+} from '../../common/hourDayUpdates'
+import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedVolumeUSD } from '../../common/pricing'
 
 function isCompleteMint(mintId: string): boolean {
   return MintEvent.load(mintId)!.sender !== null // sufficient checks
@@ -66,7 +73,7 @@ export function handleTransfer(event: Transfer): void {
     // this is to make sure all the mints are under the same transaction
     if (mints.length === 0 || isCompleteMint(mints[mints.length - 1])) {
       let mint = new MintEvent(
-        event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(mints.length).toString()),
+        event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(mints.length).toString())
       )
       mint.transaction = transaction.id
       mint.pair = pair.id
@@ -92,7 +99,7 @@ export function handleTransfer(event: Transfer): void {
   if (event.params.to.toHexString() == pair.id) {
     let burns = transaction.burns
     let burn = new BurnEvent(
-      event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(burns.length).toString()),
+      event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(burns.length).toString())
     )
     burn.transaction = transaction.id
     burn.pair = pair.id
@@ -128,7 +135,7 @@ export function handleTransfer(event: Transfer): void {
         burn = currentBurn as BurnEvent
       } else {
         burn = new BurnEvent(
-          event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(burns.length).toString()),
+          event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(burns.length).toString())
         )
         burn.transaction = transaction.id
         burn.needsComplete = false
@@ -139,7 +146,7 @@ export function handleTransfer(event: Transfer): void {
       }
     } else {
       burn = new BurnEvent(
-        event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(burns.length).toString()),
+        event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(burns.length).toString())
       )
       burn.transaction = transaction.id
       burn.needsComplete = false
@@ -230,7 +237,7 @@ export function handleSync(event: Sync): void {
   let trackedLiquidityETH: BigDecimal
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
     trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token).div(
-      bundle.ethPrice,
+      bundle.ethPrice
     )
   } else {
     trackedLiquidityETH = ZERO_BD
@@ -315,8 +322,8 @@ export function handleMint(event: Mint): void {
   mint.save()
 
   // update day entities
-  updatePairDayData(event)
-  updatePairHourData(event)
+  updatePairDayData(pair, event)
+  updatePairHourData(pair, event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
@@ -381,8 +388,8 @@ export function handleBurn(event: Burn): void {
   burn.save()
 
   // update day entities
-  updatePairDayData(event)
-  updatePairHourData(event)
+  updatePairDayData(pair, event)
+  updatePairHourData(pair, event)
   updateUniswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
@@ -470,7 +477,7 @@ export function handleSwap(event: Swap): void {
   }
   let swaps = transaction.swaps
   let swap = new SwapEvent(
-    event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(swaps.length).toString()),
+    event.transaction.hash.toHexString().concat('-').concat(BigInt.fromI32(swaps.length).toString())
   )
 
   // update swap event
@@ -499,8 +506,8 @@ export function handleSwap(event: Swap): void {
   transaction.save()
 
   // update day entities
-  let pairDayData = updatePairDayData(event)
-  let pairHourData = updatePairHourData(event)
+  let pairDayData = updatePairDayData(pair, event)
+  let pairHourData = updatePairHourData(pair, event)
   let uniswapDayData = updateUniswapDayData(event)
   let token0DayData = updateTokenDayData(token0 as Token, event)
   let token1DayData = updateTokenDayData(token1 as Token, event)
@@ -527,7 +534,7 @@ export function handleSwap(event: Swap): void {
   token0DayData.dailyVolumeToken = token0DayData.dailyVolumeToken.plus(amount0Total)
   token0DayData.dailyVolumeETH = token0DayData.dailyVolumeETH.plus(amount0Total.times(token0.derivedETH as BigDecimal))
   token0DayData.dailyVolumeUSD = token0DayData.dailyVolumeUSD.plus(
-    amount0Total.times(token0.derivedETH as BigDecimal).times(bundle.ethPrice),
+    amount0Total.times(token0.derivedETH as BigDecimal).times(bundle.ethPrice)
   )
   token0DayData.save()
 
@@ -535,7 +542,7 @@ export function handleSwap(event: Swap): void {
   token1DayData.dailyVolumeToken = token1DayData.dailyVolumeToken.plus(amount1Total)
   token1DayData.dailyVolumeETH = token1DayData.dailyVolumeETH.plus(amount1Total.times(token1.derivedETH as BigDecimal))
   token1DayData.dailyVolumeUSD = token1DayData.dailyVolumeUSD.plus(
-    amount1Total.times(token1.derivedETH as BigDecimal).times(bundle.ethPrice),
+    amount1Total.times(token1.derivedETH as BigDecimal).times(bundle.ethPrice)
   )
   token1DayData.save()
 }
