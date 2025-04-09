@@ -61,7 +61,7 @@ export function validateSubgraphType(subgraphType: string) {
 }
 
 export function getSubgraphName(subgraphType: string) {
-  dotenv.config({ path: '.subgraph-env' });
+  dotenv.config({ path: '.subgraph-env' })
   if (subgraphType === SUBGRAPH_TYPE.V2_TOKENS) {
     if (!process.env.V2_TOKEN_SUBGRAPH_NAME) {
       throw new Error('V2_TOKEN_SUBGRAPH_NAME must be set')
