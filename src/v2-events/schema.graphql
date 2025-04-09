@@ -1,0 +1,92 @@
+type PairCreated @entity(immutable: true) {
+  id: Bytes!
+  logAddress: Bytes!
+  logIndex: BigInt!
+  transactionHash: Bytes!
+  transactionFrom: Bytes!
+  transactionTo: Bytes
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  token0: Bytes!
+  token1: Bytes!
+  pair: Bytes!
+  pairIndex: BigInt!
+}
+
+type Mint @entity(immutable: true) {
+  id: Bytes!
+  logAddress: Bytes!
+  logIndex: BigInt!
+  transactionHash: Bytes!
+  transactionFrom: Bytes!
+  transactionTo: Bytes
+  blockNumber: BigInt!
+  timestamp: BigInt!
+
+  sender: Bytes!
+  amount0: BigInt!
+  amount1: BigInt!
+}
+
+type Burn @entity(immutable: true) {
+  id: Bytes!
+  logAddress: Bytes!
+  logIndex: BigInt!
+  transactionHash: Bytes!
+  transactionFrom: Bytes!
+  transactionTo: Bytes
+  blockNumber: BigInt!
+  timestamp: BigInt!
+
+  sender: Bytes!
+  amount0: BigInt!
+  amount1: BigInt!
+  to: Bytes!
+}
+
+type Swap @entity(immutable: true) {
+  id: Bytes!
+  logAddress: Bytes!
+  logIndex: BigInt!
+  transactionHash: Bytes!
+  transactionFrom: Bytes!
+  transactionTo: Bytes
+  blockNumber: BigInt!
+  timestamp: BigInt!
+
+  sender: Bytes!
+  amount0In: BigInt!
+  amount1In: BigInt!
+  amount0Out: BigInt!
+  amount1Out: BigInt!
+  to: Bytes!
+}
+
+type Sync @entity(immutable: true) {
+  id: Bytes!
+  logAddress: Bytes!
+  logIndex: BigInt!
+  transactionHash: Bytes!
+  transactionFrom: Bytes!
+  transactionTo: Bytes
+  blockNumber: BigInt!
+  timestamp: BigInt!
+
+  reserve0: BigInt!
+  reserve1: BigInt!
+}
+
+type Transfer @entity(immutable: true) {
+  id: Bytes!
+  logAddress: Bytes!
+  logIndex: BigInt!
+  transactionHash: Bytes!
+  transactionFrom: Bytes!
+  transactionTo: Bytes
+  blockNumber: BigInt!
+  timestamp: BigInt!
+
+  from: Bytes!
+  to: Bytes!
+  value: BigInt!
+}

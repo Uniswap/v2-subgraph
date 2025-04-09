@@ -4,7 +4,7 @@ import { build, deploy } from './utils/deploy-utils'
 import { validateNetwork, validateSubgraphType } from './utils/prepareNetwork'
 
 async function main() {
-  const argv = yargs(process.argv.slice(2))
+  const argv = await yargs(process.argv.slice(2))
     .option('network', {
       alias: 'n',
       description: 'Network to build for',

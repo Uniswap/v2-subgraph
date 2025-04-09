@@ -22,6 +22,7 @@ export enum NETWORK {
 export enum SUBGRAPH_TYPE {
   V2_TOKENS = 'v2-tokens',
   V2 = 'v2',
+  V2_EVENTS = 'v2-events',
 }
 
 const CHAIN_CONSTANTS_FILE_NAME = 'chain.ts'
@@ -59,32 +60,26 @@ export function validateSubgraphType(subgraphType: string) {
   }
 }
 
-export function getSubgraphVersion(subgraphType: string) {
-  dotenv.config({ path: '.subgraph-env' })
-  if (subgraphType === SUBGRAPH_TYPE.V2_TOKENS) {
-    if (!process.env.V2_TOKEN_SUBGRAPH_VERSION) {
-      throw new Error('V2_TOKEN_SUBGRAPH_VERSION must be set')
-    }
-    return process.env.V2_TOKEN_SUBGRAPH_VERSION
-  }
-  if (!process.env.V2_SUBGRAPH_VERSION) {
-    throw new Error('V2_SUBGRAPH_VERSION must be set')
-  }
-  return process.env.V2_SUBGRAPH_VERSION
-}
-
 export function getSubgraphName(subgraphType: string) {
-  dotenv.config({ path: '.subgraph-env' })
+  dotenv.config({ path: '.subgraph-env' });
   if (subgraphType === SUBGRAPH_TYPE.V2_TOKENS) {
     if (!process.env.V2_TOKEN_SUBGRAPH_NAME) {
       throw new Error('V2_TOKEN_SUBGRAPH_NAME must be set')
     }
     return process.env.V2_TOKEN_SUBGRAPH_NAME
+  } else if (subgraphType === SUBGRAPH_TYPE.V2_EVENTS) {
+    if (!process.env.V2_EVENTS_SUBGRAPH_NAME) {
+      throw new Error('V2_EVENTS_SUBGRAPH_NAME must be set')
+    }
+    return process.env.V2_EVENTS_SUBGRAPH_NAME
+  } else if (subgraphType === SUBGRAPH_TYPE.V2) {
+    if (!process.env.V2_SUBGRAPH_NAME) {
+      throw new Error('V2_SUBGRAPH_NAME must be set')
+    }
+    return process.env.V2_SUBGRAPH_NAME
+  } else {
+    throw new Error('Invalid subgraph type')
   }
-  if (!process.env.V2_SUBGRAPH_NAME) {
-    throw new Error('V2_SUBGRAPH_NAME must be set')
-  }
-  return process.env.V2_SUBGRAPH_NAME
 }
 
 export function getAlchemyDeploymentParams(): {

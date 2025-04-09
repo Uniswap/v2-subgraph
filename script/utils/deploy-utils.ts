@@ -7,7 +7,7 @@ const exec = util.promisify(execCallback)
 
 // Creating subgraphs is only available from hosted-service dashboard
 // yarn graph create $network_name-v2 --node https://api.thegraph.com/deploy/ --access-token $SUBGRAPH_DEPLOY_KEY"
-export const build = async (network, subgraphType) => {
+export const build = async (network: string, subgraphType: string) => {
   console.log(`Building subgraph for ${network}`)
   console.log(`\n Copying constants & templates for ${network} \n`)
   await prepare(network, subgraphType)
@@ -18,7 +18,7 @@ export const build = async (network, subgraphType) => {
   await exec(`graph codegen ${subgraphType}-subgraph.yaml`)
 }
 
-export const deploy = async (subgraphType) => {
+export const deploy = async (subgraphType: string) => {
   try {
     await exec('git diff-index --quiet HEAD -- && git diff --quiet || (exit 1)')
   } catch (e) {
@@ -41,7 +41,7 @@ export const deploy = async (subgraphType) => {
     }
     console.log(stdout)
     console.log('Subgraph deployed successfully.')
-  } catch (e) {
+  } catch (e: any) {
     console.log(e.stdout)
     console.log('Error: Failed to deploy subgraph. Please try again.')
     process.exit(1)

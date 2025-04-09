@@ -1,10 +1,22 @@
 {
-  
   "compilerOptions": {
+    "target": "es2018",
+    "module": "commonjs",
     "lib": [
-      "es6",
-      "dom" 
+      "es2018",
+      "dom"
     ],
-   
-  }
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "types": [
+      "@graphprotocol/graph-ts"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "script/**/*"
+  ]
 }
