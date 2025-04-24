@@ -420,13 +420,12 @@ export function handleSwap(event: Swap): void {
 
   let derivedAmountETH: any
   //if any side is 0, do not divide by 2
-  if (derivedEthToken0.equals('0') || derivedEthToken1.equals('0')) {
+  if (derivedEthToken0.equals(ZERO_BD) || derivedEthToken1.equals(ZERO_BD)) {
     derivedAmountETH = derivedEthToken0.plus(derivedEthToken1)
   } else {
     derivedAmountETH = derivedEthToken0.plus(derivedEthToken1).div(BigDecimal.fromString('2'))
   }
 
-  token1.derivedETH.times(amount1Total).plus(token0.derivedETH.times(amount0Total)).div(BigDecimal.fromString('2'))
   let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
   // only accounts for volume through white listed tokens
