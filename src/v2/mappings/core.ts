@@ -418,7 +418,7 @@ export function handleSwap(event: Swap): void {
   const derivedEthToken1 = token1.derivedETH.times(amount1Total)
   const derivedEthToken0 = token0.derivedETH.times(amount0Total)
 
-  let derivedAmountETH: any
+  let derivedAmountETH = ZERO_BD
   //if any side is 0, do not divide by 2
   if (derivedEthToken0.equals(ZERO_BD) || derivedEthToken1.equals(ZERO_BD)) {
     derivedAmountETH = derivedEthToken0.plus(derivedEthToken1)
