@@ -14,7 +14,7 @@ import {
 import { Burn, Mint, Swap, Sync, Transfer } from '../../../generated/templates/Pair/Pair'
 import { FACTORY_ADDRESS } from '../../common/chain'
 import { ADDRESS_ZERO, BI_18, ONE_BI, ZERO_BD } from '../../common/constants'
-import { convertTokenToDecimal, createUser } from '../../common/helpers'
+import { convertTokenToDecimal } from '../../common/helpers'
 import {
   updatePairDayData,
   updatePairHourData,
@@ -38,9 +38,7 @@ export function handleTransfer(event: Transfer): void {
 
   // user stats
   let from = event.params.from
-  createUser(from)
   let to = event.params.to
-  createUser(to)
 
   // get pair and load contract
   let pair = Pair.load(event.address.toHexString())!

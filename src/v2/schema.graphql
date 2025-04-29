@@ -95,11 +95,6 @@ type Pair @entity {
   swaps: [Swap!]! @derivedFrom(field: "pair")
 }
 
-type User @entity {
-  id: ID!
-  usdSwapped: BigDecimal!
-}
-
 type Transaction @entity {
   id: ID! # txn hash
   blockNumber: BigInt!
