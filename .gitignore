@@ -10,3 +10,4 @@ package-lock.json
 .vscode
 .env
 /.subgraph-env
+subgraph.yaml
