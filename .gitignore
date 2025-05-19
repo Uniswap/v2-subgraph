@@ -10,6 +10,3 @@ package-lock.json
 .vscode
 .env
 /.subgraph-env
-subgraph.yaml
-/src/common/chain.ts
-/*subgraph.yaml
