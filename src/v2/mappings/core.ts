@@ -499,7 +499,7 @@ export function handleSwap(event: Swap): void {
   swap.from = event.transaction.from
   swap.logIndex = event.logIndex
   // use the tracked amount if we have it
-  swap.amountUSD = trackedAmountUSD === ZERO_BD ? derivedAmountUSD : trackedAmountUSD
+  swap.amountUSD = trackedAmountUSD
   swap.save()
 
   // update the transaction
