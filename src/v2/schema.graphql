@@ -176,6 +176,17 @@ type Swap @entity {
 
   # derived info
   amountUSD: BigDecimal!
+  derivedAmountUSD: BigDecimal!
+  trackedAmountUSD: BigDecimal!
+  trackedAmountETH: BigDecimal!
+  derivedAmountETH: BigDecimal!
+  derivedEthToken0: BigDecimal!
+  derivedEthToken1: BigDecimal!
+
+  amount0Total: BigDecimal!
+  amount1Total: BigDecimal!
+  token0Eth: BigDecimal!
+  token1Eth: BigDecimal!
 }
 
 # stores for USD calculations

@@ -215,9 +215,9 @@ export function handleSync(event: Sync): void {
   pair.reserve1 = convertTokenToDecimal(event.params.reserve1, token1.decimals)
 
   if (pair.reserve1.notEqual(ZERO_BD)) pair.token0Price = pair.reserve0.div(pair.reserve1)
-  else pair.token0Price = ZERO_BD
+  else pair.token0Price = ZERO_BD //token0Price
   if (pair.reserve0.notEqual(ZERO_BD)) pair.token1Price = pair.reserve1.div(pair.reserve0)
-  else pair.token1Price = ZERO_BD
+  else pair.token1Price = ZERO_BD //token1Price
 
   pair.save()
 
@@ -226,8 +226,8 @@ export function handleSync(event: Sync): void {
   bundle.ethPrice = getEthPriceInUSD()
   bundle.save()
 
-  token0.derivedETH = findEthPerToken(token0 as Token)
-  token1.derivedETH = findEthPerToken(token1 as Token)
+  token0.derivedETH = findEthPerToken(token0 as Token) //derivedEthToken0
+  token1.derivedETH = findEthPerToken(token1 as Token) //derivedEthToken1
   token0.save()
   token1.save()
 
@@ -406,19 +406,21 @@ export function handleSwap(event: Swap): void {
   let amount1Out = convertTokenToDecimal(event.params.amount1Out, token1.decimals)
 
   // totals for volume updates
-  let amount0Total = amount0Out.plus(amount0In)
-  let amount1Total = amount1Out.plus(amount1In)
+  let amount0Total = amount0Out.plus(amount0In) //8.9
+  let amount1Total = amount1Out.plus(amount1In) //295238388039
 
   // ETH/USD prices
   let bundle = Bundle.load('1')!
 
   // get total amounts of derived USD and ETH for tracking
+  const token0Eth = token0.derivedETH
+  const token1Eth = token1.derivedETH
   const derivedEthToken1 = token1.derivedETH.times(amount1Total)
   const derivedEthToken0 = token0.derivedETH.times(amount0Total)
 
   let derivedAmountETH = ZERO_BD
   //if any side is 0, do not divide by 2
-  if (derivedEthToken0.equals(ZERO_BD) || derivedEthToken1.equals(ZERO_BD)) {
+  if (derivedEthToken0.le(BigDecimal.fromString('.000001')) || derivedEthToken1.le(BigDecimal.fromString('.000001'))) {
     derivedAmountETH = derivedEthToken0.plus(derivedEthToken1)
   } else {
     derivedAmountETH = derivedEthToken0.plus(derivedEthToken1).div(BigDecimal.fromString('2'))
@@ -499,7 +501,17 @@ export function handleSwap(event: Swap): void {
   swap.from = event.transaction.from
   swap.logIndex = event.logIndex
   // use the tracked amount if we have it
-  swap.amountUSD = trackedAmountUSD
+  swap.amountUSD = trackedAmountUSD === ZERO_BD ? derivedAmountUSD : trackedAmountUSD
+  swap.derivedAmountUSD = derivedAmountUSD
+  swap.trackedAmountUSD = trackedAmountUSD
+  swap.trackedAmountETH = trackedAmountETH
+  swap.derivedAmountETH = derivedAmountETH
+  swap.derivedEthToken0 = derivedEthToken0
+  swap.derivedEthToken1 = derivedEthToken1
+  swap.token0Eth = token0Eth
+  swap.token1Eth = token1Eth
+  swap.amount0Total = amount0Total
+  swap.amount1Total = amount1Total
   swap.save()
 
   // update the transaction
