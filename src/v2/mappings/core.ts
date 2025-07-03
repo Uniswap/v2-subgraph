@@ -502,16 +502,6 @@ export function handleSwap(event: Swap): void {
   swap.logIndex = event.logIndex
   // use the tracked amount if we have it
   swap.amountUSD = trackedAmountUSD === ZERO_BD ? derivedAmountUSD : trackedAmountUSD
-  swap.derivedAmountUSD = derivedAmountUSD
-  swap.trackedAmountUSD = trackedAmountUSD
-  swap.trackedAmountETH = trackedAmountETH
-  swap.derivedAmountETH = derivedAmountETH
-  swap.derivedEthToken0 = derivedEthToken0
-  swap.derivedEthToken1 = derivedEthToken1
-  swap.token0Eth = token0Eth
-  swap.token1Eth = token1Eth
-  swap.amount0Total = amount0Total
-  swap.amount1Total = amount1Total
   swap.save()
 
   // update the transaction
