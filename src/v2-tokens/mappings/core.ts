@@ -11,7 +11,7 @@ import {
   updatePairHourData,
   updateTokenDayData,
   updateTokenHourData,
-  updateUniswapDayData
+  updateUniswapDayData,
 } from '../../common/hourDayUpdates'
 import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedVolumeUSD } from '../../common/pricing'
 import { updateTokenMinuteData } from './minuteUpdates'
