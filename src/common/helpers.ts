@@ -4,6 +4,7 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { ERC20 } from '../../generated/Factory/ERC20'
 import { ERC20NameBytes } from '../../generated/Factory/ERC20NameBytes'
 import { ERC20SymbolBytes } from '../../generated/Factory/ERC20SymbolBytes'
+import { User } from '../../generated/schema'
 import { SKIP_TOTAL_SUPPLY, TokenDefinition } from './chain'
 import { ONE_BI, ZERO_BD, ZERO_BI } from './constants'
 import { getStaticDefinition } from './tokenDefinition'
@@ -129,4 +130,12 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
     decimalValue = decimalResult.value
   }
   return BigInt.fromI32(decimalValue)
+}
+
+export function createUser(address: Address): void {
+  let user = User.load(address.toHexString())
+  if (!user) {
+    user = new User(address.toHexString())
+    user.save()
+  }
 }

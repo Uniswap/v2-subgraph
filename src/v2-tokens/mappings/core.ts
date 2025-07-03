@@ -4,14 +4,14 @@ import { BigDecimal } from '@graphprotocol/graph-ts'
 import { Bundle, Pair, Token, UniswapFactory } from '../../../generated/schema'
 import { Swap, Sync } from '../../../generated/templates/Pair/Pair'
 import { FACTORY_ADDRESS } from '../../common/chain'
-import { ONE_BI, ZERO_BD } from '../../common/constants'
+import { ALMOST_ZERO_BD, ONE_BI, ZERO_BD } from '../../common/constants'
 import { convertTokenToDecimal } from '../../common/helpers'
 import {
   updatePairDayData,
   updatePairHourData,
   updateTokenDayData,
   updateTokenHourData,
-  updateUniswapDayData,
+  updateUniswapDayData
 } from '../../common/hourDayUpdates'
 import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedVolumeUSD } from '../../common/pricing'
 import { updateTokenMinuteData } from './minuteUpdates'
@@ -147,8 +147,8 @@ export function handleSwap(event: Swap): void {
 
   // Only divide by 2 if both derivedETH values are non-zero
   if (
-    token1.derivedETH.times(amount1Total).notEqual(ZERO_BD) &&
-    token0.derivedETH.times(amount0Total).notEqual(ZERO_BD)
+    token1.derivedETH.times(amount1Total).le(ALMOST_ZERO_BD) &&
+    token0.derivedETH.times(amount0Total).le(ALMOST_ZERO_BD)
   ) {
     derivedAmountETH = derivedAmountETH.div(BigDecimal.fromString('2'))
   }
