@@ -97,7 +97,7 @@ type Pair @entity {
 
 type User @entity {
   id: ID!
-  usdSwapped: BigDecimal!
+  # usdSwapped: BigDecimal!
 }
 
 type Transaction @entity {
