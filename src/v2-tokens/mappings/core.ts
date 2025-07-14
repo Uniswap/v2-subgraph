@@ -4,7 +4,7 @@ import { BigDecimal } from '@graphprotocol/graph-ts'
 import { Bundle, Pair, Token, UniswapFactory } from '../../../generated/schema'
 import { Swap, Sync } from '../../../generated/templates/Pair/Pair'
 import { FACTORY_ADDRESS } from '../../common/chain'
-import { ONE_BI, ZERO_BD } from '../../common/constants'
+import { ALMOST_ZERO_BD, ONE_BI, ZERO_BD } from '../../common/constants'
 import { convertTokenToDecimal } from '../../common/helpers'
 import {
   updatePairDayData,
@@ -143,10 +143,16 @@ export function handleSwap(event: Swap): void {
   }
 
   // get total amounts of derived USD and ETH for tracking
-  let derivedAmountETH = token1.derivedETH
-    .times(amount1Total)
-    .plus(token0.derivedETH.times(amount0Total))
-    .div(BigDecimal.fromString('2'))
+  let derivedAmountETH = token1.derivedETH.times(amount1Total).plus(token0.derivedETH.times(amount0Total))
+
+  // Only divide by 2 if both derivedETH values are non-zero
+  if (
+    token1.derivedETH.times(amount1Total).le(ALMOST_ZERO_BD) &&
+    token0.derivedETH.times(amount0Total).le(ALMOST_ZERO_BD)
+  ) {
+    derivedAmountETH = derivedAmountETH.div(BigDecimal.fromString('2'))
+  }
+
   let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
   // only accounts for volume through white listed tokens

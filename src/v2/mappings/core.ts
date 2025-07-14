@@ -13,7 +13,7 @@ import {
 } from '../../../generated/schema'
 import { Burn, Mint, Swap, Sync, Transfer } from '../../../generated/templates/Pair/Pair'
 import { FACTORY_ADDRESS } from '../../common/chain'
-import { ADDRESS_ZERO, BI_18, ONE_BI, ZERO_BD } from '../../common/constants'
+import { ADDRESS_ZERO, ALMOST_ZERO_BD, BI_18, ONE_BI, ZERO_BD } from '../../common/constants'
 import { convertTokenToDecimal, createUser } from '../../common/helpers'
 import {
   updatePairDayData,
@@ -415,10 +415,17 @@ export function handleSwap(event: Swap): void {
   let bundle = Bundle.load('1')!
 
   // get total amounts of derived USD and ETH for tracking
-  let derivedAmountETH = token1.derivedETH
-    .times(amount1Total)
-    .plus(token0.derivedETH.times(amount0Total))
-    .div(BigDecimal.fromString('2'))
+  const derivedEthToken1 = token1.derivedETH.times(amount1Total)
+  const derivedEthToken0 = token0.derivedETH.times(amount0Total)
+
+  let derivedAmountETH = ZERO_BD
+  //if any side is 0, do not divide by 2
+  if (derivedEthToken0.le(ALMOST_ZERO_BD) || derivedEthToken1.le(ALMOST_ZERO_BD)) {
+    derivedAmountETH = derivedEthToken0.plus(derivedEthToken1)
+  } else {
+    derivedAmountETH = derivedEthToken0.plus(derivedEthToken1).div(BigDecimal.fromString('2'))
+  }
+
   let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
   // only accounts for volume through white listed tokens
