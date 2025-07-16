@@ -35,7 +35,7 @@ export const WHITELIST: string[] = [
   '0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d', // USD1
 ]
 
-export const STABLECOINS = []
+export const STABLECOINS: string[] = []
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 export const MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('400000')
