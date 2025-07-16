@@ -32,6 +32,7 @@ export const WHITELIST: string[] = [
   '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', // UNI
   '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
   '0x956f47f50a910163d8bf957cf5846d573e7f87ca', // FEI
+  '0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d', // USD1
 ]
 
 export const STABLECOINS = []
