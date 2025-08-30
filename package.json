@@ -5,7 +5,13 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts --fix",
-    "build": "cross-env ts-node ./script/build"
+    "build": "cross-env ts-node ./script/build",
+    "deploy:arbitrum-one": "source .subgraph-env && graph deploy --node https://subgraph.0xnode.cloud/deploy/ --ipfs https://ipfs.0xnode.cloud -l 0.0.1 kittycorn-arbitrum-one/v2-subgraph v2-subgraph.yaml --access-token $DEPLOY_KEY",
+    "create:arbitrum-one": "source .subgraph-env && graph create --node https://subgraph.0xnode.cloud/deploy/ kittycorn-arbitrum-one/v2-subgraph --access-token $DEPLOY_KEY",
+    "remove:arbitrum-one": "source .subgraph-env && graph remove --node https://subgraph.0xnode.cloud/deploy/ kittycorn-arbitrum-one/v2-subgraph --access-token $DEPLOY_KEY",
+    "deploy-token:arbitrum-one": "source .subgraph-env && graph deploy --node https://subgraph.0xnode.cloud/deploy/ --ipfs https://ipfs.0xnode.cloud -l 0.0.1 kittycorn-arbitrum-one/v2-tokens-subgraph v2-tokens-subgraph.yaml --access-token $DEPLOY_KEY",
+    "create-token:arbitrum-one": "source .subgraph-env && graph create --node https://subgraph.0xnode.cloud/deploy/ kittycorn-arbitrum-one/v2-tokens-subgraph --access-token $DEPLOY_KEY",
+    "remove-token:arbitrum-one": "source .subgraph-env && graph remove --node https://subgraph.0xnode.cloud/deploy/ kittycorn-arbitrum-one/v2-tokens-subgraph --access-token $DEPLOY_KEY"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.64.1",
