@@ -4,6 +4,7 @@ import { BigDecimal, BigInt, store } from '@graphprotocol/graph-ts'
 import {
   Bundle,
   Burn as BurnEvent,
+  LiquidityPosition,
   Mint as MintEvent,
   Pair,
   Swap as SwapEvent,
@@ -47,6 +48,55 @@ export function handleTransfer(event: Transfer): void {
 
   // liquidity token amount being transfered
   let value = convertTokenToDecimal(event.params.value, BI_18)
+
+  // Track liquidity positions
+  let fromAddress = from.toHexString()
+  let toAddress = to.toHexString()
+  let pairAddress = event.address.toHexString()
+
+  // Update sender's liquidity position (decrease balance)
+  if (fromAddress != ADDRESS_ZERO) {
+    let fromPositionId = fromAddress.concat('-').concat(pairAddress)
+    let fromPosition = LiquidityPosition.load(fromPositionId)
+    if (fromPosition === null) {
+      fromPosition = new LiquidityPosition(fromPositionId)
+      fromPosition.user = fromAddress
+      fromPosition.pair = pairAddress
+      fromPosition.liquidityTokenBalance = ZERO_BD
+    }
+    fromPosition.liquidityTokenBalance = fromPosition.liquidityTokenBalance.minus(value)
+    
+    // Remove position if balance is zero
+    if (fromPosition.liquidityTokenBalance.le(ZERO_BD)) {
+      store.remove('LiquidityPosition', fromPositionId)
+      // Decrement liquidity provider count
+      pair.liquidityProviderCount = pair.liquidityProviderCount.minus(ONE_BI)
+    } else {
+      fromPosition.save()
+    }
+  }
+
+  // Update receiver's liquidity position (increase balance)
+  if (toAddress != ADDRESS_ZERO) {
+    let toPositionId = toAddress.concat('-').concat(pairAddress)
+    let toPosition = LiquidityPosition.load(toPositionId)
+    let isNewPosition = false
+    if (toPosition === null) {
+      toPosition = new LiquidityPosition(toPositionId)
+      toPosition.user = toAddress
+      toPosition.pair = pairAddress
+      toPosition.liquidityTokenBalance = ZERO_BD
+      isNewPosition = true
+    }
+    
+    // If this is their first LP token for this pair, increment count
+    if (isNewPosition || toPosition.liquidityTokenBalance.equals(ZERO_BD)) {
+      pair.liquidityProviderCount = pair.liquidityProviderCount.plus(ONE_BI)
+    }
+    
+    toPosition.liquidityTokenBalance = toPosition.liquidityTokenBalance.plus(value)
+    toPosition.save()
+  }
 
   // get or create transaction
   let transaction = Transaction.load(transactionHash)
