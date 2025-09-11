@@ -1,25 +1,17 @@
 {
-  "name": "beanswap-v2-subgraph",
+  "name": "bean-spot-amm",
   "version": "1.0.0",
-  "repository": "https://github.com/BeanExchange/v2-subgraph",
+  "repository": "https://github.com/BeanExchange/amm-subgraph",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts --fix",
     "build": "run-s codegen && graph build",
     "buildonly": "graph build",
-    "remove:local": "graph remove bean-swap  --node http://127.0.0.1:8020",    
-    "deploy:alchemy": "graph deploy --node https://subgraphs.alchemy.com/api/subgraphs/deploy --ipfs https://ipfs.satsuma.xyz",
+    "remove:local": "graph remove bean-swap  --node http://127.0.0.1:8020",
     "codegen": "graph codegen --output-dir src/types/",
     "create:local": "graph create bean-swap --node http://127.0.0.1:8020",
-    "deploy:local": "graph deploy bean-swap --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
-    "deploy": "graph deploy beanswap-v2-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy:local": "graph deploy bean-swap  --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020",
-    "watch:local": "graph deploy  bean-swap --watch --debug  --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
-    "create:aws": "graph create bean-swap --node http://18.143.86.6:8020",
-    "deploy:aws": "graph deploy bean-swap --ipfs http://18.143.86.6:5001/ --node http://18.143.86.6:8020/ --deploy-key $(cat .subgraph_testnet_token)",
-    "deploy:alchemy-testnet": "graph deploy bean-swap --ipfs https://ipfs.satsuma.xyz --node https://subgraphs.alchemy.com/api/subgraphs/deploy --deploy-key b2qf8fv0gsRHs",
-    "deploy-staging": "graph deploy $THE_GRAPH_GITHUB_USER/$THE_GRAPH_SUBGRAPH_NAME /Uniswap --ipfs https://api.staging.thegraph.com/ipfs/ --node https://api.staging.thegraph.com/deploy/",
-    "watch-local": "graph deploy graphprotocol/Uniswap2 --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
+    "watch:local": "graph deploy  bean-swap --watch --debug  --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.64.1",
@@ -32,5 +24,6 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^1.18.2",
     "typescript": "^3.5.2"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

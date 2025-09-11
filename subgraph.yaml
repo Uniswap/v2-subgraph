@@ -1,6 +1,6 @@
 specVersion: 0.0.4
-description: Bean is a decentralized protocol for automated token exchange on Ethereum.
-repository: https://github.com/BeanExchange/v2-subgraph
+description: Subgraph for Bean AMM Spot.
+repository: https://github.com/BeanExchange/amm-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
@@ -10,7 +10,7 @@ dataSources:
     source:
       address: '0x0085388Da29e74b66ac6b6fF690973bE05403f67'
       abi: Factory
-      startBlock: 4289820
+      startBlock: 4280870
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
