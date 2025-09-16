@@ -116,7 +116,7 @@ export function getTrackedVolumeUSD(
   token0: Token,
   tokenAmount1: BigDecimal,
   token1: Token,
-  pair: Pair,
+  pair: Pair
 ): BigDecimal {
   let bundle = Bundle.load('1')!
   let price0 = token0.derivedETH.times(bundle.ethPrice)
@@ -177,7 +177,7 @@ export function getTrackedLiquidityUSD(
   tokenAmount0: BigDecimal,
   token0: Token,
   tokenAmount1: BigDecimal,
-  token1: Token,
+  token1: Token
 ): BigDecimal {
   let bundle = Bundle.load('1')!
   let price0 = token0.derivedETH.times(bundle.ethPrice)
