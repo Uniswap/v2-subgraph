@@ -90,3 +90,5 @@ export const STATIC_TOKEN_DEFINITIONS: TokenDefinition[] = [
 ]
 
 export const SKIP_TOTAL_SUPPLY: string[] = ['0x0000000000bf2686748e1c0255036e7617e7e8a5']
+
+export const UNTRACKED_PAIRS: string[] = ['0x9ea3b5b4ec044b70375236a281986106457b20ef']
