@@ -9,7 +9,7 @@ import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
 import { TokenDefinition } from './tokenDefinition'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
-export const FACTORY_ADDRESS = '0x0085388Da29e74b66ac6b6fF690973bE05403f67'
+export const FACTORY_ADDRESS = '0xBf6FAB27075fAa8eEDdcc5c17079Ea3813f118B5'
 
 export let ZERO_BI = BigInt.fromI32(0)
 export let ONE_BI = BigInt.fromI32(1)
@@ -35,7 +35,7 @@ export function bigDecimalExp18(): BigDecimal {
 }
 
 export function convertEthToDecimal(eth: BigInt): BigDecimal {
-  return eth.toBigDecimal().div(exponentToBigDecimal(18))
+  return eth.toBigDecimal().div(exponentToBigDecimal(new BigInt(18)))
 }
 
 export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {
@@ -116,7 +116,7 @@ export function fetchTokenName(tokenAddress: Address): string {
 
 // HOT FIX: we cant implement try catch for overflow catching so skip total supply parsing on these tokens that overflow
 // TODO: find better way to handle overflow
-let SKIP_TOTAL_SUPPLY: string[] = ['0x0000000000bf2686748e1c0255036e7617e7e8a5']
+let SKIP_TOTAL_SUPPLY: string[] = ['']
 
 export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
   if (SKIP_TOTAL_SUPPLY.includes(tokenAddress.toHexString())) {
@@ -155,4 +155,8 @@ export function createUser(address: Address): void {
     user.usdSwapped = ZERO_BD
     user.save()
   }
+}
+
+export function normalizeAddress(address: Address): string {
+  return address.toHexString().toLowerCase()
 }

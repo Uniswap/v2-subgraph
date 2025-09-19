@@ -10,8 +10,8 @@
     "remove:local": "graph remove bean-amm --node http://127.0.0.1:8020",
     "codegen": "graph codegen --output-dir src/types/",
     "create:local": "graph create bean-amm --node http://127.0.0.1:8020",
-    "deploy:local": "graph deploy bean-amm  --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020",
-    "watch:local": "graph deploy  bean-amm --watch --debug  --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
+    "deploy:local": "graph deploy bean-amm ./subgraph.yaml --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020",
+    "watch:local": "graph deploy bean-amm --watch --debug  --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.64.1",
