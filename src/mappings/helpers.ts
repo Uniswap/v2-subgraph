@@ -7,20 +7,9 @@ import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { User } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
 import { TokenDefinition } from './tokenDefinition'
+import { FACTORY_ADDRESS, SKIP_TOTAL_SUPPLY, ZERO_BI, ONE_BI, ZERO_BD } from '../constants'
 
-export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
-export const FACTORY_ADDRESS = '0xBf6FAB27075fAa8eEDdcc5c17079Ea3813f118B5'
-
-export let ZERO_BI = BigInt.fromI32(0)
-export let ONE_BI = BigInt.fromI32(1)
-export let ZERO_BD = BigDecimal.fromString('0')
-export let ONE_BD = BigDecimal.fromString('1')
-export let BI_18 = BigInt.fromI32(18)
-
-export let factoryContract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
-
-// rebass tokens, dont count in tracked volume
-export let UNTRACKED_PAIRS: string[] = ['']
+export let factoryContract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS.toHexString()))
 
 export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
   let bd = BigDecimal.fromString('1')
@@ -115,9 +104,7 @@ export function fetchTokenName(tokenAddress: Address): string {
 }
 
 // HOT FIX: we cant implement try catch for overflow catching so skip total supply parsing on these tokens that overflow
-// TODO: find better way to handle overflow
-let SKIP_TOTAL_SUPPLY: string[] = ['']
-
+// TODO: find better way to handle overflo
 export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
   if (SKIP_TOTAL_SUPPLY.includes(tokenAddress.toHexString())) {
     return BigInt.fromI32(0)

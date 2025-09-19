@@ -5,13 +5,13 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts --fix",
-    "build": "run-s codegen && graph build",
-    "buildonly": "graph build",
-    "remove:local": "graph remove bean-amm --node http://127.0.0.1:8020",
-    "codegen": "graph codegen --output-dir src/types/",
-    "create:local": "graph create bean-amm --node http://127.0.0.1:8020",
-    "deploy:local": "graph deploy bean-amm ./subgraph.yaml --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020",
-    "watch:local": "graph deploy bean-amm --watch --debug  --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
+    "prepare:amm": "mustache config/monad.json src/constants/index.template.ts > src/constants/index.ts && mustache config/monad.json subgraph.template.yaml > subgraph.monad.yaml",
+    "codegen:amm": "graph codegen ./subgraph.monad.yaml --output-dir src/types/",
+    "build:amm": "graph build subgraph.monad.yaml",
+    "create:amm": "graph create bean-amm --node http://localhost:8020/",
+    "deploy:amm": "graph deploy bean-amm ./subgraph.monad.yaml --node http://localhost:8020/ --ipfs http://localhost:5001/",
+    "remove:amm": "graph remove bean-amm --node http://localhost:8020/",
+    "watch:amm": "graph deploy bean-amm --watch --debug --node http://localhost:8020/  --ipfs http://localhost:5001/"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.64.1",
@@ -25,5 +25,8 @@
     "prettier": "^1.18.2",
     "typescript": "^3.5.2"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "dependencies": {
+    "mustache": "^4.2.0"
+  }
 }

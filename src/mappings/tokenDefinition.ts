@@ -23,6 +23,12 @@ export class TokenDefinition {
         'USD Coin',
         BigInt.fromI32(6),
       ),
+      new TokenDefinition(
+        Address.fromString('0x760afe86e5de5fa0ee542fc7b7b713e1c5425701'),
+        'WMON',
+        'Wrapped Monad',
+        BigInt.fromI32(18),
+      ),
     ]
     return staticDefinitions
   }

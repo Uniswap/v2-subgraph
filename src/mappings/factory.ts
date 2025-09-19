@@ -4,21 +4,15 @@ import { log } from '@graphprotocol/graph-ts'
 import { PairCreated } from '../types/Factory/Factory'
 import { Bundle, Pair, Token, UniswapFactory } from '../types/schema'
 import { Pair as PairTemplate } from '../types/templates'
-import {
-  FACTORY_ADDRESS,
-  fetchTokenDecimals,
-  fetchTokenName,
-  fetchTokenSymbol,
-  fetchTokenTotalSupply,
-  ZERO_BD,
-  ZERO_BI,
-} from './helpers'
+import { fetchTokenDecimals, fetchTokenName, fetchTokenSymbol, fetchTokenTotalSupply } from './helpers'
+
+import { FACTORY_ADDRESS, ZERO_BD, ZERO_BI } from '../constants'
 
 export function handleNewPair(event: PairCreated): void {
   // load factory (create if first exchange)
-  let factory = UniswapFactory.load(FACTORY_ADDRESS)
+  let factory = UniswapFactory.load(FACTORY_ADDRESS.toHexString())
   if (factory === null) {
-    factory = new UniswapFactory(FACTORY_ADDRESS)
+    factory = new UniswapFactory(FACTORY_ADDRESS.toHexString())
     factory.pairCount = 0
     factory.totalVolumeETH = ZERO_BD
     factory.totalLiquidityETH = ZERO_BD

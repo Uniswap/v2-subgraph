@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Factory
-    network: monad-testnet
+    network: '{{ network }}'
     source:
-      address: '0xBf6FAB27075fAa8eEDdcc5c17079Ea3813f118B5'
+      address: '{{ factory_address }}'
       abi: Factory
-      startBlock: 37647300
+      startBlock: {{ start_block }}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

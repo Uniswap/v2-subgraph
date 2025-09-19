@@ -3,10 +3,10 @@ import { BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
 
 import { Bundle, Pair, PairDayData, Token, TokenDayData, UniswapDayData, UniswapFactory } from '../types/schema'
 import { PairHourData } from './../types/schema'
-import { FACTORY_ADDRESS, ONE_BI, ZERO_BD, ZERO_BI } from './helpers'
+import { FACTORY_ADDRESS, ONE_BI, ZERO_BD, ZERO_BI } from '../constants'
 
 export function updateUniswapDayData(event: ethereum.Event): UniswapDayData {
-  let uniswap = UniswapFactory.load(FACTORY_ADDRESS)!
+  let uniswap = UniswapFactory.load(FACTORY_ADDRESS.toHexString())!
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
@@ -33,7 +33,10 @@ export function updatePairDayData(event: ethereum.Event): PairDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
-  let dayPairID = event.address.toHexString().concat('-').concat(BigInt.fromI32(dayID).toString())
+  let dayPairID = event.address
+    .toHexString()
+    .concat('-')
+    .concat(BigInt.fromI32(dayID).toString())
   let pair = Pair.load(event.address.toHexString())!
   let pairDayData = PairDayData.load(dayPairID)
   if (pairDayData === null) {
@@ -62,7 +65,10 @@ export function updatePairHourData(event: ethereum.Event): PairHourData {
   let timestamp = event.block.timestamp.toI32()
   let hourIndex = timestamp / 3600 // get unique hour within unix history
   let hourStartUnix = hourIndex * 3600 // want the rounded effect
-  let hourPairID = event.address.toHexString().concat('-').concat(BigInt.fromI32(hourIndex).toString())
+  let hourPairID = event.address
+    .toHexString()
+    .concat('-')
+    .concat(BigInt.fromI32(hourIndex).toString())
   let pair = Pair.load(event.address.toHexString())!
   let pairHourData = PairHourData.load(hourPairID)
   if (pairHourData === null) {
@@ -90,7 +96,10 @@ export function updateTokenDayData(token: Token, event: ethereum.Event): TokenDa
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
-  let tokenDayID = token.id.toString().concat('-').concat(BigInt.fromI32(dayID).toString())
+  let tokenDayID = token.id
+    .toString()
+    .concat('-')
+    .concat(BigInt.fromI32(dayID).toString())
 
   let tokenDayData = TokenDayData.load(tokenDayID)
   if (tokenDayData === null) {
