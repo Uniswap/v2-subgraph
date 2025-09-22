@@ -421,11 +421,11 @@ export function handleSwap(event: Swap): void {
   // ETH/USD prices
   let bundle = Bundle.load('1')!
 
-  // get total amounts of derived USD and ETH for tracking
-  let derivedAmountETH = token1.derivedETH.times(amount1Total).plus(token0.derivedETH.times(amount0Total))
-
   const derivedEthToken1 = token1.derivedETH.times(amount1Total)
   const derivedEthToken0 = token0.derivedETH.times(amount0Total)
+
+  // default to legacy calculation
+  let derivedAmountETH = derivedEthToken1.plus(derivedEthToken0).div(BigDecimal.fromString('2'))
 
   // Only divide by 2 if both derivedETH values are non-zero
   if (derivedEthToken0.le(ALMOST_ZERO_BD) || derivedEthToken1.le(ALMOST_ZERO_BD)) {
