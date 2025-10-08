@@ -16,6 +16,8 @@ import { updatePairDayData, updatePairHourData, updateTokenDayData, updateUniswa
 import { ADDRESS_ZERO, BI_18, convertTokenToDecimal, createUser, FACTORY_ADDRESS, ONE_BI, ZERO_BD } from './helpers'
 import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedVolumeUSD } from './pricing'
 
+const ALMOST_ZERO_BD = BigDecimal.fromString('0.000001')
+
 function isCompleteMint(mintId: string): boolean {
   return MintEvent.load(mintId)!.sender !== null // sufficient checks
 }
@@ -408,10 +410,19 @@ export function handleSwap(event: Swap): void {
   let bundle = Bundle.load('1')!
 
   // get total amounts of derived USD and ETH for tracking
-  let derivedAmountETH = token1.derivedETH
-    .times(amount1Total)
-    .plus(token0.derivedETH.times(amount0Total))
-    .div(BigDecimal.fromString('2'))
+  const derivedEthToken1 = token1.derivedETH.times(amount1Total)
+  const derivedEthToken0 = token0.derivedETH.times(amount0Total)
+
+  // default to legacy calculation
+  let derivedAmountETH = derivedEthToken1.plus(derivedEthToken0).div(BigDecimal.fromString('2'))
+
+  // Only divide by 2 if both derivedETH values are non-zero
+  if (derivedEthToken0.le(ALMOST_ZERO_BD) || derivedEthToken1.le(ALMOST_ZERO_BD)) {
+    derivedAmountETH = derivedEthToken0.plus(derivedEthToken1)
+  } else {
+    derivedAmountETH = derivedEthToken0.plus(derivedEthToken1).div(BigDecimal.fromString('2'))
+  }
+
   let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
   // only accounts for volume through white listed tokens
