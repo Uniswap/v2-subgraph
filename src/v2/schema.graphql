@@ -90,6 +90,7 @@ type Pair @entity(immutable: false) {
   liquidityProviderCount: BigInt! # used to detect new exchanges
   # derived fields
   pairHourData: [PairHourData!]! @derivedFrom(field: "pair")
+  pairDayData: [PairDayData!]! @derivedFrom(field: "pair")
   liquidityPositions: [LiquidityPosition!]! @derivedFrom(field: "pair")
   mints: [Mint!]! @derivedFrom(field: "pair")
   burns: [Burn!]! @derivedFrom(field: "pair")
@@ -242,6 +243,7 @@ type PairDayData @entity(immutable: false) {
   id: ID!
   date: Int!
   pairAddress: Bytes!
+  pair: Pair!
   token0: Token!
   token1: Token!
 
