@@ -12,6 +12,7 @@ export enum NETWORK {
   CELO = 'celo',
   ETHEREUM = 'ethereum',
   MATIC = 'matic',
+  MONAD = 'monad',
   OPTIMISM = 'optimism',
   SONEIUM = 'soneium-mainnet',
   UNICHAIN = 'unichain-mainnet',
