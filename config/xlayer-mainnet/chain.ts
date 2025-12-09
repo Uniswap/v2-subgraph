@@ -12,26 +12,13 @@ const WBTC = '0xEA034fb02eB1808C2cc3adbC15f447B93CbE08e1'.toLowerCase()
 const DAI = '0xC5015b9d9161Dca7e18e32f6f25C4aD850731Fd4'.toLowerCase()
 const WOKB_USDC = '0x50974759D958dbaC777Fb9D32A68b6AEBCEE2Ee2'.toLowerCase()
 
-export const REFERENCE_TOKEN = WOKB // WOKB
-export const STABLE_TOKEN_PAIRS = [WOKB_USDC] // (WOKB / USDC)
+export const REFERENCE_TOKEN = WOKB
+export const STABLE_TOKEN_PAIRS = [WOKB_USDC]
 
 // token where amounts should contribute to tracked volume and liquidity
-export const WHITELIST: string[] = [
-  WOKB, // WOKB
-  WETH, // WETH
-  USDT, // USDT
-  USDT0, // USDT0
-  USDC, // USDC
-  USDCe, // USDC.e
-  WBTC, // WBTC
-  DAI, // DAI
-]
+export const WHITELIST: string[] = [WOKB, WETH, USDT, USDT0, USDC, USDCe, WBTC, DAI]
 
-export const STABLECOINS = [
-  USDC, // USDC
-  DAI, // DAI
-  USDT, // USDT
-]
+export const STABLECOINS = [USDC, DAI, USDT]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 export const MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('40000')
