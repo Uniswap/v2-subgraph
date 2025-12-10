@@ -24,7 +24,7 @@ export const STABLECOINS = [USDC, DAI, USDT]
 export const MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('40000')
 
 // minimum liquidity for price to get tracked
-export const MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('2')
+export const MINIMUM_LIQUIDITY_THRESHOLD_ETH = BigDecimal.fromString('25')
 
 export class TokenDefinition {
   address: Address
