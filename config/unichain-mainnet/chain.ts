@@ -33,3 +33,5 @@ export class TokenDefinition {
 export const STATIC_TOKEN_DEFINITIONS: TokenDefinition[] = []
 
 export const SKIP_TOTAL_SUPPLY: string[] = []
+
+export const UNTRACKED_PAIRS: string[] = []

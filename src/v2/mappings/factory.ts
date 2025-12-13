@@ -1,12 +1,19 @@
 /* eslint-disable prefer-const */
 import { log } from '@graphprotocol/graph-ts'
 
-import { PairCreated } from '../../../generated/Factory/Factory'
-import { Bundle, Pair, PairTokenLookup, Token, UniswapFactory } from '../../../generated/schema'
-import { Pair as PairTemplate } from '../../../generated/templates'
-import { FACTORY_ADDRESS } from '../../common/chain'
-import { ZERO_BD, ZERO_BI } from '../../common/constants'
-import { fetchTokenDecimals, fetchTokenName, fetchTokenSymbol, fetchTokenTotalSupply } from '../../common/helpers'
+import { PairCreated } from '../types/Factory/Factory'
+import { Bundle, Pair, PairTokenLookup, Token, UniswapFactory } from '../types/schema'
+import { Pair as PairTemplate } from '../types/templates'
+import {
+  FACTORY_ADDRESS,
+  fetchTokenDecimals,
+  fetchTokenName,
+  fetchTokenSymbol,
+  fetchTokenTotalSupply,
+  ZERO_BD,
+  ZERO_BI,
+} from './helpers'
+import { PRICE_TRACKING_TOKENS } from './pricing'
 
 export function handleNewPair(event: PairCreated): void {
   // load factory (create if first exchange)
@@ -29,7 +36,7 @@ export function handleNewPair(event: PairCreated): void {
   factory.pairCount = factory.pairCount + 1
   factory.save()
 
-  // create the tokens
+  let pair = new Pair(event.params.pair.toHexString()) as Pair
   let token0 = Token.load(event.params.token0.toHexString())
   let token1 = Token.load(event.params.token1.toHexString())
 
@@ -53,8 +60,8 @@ export function handleNewPair(event: PairCreated): void {
     token0.tradeVolumeUSD = ZERO_BD
     token0.untrackedVolumeUSD = ZERO_BD
     token0.totalLiquidity = ZERO_BD
-    // token0.allPairs = []
     token0.txCount = ZERO_BI
+    token0.priceTrackingPairs = []
   }
 
   // fetch info if null
@@ -75,11 +82,21 @@ export function handleNewPair(event: PairCreated): void {
     token1.tradeVolumeUSD = ZERO_BD
     token1.untrackedVolumeUSD = ZERO_BD
     token1.totalLiquidity = ZERO_BD
-    // token1.allPairs = []
     token1.txCount = ZERO_BI
+    token1.priceTrackingPairs = []
   }
 
-  let pair = new Pair(event.params.pair.toHexString()) as Pair
+  if (PRICE_TRACKING_TOKENS.includes(token0.id)) {
+    const priceTrackingPairs = token1.priceTrackingPairs
+    priceTrackingPairs.push(pair.id)
+    token1.priceTrackingPairs = priceTrackingPairs
+  }
+  if (PRICE_TRACKING_TOKENS.includes(token1.id)) {
+    const priceTrackingPairs = token0.priceTrackingPairs
+    priceTrackingPairs.push(pair.id)
+    token0.priceTrackingPairs = priceTrackingPairs
+  }
+
   pair.token0 = token0.id
   pair.token1 = token1.id
   pair.liquidityProviderCount = ZERO_BI
