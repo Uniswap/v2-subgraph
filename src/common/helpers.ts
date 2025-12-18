@@ -2,6 +2,7 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 
 import { ERC20 } from '../../generated/Factory/ERC20'
+import { ERC20BigDecimals } from '../../generated/Factory/ERC20BigDecimals'
 import { ERC20NameBytes } from '../../generated/Factory/ERC20NameBytes'
 import { ERC20SymbolBytes } from '../../generated/Factory/ERC20SymbolBytes'
 import { User } from '../../generated/schema'
@@ -115,21 +116,29 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
   return totalSupplyValue
 }
 
-export function fetchTokenDecimals(tokenAddress: Address): BigInt {
+export function fetchTokenDecimals(tokenAddress: Address): BigInt | null {
   // static definitions overrides
   let staticDefinition = getStaticDefinition(tokenAddress)
   if (staticDefinition != null) {
     return (staticDefinition as TokenDefinition).decimals
   }
 
-  let contract = ERC20.bind(tokenAddress)
-  // try types uint8 for decimals
-  let decimalValue = 0
+  // Use ERC20BigDecimals which returns uint256 to avoid overflow errors
+  // with malformed tokens that return garbage data for decimals()
+  let contract = ERC20BigDecimals.bind(tokenAddress)
   let decimalResult = contract.try_decimals()
-  if (!decimalResult.reverted) {
-    decimalValue = decimalResult.value
+
+  if (decimalResult.reverted) {
+    return null
   }
-  return BigInt.fromI32(decimalValue)
+
+  let decimalValue = decimalResult.value
+  // Validate decimals is reasonable (must fit in uint8, i.e. <= 255)
+  if (decimalValue.gt(BigInt.fromI32(255))) {
+    return null
+  }
+
+  return decimalValue
 }
 
 export function createUser(address: Address): void {
