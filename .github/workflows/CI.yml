@@ -8,6 +8,8 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   lint:
     name: lint
@@ -19,6 +21,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref || '' }}
           token: ${{ secrets.github_token }}
+          persist-credentials: false
 
       - name: Set up node
         uses: actions/setup-node@v3
@@ -47,8 +50,10 @@ jobs:
       - name: Commit lint fixes
         if: github.event_name == 'pull_request'
         run: |
-          git config --global user.name "${{ github.event.pull_request.user.login }}"
-          git config --global user.email "${{ github.event.pull_request.user.login }}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_EVENT_PULL_REQUEST_USER_LOGIN}"
+          git config --global user.email "${GITHUB_EVENT_PULL_REQUEST_USER_LOGIN}@users.noreply.github.com"
           if [ -z "$(git diff)" ]; then exit; fi
           git commit -a -m "fix(lint): auto-fix [ci]"
           git push
+        env:
+          GITHUB_EVENT_PULL_REQUEST_USER_LOGIN: ${{ github.event.pull_request.user.login }}
