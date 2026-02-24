@@ -10,13 +10,15 @@ const USDC = '0x74b7F16337b8972027F6196A17a631aC6dE26d22'.toLowerCase()
 const USDCe = '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035'.toLowerCase()
 const WBTC = '0xEA034fb02eB1808C2cc3adbC15f447B93CbE08e1'.toLowerCase()
 const DAI = '0xC5015b9d9161Dca7e18e32f6f25C4aD850731Fd4'.toLowerCase()
+const xETH = '0xE7B000003A45145decf8a28FC755aD5eC5EA025A'.toLowerCase()
+const xSOL = '0x505000008DE8748DBd4422ff4687a4FC9bEba15b'.toLowerCase()
 const WOKB_USDC = '0x50974759D958dbaC777Fb9D32A68b6AEBCEE2Ee2'.toLowerCase()
 
 export const REFERENCE_TOKEN = WOKB
 export const STABLE_TOKEN_PAIRS = [WOKB_USDC]
 
 // token where amounts should contribute to tracked volume and liquidity
-export const WHITELIST: string[] = [WOKB, WETH, USDT, USDT0, USDC, USDCe, WBTC, DAI]
+export const WHITELIST: string[] = [WOKB, WETH, USDT, USDT0, USDC, USDCe, WBTC, DAI, xETH, xSOL]
 
 export const STABLECOINS = [USDC, DAI, USDT]
 
