@@ -1,5 +1,5 @@
 {
-  "network": "linea-mainnet",
+  "network": "linea",
   "factory": "0x114A43DF6C5f54EBB8A9d70Cd1951D3dD68004c7",
   "startblock": "29118440"
 }

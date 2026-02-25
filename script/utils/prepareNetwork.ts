@@ -10,6 +10,7 @@ export enum NETWORK {
   BLAST = 'blast-mainnet',
   BSC = 'bsc',
   CELO = 'celo',
+  LINEA = 'linea',
   ETHEREUM = 'ethereum',
   MATIC = 'matic',
   MEGAETH = 'megaeth-mainnet',
