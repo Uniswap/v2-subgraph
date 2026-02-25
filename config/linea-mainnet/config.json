@@ -1,5 +1,5 @@
 {
-  "network": "worldchain-mainnet",
-  "factory": "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
-  "startblock": "4063439"
+  "network": "linea-mainnet",
+  "factory": "0x114A43DF6C5f54EBB8A9d70Cd1951D3dD68004c7",
+  "startblock": "29118440"
 }
