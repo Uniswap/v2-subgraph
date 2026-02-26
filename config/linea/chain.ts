@@ -20,26 +20,9 @@ export const REFERENCE_TOKEN = WETH
 export const STABLE_TOKEN_PAIRS = [USDC_WETH]
 
 // token where amounts should contribute to tracked volume and liquidity
-export const WHITELIST: string[] = [
-  WETH,
-  USDC,
-  MUSD,
-  USDT,
-  LINEA,
-  WBTC,
-  REX33,
-  WSTETH,
-  EZETH,
-  WEETH,
-  USDCE
-]
+export const WHITELIST: string[] = [WETH, USDC, MUSD, USDT, LINEA, WBTC, REX33, WSTETH, EZETH, WEETH, USDCE]
 
-export const STABLECOINS = [
-  USDC,
-  USDT,
-  MUSD,
-  USDCE,
-]
+export const STABLECOINS = [USDC, USDT, MUSD, USDCE]
 
 // minimum liquidity required to count towards tracked volume for pairs with small # of Lps
 export const MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('40000')
