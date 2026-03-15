@@ -233,7 +233,7 @@ export function handleSync(event: Sync): void {
   token0.save()
   token1.save()
 
-  // get tracked liquidity - will be 0 if neither is in whitelist
+  // get tracked liquidity - will be 0 if neither is a price tracking token
   let trackedLiquidityETH: BigDecimal
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
     trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token).div(
@@ -428,7 +428,7 @@ export function handleSwap(event: Swap): void {
 
   let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
 
-  // only accounts for volume through white listed tokens
+  // only accounts for volume through price tracking tokens
   let trackedAmountUSD = getTrackedVolumeUSD(amount0Total, token0 as Token, amount1Total, token1 as Token, pair as Pair)
 
   let trackedAmountETH: BigDecimal
