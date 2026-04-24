@@ -1,5 +1,6 @@
 {
   "name": "uniswap-v2-subgraph",
+  "private": true,
   "version": "1.0.0",
   "repository": "https://github.com/graphprotocol/uniswap-v2-subgraph",
   "license": "GPL-3.0-or-later",
