@@ -1,12 +1,12 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts/index'
 
-export const FACTORY_ADDRESS = '0x9b7f6a5c2ea87ed485bc8eb92a21aab84b077453'
+export const FACTORY_ADDRESS = '0xbf56488c857a881ae7e3bed27cf99c10a7ab7e50'
 
 const WETH = '0x4200000000000000000000000000000000000006'.toLowerCase()
 const USDT0 = '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb'.toLowerCase()
 const USDTm = '0xFAfDdbb3FC7688494971a79cc65DCa3EF82079E7'.toLowerCase()
 const MEGA = '0x28B7E77f82B25B95953825F1E3eA0E36c1c29861'.toLowerCase()
-const WETH_USDT0 = '0x3EA468B2F9118413D03fbB85363FbfcCA805B780'.toLowerCase()
+const WETH_USDT0 = '0xa674eb32ac4036fd4b28febcae23d3817a5fd04c'.toLowerCase()
 
 export const REFERENCE_TOKEN = WETH
 export const STABLE_TOKEN_PAIRS = [WETH_USDT0]
