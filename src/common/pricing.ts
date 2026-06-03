@@ -13,6 +13,12 @@ import {
 import { ADDRESS_ZERO, ONE_BD, ZERO_BD } from './constants'
 
 export function getEthPriceInUSD(): BigDecimal {
+  // On chains where the reference token is itself a USD stablecoin (e.g. Arc, whose native gas
+  // token is USDC and which has no wrapped-native / reference-stable pair), the reference token's
+  // USD price is 1 by definition. Such chains opt in by including REFERENCE_TOKEN in STABLE_TOKEN_PAIRS.
+  if (STABLE_TOKEN_PAIRS.includes(REFERENCE_TOKEN)) {
+    return ONE_BD
+  }
   // create an array with same length as STABLE_TOKEN_PAIRS
   let stableTokenPairs = new Array<Pair | null>(STABLE_TOKEN_PAIRS.length)
   let stableTokenReserves = new Array<BigDecimal>(STABLE_TOKEN_PAIRS.length)
