@@ -10,12 +10,13 @@ const USDC = '0x3600000000000000000000000000000000000000'.toLowerCase()
 const EURC = '0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a'.toLowerCase()
 const USYC = '0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C'.toLowerCase()
 const CIRBTC = '0x171A4217b86A807A64eB94757Db6849fb4bDbAA0'.toLowerCase() // cirBTC (BTC-pegged) — whitelist only, not a USD stable
+const WETH = '0x128cC466B61f542da60c70e3aA11c10e19B84EDB'.toLowerCase() // bridged ETH — whitelist only (not the native/reference; Arc's native is USDC)
 
 export const REFERENCE_TOKEN = USDC
 export const STABLE_TOKEN_PAIRS = [REFERENCE_TOKEN]
 
 // token where amounts should contribute to tracked volume and liquidity
-export const WHITELIST: string[] = [USDC, EURC, USYC, CIRBTC]
+export const WHITELIST: string[] = [USDC, EURC, USYC, CIRBTC, WETH]
 
 // USD-pegged stablecoins only (EURC is EUR-pegged, USYC is yield-bearing → excluded)
 export const STABLECOINS = [USDC]
