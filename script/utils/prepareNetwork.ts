@@ -5,6 +5,7 @@ import * as process from 'process'
 
 export enum NETWORK {
   ARBITRUM = 'arbitrum-one',
+  ARC = 'arc-mainnet',
   AVALANCHE = 'avalanche',
   BASE = 'base',
   BLAST = 'blast-mainnet',
